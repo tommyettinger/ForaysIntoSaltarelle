@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web3", "Web3\Web3.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptProject", "ScriptProject\ScriptProject.csproj", "{3D509B80-1134-4AA7-8DE2-73F5A6F4F705}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forays", "..\Forays\Forays\Forays.csproj", "{6C24A8BE-AD50-4BB8-8D76-E67B19D9CC01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forays", "Forays\Forays.csproj", "{6C24A8BE-AD50-4BB8-8D76-E67B19D9CC01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
