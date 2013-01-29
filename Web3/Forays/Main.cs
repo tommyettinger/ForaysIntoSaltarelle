@@ -38,6 +38,10 @@ namespace Forays{
         public Buffer B;
         public Actor player;
         public static ROTConsole Console;
+        static Game(){
+                Console = new ROTConsole();
+                Console.CursorVisible = false;
+        }
         static void Main()//string[] args
         {
             //{
@@ -46,60 +50,69 @@ namespace Forays{
             //        Global.LINUX = true;
             //    }
             //}
-            Console = new ROTConsole();
-            Console.CursorVisible = false;
-            //if (Global.LINUX)
-            //{
-            //    Console.SetCursorPosition(0, 0);
-            //    if (Console.BufferWidth < 80 || Console.BufferHeight < 25)
-            //    {
-            //        Console.Write("Please resize your terminal to 80x25, then press any key.");
-            //        Console.SetCursorPosition(0, 1);
-            //        Console.Write("         Current dimensions are {0}x{1}.".PadRight(57), Console.BufferWidth, Console.BufferHeight);
-            //        Console.ReadKey(true);
-            //        Console.SetCursorPosition(0, 0);
-            //        if (Console.BufferWidth < 80 || Console.BufferHeight < 25)
-            //        {
-            //            Environment.Exit(0);
-            //        }
-            //    }
-            //    Screen.Blank();
-            //}
-            //else
-            //{
-            //    Console.Title = "Forays into Norrendrin";
-            //    Console.BufferHeight = Global.SCREEN_H; //25
-            //}
-            //Console.TreatControlCAsInput = true;
-            //Console.CursorSize = 100;
-            for (int i = 0; i < 24; ++i)
+
+            jQuery.OnDocumentReady(async () =>
             {
-                Color color = Color.Yellow;
-                if (i == 18)
+                jQuery.Select("#main").ReplaceWith(Console.display.getContainer());
+
+                jQuery.Select("canvas").On("keydown", (elem, ev) =>
                 {
-                    color = Color.Green;
-                }
-                if (i > 18)
+                    Console.KeyAvailable = true;
+                });
+                //if (Global.LINUX)
+                //{
+                //    Console.SetCursorPosition(0, 0);
+                //    if (Console.BufferWidth < 80 || Console.BufferHeight < 25)
+                //    {
+                //        Console.Write("Please resize your terminal to 80x25, then press any key.");
+                //        Console.SetCursorPosition(0, 1);
+                //        Console.Write("         Current dimensions are {0}x{1}.".PadRight(57), Console.BufferWidth, Console.BufferHeight);
+                //        Console.ReadKey(true);
+                //        Console.SetCursorPosition(0, 0);
+                //        if (Console.BufferWidth < 80 || Console.BufferHeight < 25)
+                //        {
+                //            Environment.Exit(0);
+                //        }
+                //    }
+                //    Screen.Blank();
+                //}
+                //else
+                //{
+                //    Console.Title = "Forays into Norrendrin";
+                //    Console.BufferHeight = Global.SCREEN_H; //25
+                //}
+                //Console.TreatControlCAsInput = true;
+                //Console.CursorSize = 100;
+                for (int i = 0; i < 24; ++i)
                 {
-                    color = Color.DarkGray;
-                }
-                for (int j = 0; j < 80; ++j)
-                {
-                    if (Global.titlescreen[i][j] != ' ')
+                    Color color = Color.Yellow;
+                    if (i == 18)
                     {
-                        if (Global.titlescreen[i][j] == '#' && !Global.LINUX)
+                        color = Color.Green;
+                    }
+                    if (i > 18)
+                    {
+                        color = Color.DarkGray;
+                    }
+                    for (int j = 0; j < 80; ++j)
+                    {
+                        if (Global.titlescreen[i][j] != ' ')
                         {
-                            Screen.WriteChar(i, j, new colorchar(Color.Black, Color.Yellow, ' '));
-                        }
-                        else
-                        {
-                            Screen.WriteChar(i, j, new colorchar(color, Color.Black, Global.titlescreen[i][j]));
+                            if (Global.titlescreen[i][j] == '#')
+                            {
+                                Screen.WriteChar(i, j, new colorchar(Color.Black, Color.Yellow, ' '));
+                            }
+                            else
+                            {
+                                Screen.WriteChar(i, j, new colorchar(color, Color.Black, Global.titlescreen[i][j]));
+                            }
                         }
                     }
                 }
-            }
-            var dummy = Console.ReadKey(true).Result;
-            MainMenu().Start();
+
+                await Console.ReadKey(true);
+                await MainMenu();
+            });
         }
         static async Task MainMenu()
         {

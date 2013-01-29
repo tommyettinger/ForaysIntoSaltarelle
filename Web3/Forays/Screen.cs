@@ -71,6 +71,12 @@ namespace Forays{
             bgcolor = Color.Black;
             c = c_;
         }
+        public colorchar()
+        {
+            color = Color.White;
+            bgcolor = Color.Black;
+            c = " ";
+        }
         public bool Equals(colorchar tgt)
         {
             return (tgt != null && color == tgt.color && bgcolor == tgt.bgcolor && c == tgt.c);
@@ -217,9 +223,10 @@ namespace Forays{
 			memory = new colorchar[Global.SCREEN_H,Global.SCREEN_W];
 			for(int i=0;i<Global.SCREEN_H;++i){
 				for(int j=0;j<Global.SCREEN_W;++j){
-					memory[i,j].c = " ";
+                    memory[i, j] = new colorchar(" ", Color.Black, Color.Black);
+/*					memory[i,j].c = " ";
 					memory[i,j].color = Color.Black;
-					memory[i,j].bgcolor = Color.Black;
+					memory[i,j].bgcolor = Color.Black;*/
 				}
 			}
 			BackgroundColor = Game.Console.BackgroundColor;
@@ -276,6 +283,7 @@ namespace Forays{
 					memory[i,j].bgcolor = Color.Black;
 				}
 			}
+            Game.Console.display.clear();
 		}
 		public static void WriteChar(int r,int c,char ch){
 			WriteChar(r,c,new colorchar(Color.Gray,ch));

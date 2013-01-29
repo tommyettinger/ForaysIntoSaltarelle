@@ -986,49 +986,49 @@ namespace Forays{
 					switch(upgrade){
 					case 0: //flamebrand
                             player.weapons.Find(WeaponType.SWORD).Value = WeaponType.FLAMEBRAND;
-						if(Weapon.BaseWeapon(player.weapons.First()) == WeaponType.SWORD){
+						if(Weapon.BaseWeapon(player.weapons[0]) == WeaponType.SWORD){
 							player.UpdateOnEquip(WeaponType.SWORD,WeaponType.FLAMEBRAND);
 						}
 						break;
 					case 1: //mace of force
 						player.weapons.Find(WeaponType.MACE).Value = WeaponType.MACE_OF_FORCE;
-						if(Weapon.BaseWeapon(player.weapons.First()) == WeaponType.MACE){
+						if(Weapon.BaseWeapon(player.weapons[0]) == WeaponType.MACE){
 							player.UpdateOnEquip(WeaponType.MACE,WeaponType.MACE_OF_FORCE);
 						}
 						break;
 					case 2: //venomous dagger
 						player.weapons.Find(WeaponType.DAGGER).Value = WeaponType.VENOMOUS_DAGGER;
-						if(Weapon.BaseWeapon(player.weapons.First()) == WeaponType.DAGGER){
+						if(Weapon.BaseWeapon(player.weapons[0]) == WeaponType.DAGGER){
 							player.UpdateOnEquip(WeaponType.DAGGER,WeaponType.VENOMOUS_DAGGER);
 						}
 						break;
 					case 3: //staff of magic
 						player.weapons.Find(WeaponType.STAFF).Value = WeaponType.STAFF_OF_MAGIC;
-						if(Weapon.BaseWeapon(player.weapons.First()) == WeaponType.STAFF){
+						if(Weapon.BaseWeapon(player.weapons[0]) == WeaponType.STAFF){
 							player.UpdateOnEquip(WeaponType.STAFF,WeaponType.STAFF_OF_MAGIC);
 						}
 						break;
 					case 4: //holy longbow
 						player.weapons.Find(WeaponType.BOW).Value = WeaponType.HOLY_LONGBOW;
-						if(Weapon.BaseWeapon(player.weapons.First()) == WeaponType.BOW){
+						if(Weapon.BaseWeapon(player.weapons[0]) == WeaponType.BOW){
 							player.UpdateOnEquip(WeaponType.BOW,WeaponType.HOLY_LONGBOW);
 						}
 						break;
 					case 5: //elven leather
 						player.armors.Find(ArmorType.LEATHER).Value = ArmorType.ELVEN_LEATHER;
-						if(Armor.BaseArmor(player.armors.First()) == ArmorType.LEATHER){
+						if(Armor.BaseArmor(player.armors[0]) == ArmorType.LEATHER){
 							player.UpdateOnEquip(ArmorType.LEATHER,ArmorType.ELVEN_LEATHER);
 						}
 						break;
 					case 6: //chainmail of arcana
 						player.armors.Find(ArmorType.CHAINMAIL).Value = ArmorType.CHAINMAIL_OF_ARCANA;
-						if(Armor.BaseArmor(player.armors.First()) == ArmorType.CHAINMAIL){
+						if(Armor.BaseArmor(player.armors[0]) == ArmorType.CHAINMAIL){
 							player.UpdateOnEquip(ArmorType.CHAINMAIL,ArmorType.CHAINMAIL_OF_ARCANA);
 						}
 						break;
 					case 7: //full plate of resistance
 						player.armors.Find(ArmorType.FULL_PLATE).Value = ArmorType.FULL_PLATE_OF_RESISTANCE;
-						if(Armor.BaseArmor(player.armors.First()) == ArmorType.FULL_PLATE){
+						if(Armor.BaseArmor(player.armors[0]) == ArmorType.FULL_PLATE){
 							player.UpdateOnEquip(ArmorType.FULL_PLATE,ArmorType.FULL_PLATE_OF_RESISTANCE);
 						}
 						break;

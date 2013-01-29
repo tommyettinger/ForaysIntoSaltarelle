@@ -83,7 +83,7 @@ namespace Forays
             Key = key;
             KeyChar = (Char)key;
         }
-        
+
         public ConsoleKeyInfo(int key, ConsoleModifiers mods)
         {
             Key = key;
@@ -99,16 +99,19 @@ namespace Forays
 
     public class ROTConsole
     {
-        Display display;
+        public Display display;
         public int CursorLeft = 0;
         public int CursorTop = 0;
         public bool CursorVisible = false;
         private string bg, fg;
+        public ConsoleColor Background = ConsoleColor.Black;
         public ConsoleColor BackgroundColor
         {
-            get { return BackgroundColor; }
-            set {BackgroundColor = value;
-            assignBG(value);
+            get { return Background; }
+            set
+            {
+                Background = value;
+                assignBG(value);
             }
         }
 
@@ -156,48 +159,57 @@ namespace Forays
                 case ConsoleColor.Yellow: fg = "#FFFF00"; break;
             }
         }
+        public ConsoleColor Foreground = ConsoleColor.White;
         public ConsoleColor ForegroundColor
         {
-            get { return ForegroundColor; }
+            get { return Foreground; }
             set
             {
-                ForegroundColor = value;
+                Foreground = value;
                 assignFG(value);
             }
         }
         public bool KeyAvailable = false;
         private ConsoleKeyInfo kc = new ConsoleKeyInfo(65);
+        private Element keydiv;
         public ROTConsole()
         {
+            keydiv = Document.CreateElement("div");
+            keydiv.ID = "key";
             display = new Display(new DisplayOptions(80, 25));
-            jQuery.Select("canvas").On("keydown", (elem, ev) =>
-            {
-                KeyAvailable = true;
-            });
         }
+        private jQueryDeferred<ConsoleKeyInfo> defr;// Task<ConsoleKeyInfo> cki = null;
         private void processKey(Element elem, jQueryEvent ev)
-            {
-                ConsoleModifiers m = 0;
-                if (ev.AltKey) m = m | ConsoleModifiers.Alt;
-                if (ev.CtrlKey) m = m | ConsoleModifiers.Control;
-                if (ev.ShiftKey) m = m | ConsoleModifiers.Shift;
-                if (m != 0)
-                    kc = new ConsoleKeyInfo(ev.Which, m);
-                else
-                    kc = new ConsoleKeyInfo(ev.Which);
-            }
-        public async Task<ConsoleKeyInfo> ReadKey()
         {
-            await Task.Run(() => (jQuery.Select("canvas").On("keydown", processKey)));
-            jQuery.Select("canvas").Off("keydown", "canvas", processKey);
-            return kc;
-        
+            ConsoleModifiers m = 0;
+            if (ev.AltKey) m = m | ConsoleModifiers.Alt;
+            if (ev.CtrlKey) m = m | ConsoleModifiers.Control;
+            if (ev.ShiftKey) m = m | ConsoleModifiers.Shift;
+            if (m != 0)
+                kc = new ConsoleKeyInfo(ev.Which, m);
+            else
+                kc = new ConsoleKeyInfo(ev.Which);
+            //cki = Task<ConsoleKeyInfo>.FromResult(kc);
+            defr.Resolve();
+            
         }
+        /*        public async Task<ConsoleKeyInfo> ReadKey()
+                {
+                    await Task.Run(() => (jQuery.Select("body").On("keydown", processKey)));
+                    jQuery.Select("body").Off("keydown", "body", processKey);
+                    return kc;
+
+                }*/
         public async Task<ConsoleKeyInfo> ReadKey(bool _ignored)
         {
-            await Task.Run(() => (jQuery.Select("canvas").On("keydown", processKey)));
-            jQuery.Select("canvas").Off("keydown", "canvas", processKey);
-            return kc;
+//            cki = null;
+            defr = jQuery.DeferredData<ConsoleKeyInfo>();
+            defr.Done(() => jQuery.Select("body").Off("keydown", "canvas", processKey));
+            jQuery.Select("body").On("keydown", processKey);
+            await defr;//(, 2, "on", "keydown", "canvas", "processKey");
+           /*while (cki == null)
+               await Task.Delay(35);*/
+           return kc;
         }
         public void SetCursorPosition(int x, int y)
         {
@@ -206,7 +218,8 @@ namespace Forays
         }
         public void Write(string text)
         {
-            display.draw(CursorLeft, CursorTop, text);
+            display.draw(CursorLeft, CursorTop, text, fg, bg);
+            
         }
         public void Write(char text)
         {

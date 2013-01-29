@@ -6386,7 +6386,7 @@ $.widget( "ui.autocomplete", {
 			this.search( null, event );
 			return;
 		}
-		if ( this.menu.first() && /^previous/.test(direction) ||
+		if ( this.menu[0] && /^previous/.test(direction) ||
 				this.menu.last() && /^next/.test(direction) ) {
 			this.element.val( this.term );
 			this.menu.deactivate();
@@ -6571,7 +6571,7 @@ $.widget("ui.menu", {
 	previousPage: function(event) {
 		if (this.hasScroll()) {
 			// TODO merge with no-scroll-else
-			if (!this.active || this.first()) {
+			if (!this.active || this[0]) {
 				this.activate(event, this.element.children(".ui-menu-item:last"));
 				return;
 			}
@@ -6591,7 +6591,7 @@ $.widget("ui.menu", {
 			this.activate(event, result);
 		} else {
 			this.activate(event, this.element.children(".ui-menu-item")
-				.filter(!this.active || this.first() ? ":last" : ":first"));
+				.filter(!this.active || this[0] ? ":last" : ":first"));
 		}
 	},
 

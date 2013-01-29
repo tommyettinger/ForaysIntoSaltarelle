@@ -36,6 +36,7 @@ namespace Forays{
 		
 		public static Map M{get;set;}
 		public PhysicalObject(){
+            p = new pos(-1, -1);
 			row=-1;
 			col=-1;
 			name="";
@@ -45,7 +46,9 @@ namespace Forays{
 			color=Color.White;
 			light_radius = 0;
 		}
-		public PhysicalObject(string name_,char symbol_,Color color_){
+        public PhysicalObject(string name_, char symbol_, Color color_)
+        {
+            p = new pos(-1, -1);
 			row = -1;
 			col = -1;
 			SetName(name_);

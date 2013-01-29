@@ -22,16 +22,18 @@ namespace Forays{
 		public string desc;
 		public AttackInfo(int cost_,int dice_,DamageType type_,string desc_){
 			cost=cost_;
-			damage.dice=dice_;
+            damage = new Damage(dice_, type_, DamageClass.PHYSICAL, null);
+/*			damage.dice=dice_;
 			damage.type=type_;
-			damage.damclass=DamageClass.PHYSICAL;
+			damage.damclass=DamageClass.PHYSICAL;*/
 			desc=desc_;
 		}
 		public AttackInfo(int cost_,int dice_,DamageType type_,DamageClass damclass_,string desc_){
 			cost=cost_;
-			damage.dice=dice_;
+            damage = new Damage(dice_, type_, damclass_, null);
+            /*			damage.dice=dice_;
 			damage.type=type_;
-			damage.damclass=damclass_;
+			damage.damclass=damclass_;*/
 			desc=desc_;
 		}
 		public AttackInfo(AttackInfo a){
@@ -556,13 +558,13 @@ namespace Forays{
 		public int LightRadius(){ return Math.Max(light_radius,attrs[AttrType.ON_FIRE]); }
 		public int ArmorClass(){
 			int total = TotalSkill(SkillType.DEFENSE);
-			if(weapons.First() == WeaponType.STAFF || weapons.First() == WeaponType.STAFF_OF_MAGIC){
+			if(weapons[0] == WeaponType.STAFF || weapons[0] == WeaponType.STAFF_OF_MAGIC){
 				total++;
 			}
 			if(magic_items.Contains(MagicItemType.RING_OF_PROTECTION)){
 				total++;
 			}
-			total += Armor.Protection(armors.First());
+			total += Armor.Protection(armors[0]);
 			return total;
 		}
 		public int Stealth(){ return Stealth(row,col); }
@@ -576,8 +578,8 @@ namespace Forays{
 					total += 2;
 				}
 			}
-			if(!HasFeat(FeatType.SILENT_CHAINMAIL) || Armor.BaseArmor(armors.First()) != ArmorType.CHAINMAIL){
-				total -= Armor.StealthPenalty(armors.First());
+			if(!HasFeat(FeatType.SILENT_CHAINMAIL) || Armor.BaseArmor(armors[0]) != ArmorType.CHAINMAIL){
+				total -= Armor.StealthPenalty(armors[0]);
 			}
 			return total;
 		}
@@ -1225,7 +1227,7 @@ namespace Forays{
 				return;
 			}
 			if(HasAttr(AttrType.FROZEN)){
-				int damage = Global.Roll(Weapon.Damage(weapons.First()).dice,6) + TotalSkill(SkillType.COMBAT);
+				int damage = Global.Roll(Weapon.Damage(weapons[0]).dice,6) + TotalSkill(SkillType.COMBAT);
 				attrs[Forays.AttrType.FROZEN] -= damage;
 				if(attrs[Forays.AttrType.FROZEN] < 0){
 					attrs[Forays.AttrType.FROZEN] = 0;
@@ -1706,7 +1708,7 @@ namespace Forays{
 				}*/
 			case "s":
 				{
-				if(Weapon.BaseWeapon(weapons.First()) == WeaponType.BOW || HasFeat(FeatType.QUICK_DRAW)){
+				if(Weapon.BaseWeapon(weapons[0]) == WeaponType.BOW || HasFeat(FeatType.QUICK_DRAW)){
 					if(ActorsAtDistance(1).Count > 0){
 						if(ActorsAtDistance(1).Count == 1){
 							B.Add("You can't fire with an enemy so close. ");
@@ -1907,7 +1909,7 @@ namespace Forays{
 					colorstring topborder = new colorstring("------------------Level---Fail rate--------Description------------",Color.Gray);
 					int basefail = magic_penalty * 5;
 					if(!HasFeat(FeatType.ARMORED_MAGE)){
-						basefail += Armor.AddedFailRate(armors.First());
+						basefail += Armor.AddedFailRate(armors[0]);
 					}
 					colorstring bottomborder = new colorstring("------------Base fail rate: ",Color.Gray,(basefail.ToString().PadLeft(3) + "%"),FailColor(basefail),"----------[",Color.Gray,"?",Color.Cyan,"] for help".PadRight(22,'-'),Color.Gray);
 					//int i = Select("Cast which spell? ",topborder,bottomborder,ls);
@@ -2101,7 +2103,7 @@ namespace Forays{
 									colorstring topborder = new colorstring("------------------Level---Fail rate--------Description------------",Color.Gray);
 									int basefail = magic_penalty * 5;
 									if(!HasFeat(FeatType.ARMORED_MAGE)){
-										basefail += Armor.AddedFailRate(armors.First());
+										basefail += Armor.AddedFailRate(armors[0]);
 									}
 									colorstring bottomborder = new colorstring("------------Base fail rate: ",Color.Gray,(basefail.ToString().PadLeft(3) + "%"),FailColor(basefail),"----------[",Color.Gray,"?",Color.Cyan,"] for help".PadRight(22,'-'),Color.Gray);
                                     int i = await Select("Trade one of your spells for another? ", topborder, bottomborder, ls, false, false, true, true, HelpTopic.Spells);
@@ -2458,8 +2460,8 @@ namespace Forays{
 				int[] changes = await DisplayEquipment();
 				WeaponType new_weapon = Weapon.BaseWeapon((WeaponType)changes[0]);
 				ArmorType new_armor = Armor.BaseArmor((ArmorType)changes[1]);
-				WeaponType old_weapon = weapons.First();
-				ArmorType old_armor = armors.First();
+				WeaponType old_weapon = weapons[0];
+				ArmorType old_armor = armors[0];
 				bool weapon_changed = (new_weapon != Weapon.BaseWeapon(old_weapon));
 				bool armor_changed = (new_armor != Armor.BaseArmor(old_armor));
 				bool cursed_weapon = false;
@@ -2469,7 +2471,7 @@ namespace Forays{
 				}
 				if(!weapon_changed && !armor_changed){
 					if(cursed_weapon){
-						B.Add("Your " + Weapon.Name(weapons.First()) + " is stuck to your hand and can't be dropped. ");
+						B.Add("Your " + Weapon.Name(weapons[0]) + " is stuck to your hand and can't be dropped. ");
 					}
 					Q0();
 				}
@@ -2481,36 +2483,36 @@ namespace Forays{
 					if(weapon_changed){
 						bool done=false;
 						while(!done){
-							WeaponType w = weapons.First();
+							WeaponType w = weapons[0];
 							weapons.Remove(w);
 							weapons.Insert(weapons.Count, w);
-							if(new_weapon == Weapon.BaseWeapon(weapons.First())){
+							if(new_weapon == Weapon.BaseWeapon(weapons[0])){
 								done = true;
 							}
 						}
 						if(HasFeat(FeatType.QUICK_DRAW) && !armor_changed){
-							B.Add("You quickly ready your " + Weapon.Name(weapons.First()) + ". ");
+							B.Add("You quickly ready your " + Weapon.Name(weapons[0]) + ". ");
 						}
 						else{
-							B.Add("You ready your " + Weapon.Name(weapons.First()) + ". ");
+							B.Add("You ready your " + Weapon.Name(weapons[0]) + ". ");
 						}
-						UpdateOnEquip(old_weapon,weapons.First());
+						UpdateOnEquip(old_weapon,weapons[0]);
 					}
 					if(armor_changed){
 						bool done=false;
 						while(!done){
-							ArmorType a = armors.First();
+							ArmorType a = armors[0];
 							armors.Remove(a);
                             armors.Insert(armors.Count, a);
-							if(new_armor == Armor.BaseArmor(armors.First())){
+							if(new_armor == Armor.BaseArmor(armors[0])){
 								done = true;
 							}
 						}
-						B.Add("You wear your " + Armor.Name(armors.First()) + ". ");
-						UpdateOnEquip(old_armor,armors.First());
+						B.Add("You wear your " + Armor.Name(armors[0]) + ". ");
+						UpdateOnEquip(old_armor,armors[0]);
 					}
 					if(cursed_weapon){
-						B.Add("Your " + Weapon.Name(weapons.First()) + " is stuck to your hand and can't be dropped. ");
+						B.Add("Your " + Weapon.Name(weapons[0]) + " is stuck to your hand and can't be dropped. ");
 					}
 					if(HasFeat(FeatType.QUICK_DRAW) && !armor_changed){
 						Q0();
@@ -2528,7 +2530,7 @@ namespace Forays{
 			case "%":
 			{
 				if(HasAttr(AttrType.CURSED_WEAPON)){
-					B.Add("Your " + Weapon.Name(weapons.First()) + " is stuck to your hand and can't be dropped. ");
+					B.Add("Your " + Weapon.Name(weapons[0]) + " is stuck to your hand and can't be dropped. ");
 					Q0();
 				}
 				else{
@@ -2550,7 +2552,7 @@ namespace Forays{
 						new_weapon = WeaponType.BOW;
 						break;
 					}
-					WeaponType old_weapon = weapons.First();
+					WeaponType old_weapon = weapons[0];
 					if(new_weapon == Weapon.BaseWeapon(old_weapon)){
 						Q0();
 					}
@@ -2561,22 +2563,22 @@ namespace Forays{
 						}
 						bool done=false;
 						while(!done){
-							WeaponType w = weapons.First();
+							WeaponType w = weapons[0];
 							weapons.Remove(w);
                             weapons.Insert(weapons.Count, w);
-							if(new_weapon == Weapon.BaseWeapon(weapons.First())){
+							if(new_weapon == Weapon.BaseWeapon(weapons[0])){
 								done = true;
 							}
 						}
 						if(HasFeat(FeatType.QUICK_DRAW)){
-							B.Add("You quickly ready your " + Weapon.Name(weapons.First()) + ". ");
+							B.Add("You quickly ready your " + Weapon.Name(weapons[0]) + ". ");
 							Q0();
 						}
 						else{
-							B.Add("You ready your " + Weapon.Name(weapons.First()) + ". ");
+							B.Add("You ready your " + Weapon.Name(weapons[0]) + ". ");
 							Q1();
 						}
-						UpdateOnEquip(old_weapon,weapons.First());
+						UpdateOnEquip(old_weapon,weapons[0]);
 					}
 				}
 				break;
@@ -2597,7 +2599,7 @@ namespace Forays{
 					new_armor = ArmorType.FULL_PLATE;
 					break;
 				}
-				ArmorType old_armor = armors.First();
+				ArmorType old_armor = armors[0];
 				if(new_armor == Armor.BaseArmor(old_armor)){
 					Q0();
 				}
@@ -2608,16 +2610,16 @@ namespace Forays{
 					}
 					bool done=false;
 					while(!done){
-						ArmorType a = armors.First();
+						ArmorType a = armors[0];
 						armors.Remove(a);
 						armors.Insert(armors.Count, a);
-						if(new_armor == Armor.BaseArmor(armors.First())){
+						if(new_armor == Armor.BaseArmor(armors[0])){
 							done = true;
 						}
 					}
-					B.Add("You wear your " + Armor.Name(armors.First()) + ". ");
+					B.Add("You wear your " + Armor.Name(armors[0]) + ". ");
 					Q1();
-					UpdateOnEquip(old_armor,armors.First());
+					UpdateOnEquip(old_armor,armors[0]);
 				}
 				break;
 			}
@@ -2730,7 +2732,7 @@ namespace Forays{
 								colorstring topborder = new colorstring("------------------Level---Fail rate--------Description------------",Color.Gray);
 								int basefail = magic_penalty * 5;
 								if(!HasFeat(FeatType.ARMORED_MAGE)){
-									basefail += Armor.AddedFailRate(armors.First());
+									basefail += Armor.AddedFailRate(armors[0]);
 								}
 								colorstring bottomborder = new colorstring("------------Base fail rate: ",Color.Gray,(basefail.ToString().PadLeft(3) + "%"),FailColor(basefail),"".PadRight(37,'-'),Color.Gray);
                                 int i = await Select("Automatically cast which spell? ", topborder, bottomborder, list, false, false, false, false, HelpTopic.Overview);
@@ -4659,8 +4661,8 @@ namespace Forays{
 						target.GainAttrRefreshDuration(AttrType.AGGRAVATING,10000,"Your sounds are no longer amplified. ");
 						break;
 					case 4: //cursed weapon
-						B.Add("Your " + Weapon.Name(target.weapons.First()) + " becomes stuck to your hand! ");
-						target.GainAttrRefreshDuration(AttrType.CURSED_WEAPON,10000,"Your " + Weapon.Name(target.weapons.First()) + " is no longer stuck to your hand. ");
+						B.Add("Your " + Weapon.Name(target.weapons[0]) + " becomes stuck to your hand! ");
+						target.GainAttrRefreshDuration(AttrType.CURSED_WEAPON,10000,"Your " + Weapon.Name(target.weapons[0]) + " is no longer stuck to your hand. ");
 						break;
 					}
 					attrs[Forays.AttrType.COOLDOWN_1]++;
@@ -5603,7 +5605,7 @@ namespace Forays{
 					Q.Add(new Event(this,100,EventType.MOVE));
 				}
 				else{
-					if(player.armors.First() == ArmorType.FULL_PLATE_OF_RESISTANCE && DistanceFrom(player) <= 12 && CanSee(player)){
+					if(player.armors[0] == ArmorType.FULL_PLATE_OF_RESISTANCE && DistanceFrom(player) <= 12 && CanSee(player)){
 						B.Add(the_name + " exhales an orange mist toward you. ");
 						foreach(Tile t in GetBestLine(player)){
 							Screen.AnimateStorm(t.p,1,2,3,"*",Color.Red);
@@ -6454,8 +6456,8 @@ namespace Forays{
 			}
 			//pos pos_of_target = new pos(a.row,a.col);
 			AttackInfo info = AttackList.Attack(type,attack_idx);
-			if(weapons.First() != WeaponType.NO_WEAPON){
-				info.damage = Weapon.Damage(weapons.First());
+			if(weapons[0] != WeaponType.NO_WEAPON){
+				info.damage = Weapon.Damage(weapons[0]);
 			}
 			info.damage.source = this;
 			int plus_to_hit = TotalSkill(SkillType.COMBAT);
@@ -6543,7 +6545,7 @@ namespace Forays{
 				if(pos != -1){
 					string sc = "";
 					int critical_target = 20;
-					if(weapons.First() == WeaponType.DAGGER){
+					if(weapons[0] == WeaponType.DAGGER){
 						critical_target -= 2;
 					}
 					if(HasFeat(FeatType.LETHALITY)){ //10% crit plus 5% for each 20% health the target is missing
@@ -6571,7 +6573,7 @@ namespace Forays{
 					if(!a.HasAttr(AttrType.UNDEAD) && !a.HasAttr(AttrType.CONSTRUCT) 
 						&& !a.HasAttr(AttrType.PLANTLIKE) && !a.HasAttr(AttrType.BOSS_MONSTER)){
 						if(a.type != ActorType.PLAYER){ //being nice to the player here...
-							switch(weapons.First()){
+							switch(weapons[0]){
 							case WeaponType.SWORD:
 							case WeaponType.FLAMEBRAND:
 								B.Add("You run " + a.TheVisible() + " through! ");
@@ -6803,7 +6805,7 @@ namespace Forays{
 										}
 										else{
 											int miss_chance = 25 - plus_to_hit;
-											if(Global.Roll(miss_chance) <= Armor.Protection(a.armors.First()) * 2){
+											if(Global.Roll(miss_chance) <= Armor.Protection(a.armors[0]) * 2){
 												B.Add(a.YourVisible() + " armor blocks " + YourVisible() + " attack. ");
 											}
 											else{
@@ -8722,7 +8724,7 @@ namespace Forays{
 			}
 			failrate += (magic_penalty * 5);
 			if(!HasFeat(FeatType.ARMORED_MAGE)){
-				failrate += Armor.AddedFailRate(armors.First());
+				failrate += Armor.AddedFailRate(armors[0]);
 			}
 			if(failrate > 100){
 				failrate = 100;
@@ -9310,10 +9312,10 @@ effect as standing still, if you're on fire or catching fire. */
 			Screen.WriteStatsString(3,0,"Depth: " + M.current_level + "  ");
 			Screen.WriteStatsString(4,0,"AC: " + ArmorClass() + "  ");
 			int magic_item_lines = magic_items.Count;
-			cstr cs = Weapon.StatsName(weapons.First());
+			cstr cs = Weapon.StatsName(weapons[0]);
 			cs.s = cs.s.PadRight(12);
 			Screen.WriteStatsString(5,0,cs);
-			cs = Armor.StatsName(armors.First());
+			cs = Armor.StatsName(armors[0]);
 			cs.s = cs.s.PadRight(12);
 			Screen.WriteStatsString(6,0,cs);
 			int line = 7;
@@ -9393,14 +9395,14 @@ E[x]plore
 			int magic_item_lines = magic_items.Count;
 			string divider = "---".PadRight(12);
 			//Screen.WriteStatsString(6,0,divider);
-			cstr cs = Weapon.StatsName(weapons.First());
+			cstr cs = Weapon.StatsName(weapons[0]);
 			cs.s = cs.s.PadRight(12);
 			Screen.WriteStatsString(6,0,cs);
 			if(expand_weapons){ //this can easily be extended to handle a variable number of weapons
 				weapon_lines = 5;
 				int i = 7;
 				foreach(WeaponType w in weapons){
-					if(w != weapons.First()){
+					if(w != weapons[0]){
 						cs = Weapon.StatsName(w);
 						cs.s = cs.s.PadRight(12);
 						Screen.WriteStatsString(i,0,cs);
@@ -9410,14 +9412,14 @@ E[x]plore
 				
 			}
 			//Screen.WriteStatsString(7+weapon_lines,0,divider);
-			cs = Armor.StatsName(armors.First());
+			cs = Armor.StatsName(armors[0]);
 			cs.s = cs.s.PadRight(12);
 			Screen.WriteStatsString(6+weapon_lines,0,cs);
 			if(expand_armors){
 				armor_lines = 3;
 				int i = 7 + weapon_lines;
 				foreach(ArmorType a in armors){
-					if(a != armors.First()){
+					if(a != armors[0]){
 						cs = Armor.StatsName(a);
 						cs.s = cs.s.PadRight(12);
 						Screen.WriteStatsString(i,0,cs);
@@ -9577,8 +9579,8 @@ E[x]plore
 			}
 		}
 		public async Task<int[]> DisplayEquipment(){
-			WeaponType new_weapon = weapons.First();
-			ArmorType new_armor = armors.First();
+			WeaponType new_weapon = weapons[0];
+			ArmorType new_armor = armors[0];
 			Dict<WeaponType,WeaponType> heldweapon = new Dict<WeaponType, WeaponType>();
 			Dict<ArmorType,ArmorType> heldarmor = new Dict<ArmorType, ArmorType>();
 			for(WeaponType w = WeaponType.SWORD;w <= WeaponType.BOW;++w){
@@ -9663,7 +9665,7 @@ E[x]plore
 				else{
 					Screen.WriteMapString(12,8,"".PadRight(COLS));
 				}
-				if(new_weapon == weapons.First() && new_armor == armors.First()){
+				if(new_weapon == weapons[0] && new_armor == armors[0]){
 					Screen.WriteMapString(ROWS-1,0,"".PadRight(COLS,'-'));
 				}
 				else{
@@ -9732,8 +9734,8 @@ E[x]plore
 					break;
 				//case 27 whatever:
 				case " ":
-					new_weapon = weapons.First(); //reset
-					new_armor = armors.First();
+					new_weapon = weapons[0]; //reset
+					new_armor = armors[0];
 					done = true;
 					break;
                 case "\u000D":

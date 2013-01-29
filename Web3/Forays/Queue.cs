@@ -103,8 +103,8 @@ namespace Forays{
 			}
 		}
 		public async Task Pop(){
-			turn = list.First().TimeToExecute();
-			Event e = list.First();
+			turn = list[0].TimeToExecute();
+			Event e = list[0];
 			//list.First.Value.Execute();
 			//list.RemoveFirst();
             await e.Execute();
