@@ -21994,14 +21994,14 @@
 		this.keyChar = 0;
 		this.modifiers = 0;
 		this.key = key;
-		this.keyChar = key;
+		this.keyChar = String.fromCharCode(key).charCodeAt(0);
 	};
 	$Forays_ConsoleKeyInfo.$ctor2 = function(key, mods) {
 		this.key = 0;
 		this.keyChar = 0;
 		this.modifiers = 0;
 		this.key = key;
-		this.keyChar = key;
+		this.keyChar = String.fromCharCode(key).charCodeAt(0);
 		this.modifiers = mods;
 	};
 	$Forays_ConsoleKeyInfo.$ctor1.prototype = $Forays_ConsoleKeyInfo.$ctor2.prototype = $Forays_ConsoleKeyInfo.prototype;
@@ -33114,6 +33114,7 @@
 		this.background = 0;
 		this.foreground = 15;
 		this.keyAvailable = false;
+		this.$intercept = false;
 		this.$kc = new $Forays_ConsoleKeyInfo.$ctor1(65);
 		this.$keydiv = null;
 		this.$defr = null;
@@ -33289,10 +33290,14 @@
 			else {
 				this.$kc = new $Forays_ConsoleKeyInfo.$ctor1(ev.which);
 			}
+			if (!this.$intercept) {
+				this.write(this.$kc.keyChar);
+			}
+			$(document).append('<p>Key Down, Key is ' + this.$kc.key + ', Char is ' + String.fromCharCode(this.$kc.keyChar) + '</p>');
 			//cki = Task<ConsoleKeyInfo>.FromResult(kc);
 			this.$defr.resolve();
 		},
-		readKey: function(_ignored) {
+		readKey: function(intercept) {
 			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
 			var $sm = Function.mkdel(this, function() {
 				try {
@@ -33302,10 +33307,11 @@
 							case 0: {
 								$state = -1;
 								//            cki = null;
+								this.$intercept = intercept;
 								this.$defr = $.Deferred();
-								this.$defr.done(Function.mkdel(this, function() {
+								this.$defr.done([Function.mkdel(this, function() {
 									$('body').off('keydown', 'canvas', Function.thisFix(Function.mkdel(this, this.$processKey)));
-								}));
+								})]);
 								$('body').on('keydown', Function.thisFix(Function.mkdel(this, this.$processKey)));
 								$t1 = ss.Task.fromPromise(this.$defr);
 								$state = 1;
@@ -33339,7 +33345,9 @@
 			this.cursorTop = y;
 		},
 		write$1: function(text) {
-			this.display.draw(this.cursorLeft, this.cursorTop, text, this.$fg, this.$bg);
+			for (var i = 0; i < text.length; i++) {
+				this.display.draw(this.cursorLeft + i, this.cursorTop, String.fromCharCode(text.charCodeAt(i)), this.$fg, this.$bg);
+			}
 		},
 		write: function(text) {
 			this.display.draw(this.cursorLeft, this.cursorTop, String.fromCharCode(text), this.$fg, this.$bg);
@@ -33434,6 +33442,7 @@
 		return false;
 	};
 	$Forays_Screen.blank = function() {
+		//jQuery.Select("#main").ReplaceWith(Game.Console.display.getContainer());
 		$Forays_Game.console.cursorVisible = false;
 		for (var i = 0; i < $Forays_Global.screeN_H; ++i) {
 			$Forays_Game.console.setCursorPosition(0, i);

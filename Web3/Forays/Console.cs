@@ -81,13 +81,13 @@ namespace Forays
         public ConsoleKeyInfo(int key)
         {
             Key = key;
-            KeyChar = (Char)key;
+            KeyChar = ((string)(char)key)[0];
         }
 
         public ConsoleKeyInfo(int key, ConsoleModifiers mods)
         {
             Key = key;
-            KeyChar = (Char)key;
+            KeyChar = ((string)(char)key)[0];
             Modifiers = mods;
         }
         public ConsoleKeyInfo(char keycode)
@@ -170,6 +170,7 @@ namespace Forays
             }
         }
         public bool KeyAvailable = false;
+        private bool Intercept = false;
         private ConsoleKeyInfo kc = new ConsoleKeyInfo(65);
         private Element keydiv;
         public ROTConsole()
@@ -178,7 +179,7 @@ namespace Forays
             keydiv.ID = "key";
             display = new Display(new DisplayOptions(80, 25));
         }
-        private jQueryDeferred<ConsoleKeyInfo> defr;// Task<ConsoleKeyInfo> cki = null;
+        private jQueryDeferred defr;// Task<ConsoleKeyInfo> cki = null;
         private void processKey(Element elem, jQueryEvent ev)
         {
             ConsoleModifiers m = 0;
@@ -189,6 +190,9 @@ namespace Forays
                 kc = new ConsoleKeyInfo(ev.Which, m);
             else
                 kc = new ConsoleKeyInfo(ev.Which);
+            if (!Intercept)
+                Write(kc.KeyChar);
+            jQuery.Document.Append("<p>Key Down, Key is " + kc.Key + ", Char is " + kc.KeyChar.ToString() + "</p>");
             //cki = Task<ConsoleKeyInfo>.FromResult(kc);
             defr.Resolve();
             
@@ -200,10 +204,11 @@ namespace Forays
                     return kc;
 
                 }*/
-        public async Task<ConsoleKeyInfo> ReadKey(bool _ignored)
+        public async Task<ConsoleKeyInfo> ReadKey(bool intercept)
         {
 //            cki = null;
-            defr = jQuery.DeferredData<ConsoleKeyInfo>();
+            Intercept = intercept;
+            defr = jQuery.Deferred();
             defr.Done(() => jQuery.Select("body").Off("keydown", "canvas", processKey));
             jQuery.Select("body").On("keydown", processKey);
             await defr;//(, 2, "on", "keydown", "canvas", "processKey");
@@ -218,8 +223,10 @@ namespace Forays
         }
         public void Write(string text)
         {
-            display.draw(CursorLeft, CursorTop, text, fg, bg);
-            
+            for (int i = 0; i < text.Length; i++)
+            {
+                display.draw(CursorLeft+i, CursorTop, text[i].ToString(), fg, bg);
+            }
         }
         public void Write(char text)
         {

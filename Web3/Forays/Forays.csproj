@@ -63,6 +63,7 @@
     <Content Include="highscore.txt" />
     <Content Include="item_help.txt" />
     <Content Include="options.txt" />
+    <Content Include="Saltarelle.RotJS.dll" />
     <Content Include="spell_help.txt" />
     <Content Include="todo.txt" />
   </ItemGroup>
@@ -70,8 +71,9 @@
     <Reference Include="mscorlib">
       <HintPath>$(SolutionDir)packages\Saltarelle.Runtime.1.7.1\tools\Assemblies\mscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="Saltarelle.RotJS">
-      <HintPath>..\..\..\..\GitHub\SaltarelleRotJS\RotJS\bin\Saltarelle.RotJS.dll</HintPath>
+    <Reference Include="Saltarelle.RotJS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=d20d37cd8f010970, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Saltarelle.RotJS.dll</HintPath>
     </Reference>
     <Reference Include="Script.jQuery">
       <HintPath>..\..\Web3\packages\Saltarelle.jQuery.1.7.1\lib\Script.jQuery.dll</HintPath>

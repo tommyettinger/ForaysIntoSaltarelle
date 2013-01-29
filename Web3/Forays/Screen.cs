@@ -273,6 +273,7 @@ namespace Forays{
 			return false;
 		}
 		public static void Blank(){
+            //jQuery.Select("#main").ReplaceWith(Game.Console.display.getContainer());
 			Game.Console.CursorVisible = false;
 			for(int i=0;i<Global.SCREEN_H;++i){
 				Game.Console.SetCursorPosition(0,i);

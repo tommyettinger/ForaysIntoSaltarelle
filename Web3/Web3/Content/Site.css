@@ -106,6 +106,7 @@ header h1, #header h1 {
     -webkit-border-radius: 4px 0 0 0;
     -moz-border-radius: 4px 0 0 0;
     border-radius: 4px 0 0 0;
+    text-align: left;
 }
 
 footer, 
