@@ -110,7 +110,7 @@ namespace Forays{
 		public List<pos> AllPositions(){ return allpositions; }
 		public LevelType ChooseNextLevelType(LevelType current){
 			List<LevelType> types = new List<LevelType>();
-			foreach(LevelType l in LevelType.Cave.GetValues()){
+			foreach(LevelType l in typeof(LevelType).GetValues()){
 				if(l != current){
 					types.Add(l);
 				}
@@ -1323,7 +1323,7 @@ namespace Forays{
 				Tile t = goodtiles.Random();
 				int light = player.light_radius;
 				player.light_radius = 0;
-                await player.Move(t.row, t.col);
+                player.Move(t.row, t.col);
 				player.UpdateRadius(0,light,true);
 			}
 			else{
@@ -1341,7 +1341,7 @@ namespace Forays{
 						int fire = player.attrs[Forays.AttrType.ON_FIRE];
 						player.light_radius = 0;
 						player.attrs[Forays.AttrType.ON_FIRE] = 0;
-                        await player.Move(rr, rc);
+                        player.Move(rr, rc);
 						player.UpdateRadius(0,Math.Max(light,fire),true);
 						player.light_radius = light;
 						player.attrs[Forays.AttrType.ON_FIRE] = fire;
@@ -1695,7 +1695,7 @@ namespace Forays{
 				int fire = player.attrs[Forays.AttrType.ON_FIRE];
 				player.light_radius = 0;
 				player.attrs[Forays.AttrType.ON_FIRE] = 0;
-                await player.Move(t.row, t.col);
+                player.Move(t.row, t.col);
 				player.UpdateRadius(0,Math.Max(light,fire),true);
 				player.light_radius = light;
 				player.attrs[Forays.AttrType.ON_FIRE] = fire;
@@ -1713,7 +1713,7 @@ namespace Forays{
 					if(good && tile[rr,rc].passable && actor[rr,rc] == null){
 						int light = player.light_radius;
 						player.light_radius = 0;
-                        await player.Move(rr, rc);
+                        player.Move(rr, rc);
 						player.UpdateRadius(0,light,true);
 						done = true;
 					}

@@ -68,32 +68,37 @@ namespace Forays
     {
         Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, Gray, DarkGray, Blue, Green, Cyan, Red, Magenta, Yellow, White
     }
-    [FlagsAttribute]
-    public enum ConsoleModifiers
+    public static class ConsoleModifiers
     {
-        Alt = 1, Shift = 2, Control = 4
+        public static int Plain = 0; public static int Alt = 1;
+        public static int Shift = 2; public static int Control = 4;
     }
     public class ConsoleKeyInfo
     {
         public int Key;
         public char KeyChar;
-        public ConsoleModifiers Modifiers;
+        public int Modifiers;
         public ConsoleKeyInfo(int key)
         {
             Key = key;
-            KeyChar = ((string)(char)key)[0];
+            KeyChar = ((char)key).ToString().ToLower()[0];
+            Modifiers = ConsoleModifiers.Plain;
         }
 
-        public ConsoleKeyInfo(int key, ConsoleModifiers mods)
+        public ConsoleKeyInfo(int key, int mods)
         {
             Key = key;
-            KeyChar = ((string)(char)key)[0];
+            if((mods & ConsoleModifiers.Shift) == ConsoleModifiers.Shift)
+                KeyChar = ((char)key).ToString().ToUpper()[0];
+            else
+                KeyChar = ((char)key).ToString().ToLower()[0];
             Modifiers = mods;
         }
         public ConsoleKeyInfo(char keycode)
         {
             Key = (int)keycode;
             KeyChar = keycode;
+            Modifiers = ConsoleModifiers.Plain;
         }
     }
 
@@ -172,17 +177,15 @@ namespace Forays
         public bool KeyAvailable = false;
         private bool Intercept = false;
         private ConsoleKeyInfo kc = new ConsoleKeyInfo(65);
-        private Element keydiv;
+        //private Element keydiv;
         public ROTConsole()
         {
-            keydiv = Document.CreateElement("div");
-            keydiv.ID = "key";
             display = new Display(new DisplayOptions(80, 25));
         }
-        private jQueryDeferred defr;// Task<ConsoleKeyInfo> cki = null;
+        private TaskCompletionSource<ConsoleKeyInfo> defr;// Task<ConsoleKeyInfo> cki = null;
         private void processKey(Element elem, jQueryEvent ev)
         {
-            ConsoleModifiers m = 0;
+            int m = 0;
             if (ev.AltKey) m = m | ConsoleModifiers.Alt;
             if (ev.CtrlKey) m = m | ConsoleModifiers.Control;
             if (ev.ShiftKey) m = m | ConsoleModifiers.Shift;
@@ -190,11 +193,17 @@ namespace Forays
                 kc = new ConsoleKeyInfo(ev.Which, m);
             else
                 kc = new ConsoleKeyInfo(ev.Which);
-            if (!Intercept)
+            /*if (!Intercept && KeyAvailable)
+            {
+               // SetCursorPosition(CursorLeft - 1, CursorTop);
                 Write(kc.KeyChar);
-            jQuery.Document.Append("<p>Key Down, Key is " + kc.Key + ", Char is " + kc.KeyChar.ToString() + "</p>");
+            }*/
+            jQuery.Select("#key").ReplaceWith("<div id=\"key\"><p>Key Down, Key is " + kc.Key + ", Char is " + kc.KeyChar.ToString() + "</p></div>");
             //cki = Task<ConsoleKeyInfo>.FromResult(kc);
-            defr.Resolve();
+            KeyAvailable = false;
+            jQuery.Select("body").Off("keyup", "canvas", processKey);
+            //defr = new TaskCompletionSource<ConsoleKeyInfo>();
+            defr.TrySetResult(kc);
             
         }
         /*        public async Task<ConsoleKeyInfo> ReadKey()
@@ -208,13 +217,13 @@ namespace Forays
         {
 //            cki = null;
             Intercept = intercept;
-            defr = jQuery.Deferred();
-            defr.Done(() => jQuery.Select("body").Off("keydown", "canvas", processKey));
-            jQuery.Select("body").On("keydown", processKey);
-            await defr;//(, 2, "on", "keydown", "canvas", "processKey");
+            defr = new TaskCompletionSource<ConsoleKeyInfo>();
+            //defr.Done(() => );
+            jQuery.Select("body").On("keyup", processKey);
+            //(, 2, "on", "keydown", "canvas", "processKey");
            /*while (cki == null)
                await Task.Delay(35);*/
-           return kc;
+            return await defr.Task;
         }
         public void SetCursorPosition(int x, int y)
         {

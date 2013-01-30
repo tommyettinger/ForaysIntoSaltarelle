@@ -426,8 +426,8 @@ namespace Forays{
 				}
 			}
 		}
-		public async Task Move(int r,int c){ await Move(r,c,true); }
-		public async Task Move(int r,int c,bool trigger_traps){
+        public async void Move(int r, int c) { await Task.Run(() => Move(r, c, true)); }
+		public async void Move(int r,int c,bool trigger_traps){
 			if(r>=0 && r<ROWS && c>=0 && c<COLS){
 				if(M.actor[r,c] == null){
 					if(HasAttr(AttrType.GRABBED)){
@@ -859,7 +859,7 @@ namespace Forays{
 							if(type == ActorType.PLAYER){
 								B.Add("You are suddenly somewhere else. ");
 								Interrupt();
-								await Move(rr,rc);
+								Move(rr,rc);
 							}
 							else{
 								bool seen = false;
@@ -869,7 +869,7 @@ namespace Forays{
 								if(player.CanSee(tile())){
 									B.Add(the_name + " suddenly disappears. ",this);
 								}
-                                await Move(rr, rc);
+                                Move(rr, rc);
 								if(player.CanSee(tile())){
 									if(seen){
 										B.Add(the_name + " reappears. ",this);
@@ -1589,7 +1589,7 @@ namespace Forays{
 									}
 									else{
 										B.Add("You set off " + Tile.Prototype(t.type).the_name + "! ");
-                                        await Move(t.row, t.col);
+                                        Move(t.row, t.col);
 										Q1();
 									}
 								}
@@ -1627,7 +1627,7 @@ namespace Forays{
 									}
 									else{
 										B.Add("You set off " + Tile.Prototype(t.type).the_name + "! ");
-                                        await Move(t.row, t.col);
+                                        Move(t.row, t.col);
 										Q1();
 									}
 								}
@@ -1996,7 +1996,7 @@ namespace Forays{
 					B.Add("You walk down the stairs. ");
 					await B.PrintAll();
 					if(M.current_level < 20){
-                        await M.GenerateLevel();
+                        M.GenerateLevel();
 					}
 					else{
                         await M.GenerateBossLevel(false);
@@ -2109,7 +2109,7 @@ namespace Forays{
                                     int i = await Select("Trade one of your spells for another? ", topborder, bottomborder, ls, false, false, true, true, HelpTopic.Spells);
 									if(i != -1){
 										List<SpellType> unknown = new List<SpellType>();
-										foreach(SpellType spell in SpellType.AMNESIA.GetValues()){
+										foreach(SpellType spell in typeof(SpellType).GetValues()){
 											if(!HasSpell(spell) && spell != SpellType.BLESS && spell != SpellType.MINOR_HEAL
 											&& spell != SpellType.HOLY_SHIELD && spell != SpellType.NO_SPELL && spell != SpellType.NUM_SPELLS){
 												unknown.Add(spell);
@@ -2976,7 +2976,7 @@ namespace Forays{
 						Q0();
 						break;
 					case 11:
-                        await M.GenerateLevel();
+                        M.GenerateLevel();
 						Q0();
 						break;
 					case 12:
@@ -3014,7 +3014,8 @@ namespace Forays{
 						skills[SkillType.MAGIC] = 10;
 						skills[SkillType.SPIRIT] = 10;
 						skills[SkillType.STEALTH] = 10;
-						foreach(FeatType f in FeatType.ARCANE_SHIELD.GetValues()){
+                        foreach (FeatType f in typeof(FeatType).GetValues())
+                        {
 							if(f != FeatType.NO_FEAT && f != FeatType.NUM_FEATS){
 								feats[f] = 1;
 							}
@@ -3210,7 +3211,7 @@ namespace Forays{
 						if(TileInDirection(dir).inv != null){
 							B.Add("You see " + TileInDirection(dir).inv.AName() + ". ");
 						}
-                        await Move(TileInDirection(dir).row, TileInDirection(dir).col);
+                        Move(TileInDirection(dir).row, TileInDirection(dir).col);
 						QS();
 						if(!Help.displayed[TutorialTopic.Recovery] && !HasAttr(AttrType.POISONED) && !HasAttr(AttrType.ON_FIRE) && !HasAttr(AttrType.CATCHING_FIRE)
 						&& curhp % 10 > 0 && curhp % 10 <= 5 && !M.AllActors().Any(a=>(a != this && CanSee(a))) && !TilesWithinDistance(1).Any(t=>t.Is(FeatureType.FUNGUS_ACTIVE)||t.Is(FeatureType.FUNGUS_PRIMED)
@@ -3891,7 +3892,7 @@ namespace Forays{
 							}
 							else{
 								B.Add(You("stagger") + ". ",this);
-                                await Move(TileInDirection(dir).row, TileInDirection(dir).col);
+                                Move(TileInDirection(dir).row, TileInDirection(dir).col);
 							}
 						}
 					}
@@ -3987,7 +3988,7 @@ namespace Forays{
 						openspaces.Add(tile());
 						Tile newtile = openspaces[Global.Roll(openspaces.Count)-1];
 						if(newtile != tile()){
-                            await Move(newtile.row, newtile.col, false);
+                            Move(newtile.row, newtile.col, false);
 						}
 						if(openspaces.Count > 1){
 							B.Add(the_name + " is suddenly standing all around " + target.the_name + ". ");
@@ -4472,7 +4473,7 @@ namespace Forays{
 						}
 						if(tilelist.Count > 0){
 							Tile t = tilelist[Global.Roll(1,tilelist.Count)-1];
-                            await Move(t.row, t.col);
+                            Move(t.row, t.col);
                             await Attack(0, target);
 						}
 						else{
@@ -4498,7 +4499,7 @@ namespace Forays{
 							b += col;
 							if(M.BoundsCheck(a,b)){
 								if(M.tile[a,b].passable && M.actor[a,b] == null){
-                                    await Move(a, b);
+                                    Move(a, b);
 									break;
 								}
 							}
@@ -4532,7 +4533,7 @@ namespace Forays{
 					}
 					if(found){
 						Tile t = tilelist[Global.Roll(1,tilelist.Count)-1];
-                        await Move(t.row, t.col);
+                        Move(t.row, t.col);
 					}
 					QS();
 					break;
@@ -4616,7 +4617,7 @@ namespace Forays{
 							else{
 								if(next.actor() != null){
 									if(!next.actor().HasAttr(AttrType.NEVER_MOVES)){
-                                        await Move(next.row, next.col);
+                                        Move(next.row, next.col);
 										QS();
 									}
 									else{
@@ -4777,7 +4778,7 @@ namespace Forays{
 					bool cw = Global.CoinFlip();
 					if(TileInDirection(dir).passable && ActorInDirection(dir) == null && !GrabPreventsMovement(TileInDirection(dir))){
 						B.Add(the_name + " leaps forward swinging his axe! ",this);
-                        await Move(TileInDirection(dir).row, TileInDirection(dir).col);
+                        Move(TileInDirection(dir).row, TileInDirection(dir).col);
 						Actor a = ActorInDirection(RotateDirection(dir,cw));
 						if(a != null){
 							B.Add(Your() + " axe hits " + a.the_name + ". ",this,a);
@@ -4949,7 +4950,7 @@ namespace Forays{
 					Actor thrall = group[1];
 					if(CanSee(thrall)){ //cooldown 1 is teleport. cooldown 2 is shield.
 						if(DistanceFrom(target) < thrall.DistanceFrom(target) && DistanceFrom(thrall) == 1){
-                            await Move(thrall.row, thrall.col);
+                            Move(thrall.row, thrall.col);
 							QS();
 						}
 						else{
@@ -5004,7 +5005,7 @@ namespace Forays{
 										GainAttr(AttrType.COOLDOWN_1,400);
 										B.Add(TheVisible() + " teleports " + thrall.TheVisible() + ". ",this,thrall);
 										M.Draw();
-                                        await thrall.Move(tile.row, tile.col);
+                                        thrall.Move(tile.row, tile.col);
 										B.DisplayNow();
 										Screen.AnimateStorm(tile.p,1,1,4,thrall.symbol,thrall.color);
 										foreach(Tile t2 in thrall.GetBestLineOfEffect(tile)){
@@ -5243,7 +5244,7 @@ namespace Forays{
 								B.Add(TheVisible() + " slashes at the air, sending a swirling vortex toward " + target.the_name + ". ",target);
 								AnimateBeam(target,"*",Color.Green);
 								target.AnimateStorm(3,3,10,"*",Color.Green);
-                                await target.Move(rr, rc);
+                                target.Move(rr, rc);
 								M.Draw();
 								target.AnimateStorm(3,3,10,"*",Color.Green);
 								B.Add(target.YouAre() + " transported elsewhere. ");
@@ -5790,7 +5791,7 @@ namespace Forays{
 						}
 						if(tilelist.Count > 0){
 							Tile t = tilelist[Global.Roll(1,tilelist.Count)-1];
-                            await Move(t.row, t.col);
+                            Move(t.row, t.col);
 						}
 						QS();
 					}
@@ -5835,7 +5836,7 @@ namespace Forays{
 							QS(); //todo: should target_location be cleared here?
 						}
 						else{
-                            await Move(target_location.row, target_location.col); //swap places
+                            Move(target_location.row, target_location.col); //swap places
 							target_location = null;
 							QS();
 						}
@@ -6337,7 +6338,7 @@ namespace Forays{
 		}
 		public async Task<bool> AI_MoveOrOpen(int r,int c){
 			if(M.tile[r,c].passable && M.actor[r,c] == null && !GrabPreventsMovement(M.tile[r,c]) && M.tile[r,c].type != TileType.CHASM){
-                await Move(r, c);
+                Move(r, c);
 				return true;
 			}
 			else{
@@ -6349,7 +6350,7 @@ namespace Forays{
 					if(M.tile[r,c].type == TileType.RUBBLE){
 						if(HasAttr(AttrType.SMALL)){
 							if(M.actor[r,c] == null && !GrabPreventsMovement(M.tile[r,c])){
-                                await Move(r, c);
+                                Move(r, c);
 							}
 							else{
 								return false;
@@ -6402,7 +6403,7 @@ namespace Forays{
 							path.Clear();
 						}
 						else{
-                            await Move(path[0].row, path[0].col); //leaders can push through their followers
+                            Move(path[0].row, path[0].col); //leaders can push through their followers
 							if(DistanceFrom(path[0]) == 0){
 								path.RemoveAt(0);
 							}
@@ -7514,14 +7515,14 @@ namespace Forays{
 								}
 							}
 							if(destination != null){
-                                await Move(destination.row, destination.col);
+                                Move(destination.row, destination.col);
 							}
 							else{
 								for(int i=0;i<9999;++i){
 									int rr = Global.Roll(1,ROWS-2);
 									int rc = Global.Roll(1,COLS-2);
 									if(M.tile[rr,rc].passable && M.actor[rr,rc] == null && DistanceFrom(rr,rc) >= 6 && !M.tile[rr,rc].IsTrap()){
-                                        await Move(rr, rc);
+                                        Move(rr, rc);
 										break;
 									}
 								}
@@ -7558,7 +7559,7 @@ namespace Forays{
 						B.Add("The ice breaks! ",this);
 					}
 				}
-                await Move(next.row, next.col);
+                Move(next.row, next.col);
 			}
 			else{
 				int r = row;
@@ -7877,7 +7878,7 @@ namespace Forays{
 							B.Add(You("cast") + " blink. ",this);
 							B.Add(You("step") + " through a rip in reality. ",this);
 							AnimateStorm(2,3,4,"*",Color.DarkMagenta);
-                            await Move(a, b);
+                            Move(a, b);
 							M.Draw();
 							AnimateStorm(2,3,4,"*",Color.DarkMagenta);
 							break;
@@ -8193,7 +8194,7 @@ namespace Forays{
 				else{
 					if(M.actor[target_location.row,target_location.col] == null && target_location.passable){
 						B.Add("You activate your rune of transport. ");
-                        await Move(target_location.row, target_location.col);
+                        Move(target_location.row, target_location.col);
 						target_location.features.Remove(FeatureType.RUNE_OF_RETREAT);
 						target_location = null;
 					}
@@ -8290,7 +8291,7 @@ namespace Forays{
 										//Thread.Sleep(35);
 									}
 								}
-                                await Move(t.row, t.col);
+                                Move(t.row, t.col);
 								M.Draw();
 								B.Add(You("travel") + " through the passage. ",this);
 							}
@@ -8816,7 +8817,7 @@ namespace Forays{
 					if(DistanceFrom(t) == 2 && line[1].passable && line[1].actor() == null && !GrabPreventsMovement(line[1])){
 						moved = true;
 						B.Add("You lunge! ");
-                        await Move(line[1].row, line[1].col);
+                        Move(line[1].row, line[1].col);
 						attrs[AttrType.BONUS_COMBAT] += 4;
                         await Attack(0, t.actor());
 						attrs[AttrType.BONUS_COMBAT] -= 4;
@@ -8865,7 +8866,7 @@ effect as standing still, if you're on fire or catching fire. */
 						}
 						if(neighbor.passable && !moved){
 							B.Add("You tumble. ");
-                            await Move(t.row, t.col);
+                            Move(t.row, t.col);
 							moved = true;
 							attrs[AttrType.TUMBLING]++;
 							if(HasAttr(AttrType.CATCHING_FIRE)){ //copy&paste happened here: todo, make a single fire-handling method
@@ -9070,7 +9071,7 @@ effect as standing still, if you're on fire or catching fire. */
 							}
 							else{
 								B.Add("You set off " + Tile.Prototype(TileInDirection(dir).type).the_name + "! ");
-                                await Move(TileInDirection(dir).row, TileInDirection(dir).col);
+                                Move(TileInDirection(dir).row, TileInDirection(dir).col);
 								Q1();
 							}
 						}
@@ -9158,7 +9159,7 @@ effect as standing still, if you're on fire or catching fire. */
 						}
 						else{
 							B.Add(You("stagger") + ". ",this);
-                            await Move(TileInDirection(dir).row, TileInDirection(dir).col);
+                            Move(TileInDirection(dir).row, TileInDirection(dir).col);
 						}
 					}
 				}
@@ -9643,11 +9644,11 @@ E[x]plore
 				for(ArmorType a = ArmorType.LEATHER;a <= ArmorType.FULL_PLATE;++a){
 					if(new_armor == heldarmor[a]){
 						Screen.WriteMapChar(line,36,">");
-						Screen.WriteMapString(line,38,new cstr(Color.Red,"[" + string.FromCharCode((char)(a.ToInt()+(int)'f')) + "]"));
+						Screen.WriteMapString(line,38,new cstr(Color.Red,"[" + string.FromCharCode((char)(a+(int)'f')) + "]"));
 					}
 					else{
 						Screen.WriteMapChar(line,36," ");
-                        Screen.WriteMapString(line, 38, new cstr(Color.Cyan, "[" + string.FromCharCode((char)(a.ToInt() + (int)'f')) + "]"));
+                        Screen.WriteMapString(line, 38, new cstr(Color.Cyan, "[" + string.FromCharCode((char)(a + (int)'f')) + "]"));
 					}
 					++line;
 				}
@@ -9863,7 +9864,7 @@ E[x]plore
 			if(skill == SkillType.MAGIC){
 				List<SpellType> unknown = new List<SpellType>();
 				List<colorstring> unknownstr = new List<colorstring>();
-				foreach(SpellType spell in SpellType.AMNESIA.GetValues()){
+				foreach(SpellType spell in typeof(SpellType).GetValues()){
 					if(!HasSpell(spell) && spell != SpellType.BLESS && spell != SpellType.MINOR_HEAL
 					&& spell != SpellType.HOLY_SHIELD && spell != SpellType.NO_SPELL && spell != SpellType.NUM_SPELLS){
 						unknown.Add(spell);

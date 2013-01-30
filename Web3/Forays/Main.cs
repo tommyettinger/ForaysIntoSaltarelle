@@ -226,7 +226,7 @@ namespace Forays{
                                     Actor.player_name = await Global.EnterString(26);
                                 }
                                 game.M.GenerateLevelTypes();
-                                await game.M.GenerateLevel();
+                                game.M.GenerateLevel();
                                 Screen.Blank();
                                 Screen.WriteMapString(0, 0, "".PadRight(Global.COLS, '-'));
                                 Screen.WriteMapString(1, 0, "[a] Toughness - You have a slight resistance to physical damage.");

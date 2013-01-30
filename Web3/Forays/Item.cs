@@ -219,7 +219,8 @@ namespace Forays{
 		}
 		public static ConsumableType RandomItem(){
 			List<ConsumableType> list = new List<ConsumableType>();
-			foreach(ConsumableType item in ConsumableType.BANDAGE.GetValues()){
+            foreach (ConsumableType item in typeof(ConsumableType).GetValues())
+            {
 				if(Item.Rarity(item) == 1){
 					list.Add(item);
 				}
@@ -315,7 +316,7 @@ namespace Forays{
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
 							B.Add(user.You("step") + " through a rip in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
 							user.AnimateStorm(2,3,4,"*",Color.DarkMagenta);
-							await user.Move(rr,rc);
+							user.Move(rr,rc);
 							M.Draw();
 							user.AnimateStorm(2,3,4,"*",Color.DarkMagenta);
 							break;
@@ -331,7 +332,7 @@ namespace Forays{
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
 							B.Add(user.You("jump") + " through a rift in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
 							user.AnimateStorm(3,3,10,"*",Color.Green);
-                            await user.Move(rr, rc);
+                            user.Move(rr, rc);
 							M.Draw();
 							user.AnimateStorm(3,3,10,"*",Color.Green);
 							break;
@@ -390,7 +391,7 @@ namespace Forays{
                                     await Task.Delay(35);
 								}
 								B.Add(user.You("travel") + " through the passage. ",user,t);
-                                await user.Move(t.row, t.col);
+                                user.Move(t.row, t.col);
 							}
 							else{
 								int j = 0;

@@ -18,7 +18,7 @@ namespace Forays{
 		public static async Task DisplayHelp(HelpTopic h){
 			Game.Console.CursorVisible = false;
 			Screen.Blank();
-			int num_topics = (HelpTopic.Advanced.GetValues()).Length;
+			int num_topics = (typeof(HelpTopic).GetValues()).Length;
 			Screen.WriteString(5,4,"Topics:",Color.Yellow);
 			for(int i=0;i<num_topics+1;++i){
 				Screen.WriteString(i+7,0,"[ ]");
@@ -32,7 +32,8 @@ namespace Forays{
 			ConsoleKeyInfo command;
 			string ch;
 			for(bool done=false;!done;){
-				foreach(HelpTopic help in (HelpTopic.Advanced.GetValues())){
+                foreach (HelpTopic help in (typeof(HelpTopic).GetValues()))
+                {
 					if(h == help){
 						Screen.WriteString(7+(int)help,4,Enum.ToString(typeof(HelpTopic),help),Color.Yellow);
 					}
@@ -222,7 +223,7 @@ namespace Forays{
 				result.Add("");
 				result.Add("");
 				result.Add("");
-				foreach(TutorialTopic topic in (TutorialTopic.Armor.GetValues())){
+				foreach(TutorialTopic topic in (typeof(TutorialTopic).GetValues())){
 					foreach(string s in TutorialText(topic)){
 						result.Add(s);
 					}

@@ -656,7 +656,7 @@ namespace Forays{
     public static class Extensions
     {
 
-        public static int ToInt(this Enum e)
+        /*public static int ToInt(this Enum e)
         {
             Enum[] av = e.GetValues();
             for (int i = 0; i < av.Length; i++)
@@ -665,17 +665,17 @@ namespace Forays{
                     return i;
             }
             return -1;
-        }
-        public static Enum[] GetValues(this Enum e)
+        }*/
+        public static int[] GetValues(this Type e)
         {
             if (Enum.Keys(e.GetType()).Length == 0)
             {
-                return new Enum[]{};
+                return new int[]{};
             }
-            Enum[] ret = new Enum[]{};
-            foreach (string s in Enum.Keys(e.GetType()))
+            int[] ret = new int[]{};
+            for (int i = 0; i <  Type.Keys(e).Length; i++ )
             {
-                ret.Concat(Enum.Parse(e.GetType(), s));
+                ret[i] = i;
             }
             return ret;
         }
@@ -809,10 +809,10 @@ namespace Forays{
 		}
 		public static colorstring GetColorString(this string s){ return GetColorString(s,Color.Gray); }
 		public static colorstring GetColorString(this string s,Color color){
-			if(s.Search(new Regex("[")) > -1){
+			if(s.Search(new Regex("\\[")) > -1){
 				string temp = s;
 				colorstring result = new colorstring();
-				while(temp.Search(new Regex("[")) > -1){
+				while(temp.Search(new Regex("\\[")) > -1){
 					int open = temp.IndexOf('[');
 					int close = temp.IndexOf(']');
 					if(close == -1){
