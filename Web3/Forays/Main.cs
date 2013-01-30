@@ -53,7 +53,7 @@ namespace Forays{
 
             jQuery.OnDocumentReady(async () =>
             {
-                jQuery.Select("#main").ReplaceWith(Console.display.getContainer());
+                jQuery.Select("#main").Append( Console.display.getContainer());
 
                 jQuery.Select("canvas").On("keydown", (elem, ev) =>
                 {
@@ -226,7 +226,7 @@ namespace Forays{
                                     Actor.player_name = await Global.EnterString(26);
                                 }
                                 game.M.GenerateLevelTypes();
-                                game.M.GenerateLevel();
+                                await game.M.GenerateLevel();
                                 Screen.Blank();
                                 Screen.WriteMapString(0, 0, "".PadRight(Global.COLS, '-'));
                                 Screen.WriteMapString(1, 0, "[a] Toughness - You have a slight resistance to physical damage.");

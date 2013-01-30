@@ -163,7 +163,7 @@ namespace Forays{
         {
         }
 		public static colorstring operator +(colorstring one,colorstring two){
-			colorstring result = new colorstring(null);
+			colorstring result = new colorstring();
 			foreach(cstr s in one.strings){
 				result.strings.Add(s);
 			}

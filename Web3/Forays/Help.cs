@@ -424,16 +424,16 @@ namespace Forays{
 			colorstring[] box = new colorstring[boxheight]; //maybe i should make this a list to match the others
 			box[0] = new colorstring("+",box_corner_color,"".PadRight(stringwidth,'-'),box_edge_color,"+",box_corner_color);
 			box[text.Length + 1] = new colorstring("|",box_edge_color,"".PadRight(stringwidth),Color.Gray,"|",box_edge_color);
-			box[text.Length + 2] = new colorstring("|",box_edge_color) + "[Press any key to continue]".PadOuter(stringwidth).GetColorString(text_color) + new colorstring("|",box_edge_color);
-			box[text.Length + 3] = new colorstring("|",box_edge_color) + "[=] Stop showing tips".PadOuter(stringwidth).GetColorString(text_color) + new colorstring("|",box_edge_color);
+            box[text.Length + 2] = new colorstring("|", box_edge_color) + ("[Press any key to continue]".PadOuter(stringwidth).GetColorString(text_color)) + new colorstring("|", box_edge_color); //PadOuter originally here
+            box[text.Length + 3] = new colorstring("|", box_edge_color) + ("[=] Stop showing tips".PadOuter(stringwidth).GetColorString(text_color)) + new colorstring("|", box_edge_color); //PadOuter originally here
 			box[text.Length + 4] = new colorstring("+",box_corner_color,"".PadRight(stringwidth,'-'),box_edge_color,"+",box_corner_color);
 			int pos = 1;
 			foreach(string s in text){
-				box[pos] = new colorstring("|",box_edge_color) + s.PadOuter(stringwidth).GetColorString(text_color) + new colorstring("|",box_edge_color);
+                box[pos] = new colorstring("|", box_edge_color) + (s.PadOuter(stringwidth).GetColorString(text_color)) + new colorstring("|", box_edge_color); //PadOuter originally here
 				if(pos == 1){
 					box[pos] = new colorstring();
 					box[pos].strings.Add(new cstr("|",box_edge_color));
-					box[pos].strings.Add(new cstr(s.PadOuter(stringwidth),first_line_color));
+                    box[pos].strings.Add(new cstr(s.PadOuter(stringwidth), first_line_color)); //PadOuter originally here
 					box[pos].strings.Add(new cstr("|",box_edge_color));
 				}
 				++pos;

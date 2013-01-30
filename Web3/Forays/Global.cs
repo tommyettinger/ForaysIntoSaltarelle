@@ -809,30 +809,30 @@ namespace Forays{
 		}
 		public static colorstring GetColorString(this string s){ return GetColorString(s,Color.Gray); }
 		public static colorstring GetColorString(this string s,Color color){
-			if(s.Search(new Regex("\\[")) > -1){
+			if(s.Search(new Regex(@"\[")) > -1){
 				string temp = s;
 				colorstring result = new colorstring();
-				while(temp.Search(new Regex("\\[")) > -1){
-					int open = temp.IndexOf('[');
-					int close = temp.IndexOf(']');
+				while(temp.Search(new Regex(@"\[")) > -1){
+					int open = temp.IndexOf("[");
+					int close = temp.IndexOf("]");
 					if(close == -1){
 						result.strings.Add(new cstr(temp,color));
 						temp = "";
 					}
 					else{
-						int hyphen = temp.IndexOf('-');
+						int hyphen = temp.IndexOf("-");
 						if(hyphen != -1 && hyphen > open && hyphen < close){
 							result.strings.Add(new cstr(temp.Substring(0,open+1),color));
 							//result.strings.Add(new cstr(temp.Substring(open+1,(close-open)-1),Color.Cyan));
-							result.strings.Add(new cstr(temp.Substring(open+1,(hyphen-open)-1),Color.Cyan));
+							result.strings.Add(new cstr(temp.Substring(open+1,hyphen),Color.Cyan)); //was hyphen - open
 							result.strings.Add(new cstr("-",color));
-							result.strings.Add(new cstr(temp.Substring(hyphen+1,(close-hyphen)-1),Color.Cyan));
+							result.strings.Add(new cstr(temp.Substring(hyphen+1,(close)),Color.Cyan)); // was close - hyphen
 							result.strings.Add(new cstr("]",color));
 							temp = temp.Substring(close+1);
 						}
 						else{
 							result.strings.Add(new cstr(temp.Substring(0,open+1),color));
-							result.strings.Add(new cstr(temp.Substring(open+1,(close-open)-1),Color.Cyan));
+                            result.strings.Add(new cstr(temp.Substring(open + 1, (close)), Color.Cyan)); // was close-open
 							result.strings.Add(new cstr("]",color));
 							temp = temp.Substring(close+1);
 						}

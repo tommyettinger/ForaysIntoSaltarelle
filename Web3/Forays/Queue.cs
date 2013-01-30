@@ -102,13 +102,15 @@ namespace Forays{
 				}
 			}
 		}
-		public async Task Pop(){
+		public async Task<bool> Pop(){
 			turn = list[0].TimeToExecute();
 			Event e = list[0];
 			//list.First.Value.Execute();
 			//list.RemoveFirst();
-            await e.Execute();
+            e.Execute();
+            //await Task.Delay(1000);
 			list.Remove(e);
+            return true;
 		}
 		public void ResetForNewLevel(){
 			List<Event> newlist = new List<Event>();
@@ -138,7 +140,7 @@ namespace Forays{
             int i = 0;
             for (Event current = list[0]; current != null; i++, current = list[i])
             {
-				if(current.type == type){
+				if(current.evtype == type){
 					return true;
 				}
 			}
@@ -159,7 +161,7 @@ namespace Forays{
 		public PhysicalObject target{get;set;}
 		public List<Tile> area = null;
 		public int delay{get;set;}
-		public EventType type{get;set;}
+		public EventType evtype{get;set;}
 		public AttrType attr{get;set;}
 		public int value{get;set;}
 		public string msg{get;set;}
@@ -175,7 +177,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_){
 			target=target_;
 			delay=delay_;
-			type=EventType.MOVE;
+			evtype=EventType.MOVE;
 			value=0;
 			msg="";
 			msg_objs = null;
@@ -186,7 +188,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=1;
 			msg="";
@@ -198,7 +200,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_,int value_){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=value_;
 			msg="";
@@ -210,7 +212,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_,string msg_){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=1;
 			msg=msg_;
@@ -222,7 +224,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_,int value_,string msg_){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=value_;
 			msg=msg_;
@@ -234,7 +236,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_,string msg_, PhysicalObject[] objs){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=1;
 			msg=msg_;
@@ -250,7 +252,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,AttrType attr_,int value_,string msg_, PhysicalObject[] objs){
 			target=target_;
 			delay=delay_;
-			type=EventType.REMOVE_ATTR;
+			evtype=EventType.REMOVE_ATTR;
 			attr=attr_;
 			value=value_;
 			msg=msg_;
@@ -266,7 +268,7 @@ namespace Forays{
 		public Event(int delay_,EventType type_){
 			target=null;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg="";
@@ -278,7 +280,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,EventType type_){
 			target=target_;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg="";
@@ -290,7 +292,7 @@ namespace Forays{
 		public Event(PhysicalObject target_,int delay_,EventType type_,int value_){
 			target=target_;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=value_;
 			msg="";
@@ -302,7 +304,7 @@ namespace Forays{
 		public Event(int delay_,string msg_){
 			target=null;
 			delay=delay_;
-			type=EventType.ANY_EVENT;
+			evtype=EventType.ANY_EVENT;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg=msg_;
@@ -319,7 +321,7 @@ namespace Forays{
 			}
 			//area=area_;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg="";
@@ -332,7 +334,7 @@ namespace Forays{
 			target=null;
 			area=area_;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg=msg_;
@@ -349,7 +351,7 @@ namespace Forays{
 			target=target_;
 			area=area_;
 			delay=delay_;
-			type=type_;
+			evtype=type_;
 			attr=AttrType.NO_ATTR;
 			value=0;
 			msg="";
@@ -363,7 +365,7 @@ namespace Forays{
             target = target_;
             area = area_;
             delay = delay_;
-            type = type_;
+            evtype = type_;
             attr = attr_;
             value = value_;
             msg = msg_;
@@ -381,7 +383,7 @@ namespace Forays{
             target = target_;
             area = area_;
             delay = delay_;
-            type = type_;
+            evtype = type_;
             attr = attr_;
             value = value_;
             msg = msg_;
@@ -391,7 +393,7 @@ namespace Forays{
         }
 		public int TimeToExecute(){ return delay + time_created; }
 		public void Kill(PhysicalObject target_,EventType type_){
-			if(msg_objs != null && (type==type_ || type_==EventType.ANY_EVENT)){
+			if(msg_objs != null && (evtype==type_ || type_==EventType.ANY_EVENT)){
 				if(msg_objs.Contains(target)){
 					msg_objs.Remove(target);
 				}
@@ -408,7 +410,7 @@ namespace Forays{
 				dead = true;*/
 				area.Remove(t);
 			}
-			if(target==target_ && (type==type_ || type_==EventType.ANY_EVENT)){
+			if(target==target_ && (evtype==type_ || type_==EventType.ANY_EVENT)){
 				target = null;
 				if(msg_objs != null){
 					msg_objs.Clear();
@@ -420,24 +422,24 @@ namespace Forays{
 				}
 				dead = true;
 			}
-			if(type_ == EventType.CHECK_FOR_HIDDEN && type == EventType.CHECK_FOR_HIDDEN){
+			if(type_ == EventType.CHECK_FOR_HIDDEN && evtype == EventType.CHECK_FOR_HIDDEN){
 				dead = true;
 			}
-			if(target_ == null && type_ == EventType.REGENERATING_FROM_DEATH && type == EventType.REGENERATING_FROM_DEATH){
+			if(target_ == null && type_ == EventType.REGENERATING_FROM_DEATH && evtype == EventType.REGENERATING_FROM_DEATH){
 				dead = true;
 			}
-			if(target_ == null && type_ == EventType.POLTERGEIST && type == EventType.POLTERGEIST){
+			if(target_ == null && type_ == EventType.POLTERGEIST && evtype == EventType.POLTERGEIST){
 				dead = true;
 			}
-			if(target_ == null && type_ == EventType.RELATIVELY_SAFE && type == EventType.RELATIVELY_SAFE){
+			if(target_ == null && type_ == EventType.RELATIVELY_SAFE && evtype == EventType.RELATIVELY_SAFE){
 				dead = true;
 			}
-			if(target_ == null && type_ == EventType.BLAST_FUNGUS && type == EventType.BLAST_FUNGUS){
+			if(target_ == null && type_ == EventType.BLAST_FUNGUS && evtype == EventType.BLAST_FUNGUS){
 				dead = true;
 			}
 		}
 		public void Kill(PhysicalObject target_,AttrType attr_){
-			if(target==target_ && type==EventType.REMOVE_ATTR && attr==attr_){
+			if(target==target_ && evtype==EventType.REMOVE_ATTR && attr==attr_){
 				target = null;
 				if(msg_objs != null){
 					msg_objs.Clear();
@@ -452,7 +454,7 @@ namespace Forays{
 		}
 		public async Task Execute(){
 			if(!dead){
-				switch(type){
+				switch(evtype){
 				case EventType.MOVE:
 				{
 					Actor temp = target as Actor;
@@ -649,7 +651,7 @@ namespace Forays{
 									a.Q0();
 									a.player_visibility_duration = -1;
 									foreach(Event e in Q.list){
-										if(e.target == a && e.type == EventType.MOVE){
+										if( e != null && e.target != null && e.target == a && e.evtype == EventType.MOVE){
 											e.tiebreaker = this.tiebreaker;
 											break;
 										}
@@ -783,7 +785,7 @@ namespace Forays{
 								a.symbol = item.symbol;
 								a.color = item.color;
 								foreach(Event e in Q.list){
-									if(e.target == a && e.type == EventType.MOVE){
+									if(e.target == a && e.evtype == EventType.MOVE){
 										e.tiebreaker = this.tiebreaker;
 										break;
 									}
@@ -812,7 +814,7 @@ namespace Forays{
 							a.symbol = item.symbol;
 							a.color = item.color;
 							foreach(Event e in Q.list){
-								if(e.target == a && e.type == EventType.MOVE){
+								if(e.target == a && e.evtype == EventType.MOVE){
 									e.tiebreaker = this.tiebreaker;
 									break;
 								}
@@ -943,7 +945,7 @@ namespace Forays{
 						Event hiddencheck = null;
 						Tile t = target as Tile;
 						foreach(Event e in Q.list){
-							if(!e.dead && e.type == EventType.CHECK_FOR_HIDDEN){
+							if(!e.dead && e.evtype == EventType.CHECK_FOR_HIDDEN){
 								hiddencheck = e;
 								break;
 							}
@@ -1018,7 +1020,7 @@ namespace Forays{
 						Event hiddencheck = null;
 						Tile t = target as Tile;
 						foreach(Event e in Q.list){
-							if(!e.dead && e.type == EventType.CHECK_FOR_HIDDEN){
+							if(!e.dead && e.evtype == EventType.CHECK_FOR_HIDDEN){
 								hiddencheck = e;
 								break;
 							}
@@ -1090,7 +1092,7 @@ namespace Forays{
 						Event hiddencheck = null;
 						Tile t = target as Tile;
 						foreach(Event e in Q.list){
-							if(!e.dead && e.type == EventType.CHECK_FOR_HIDDEN){
+							if(!e.dead && e.evtype == EventType.CHECK_FOR_HIDDEN){
 								hiddencheck = e;
 								break;
 							}
@@ -1212,7 +1214,7 @@ namespace Forays{
 							t.TransformTo(TileType.FLOOR);
 							Actor a = Actor.Create(ActorType.MARBLE_HORROR,t.row,t.col,true,true);
 							foreach(Event e in Q.list){
-								if(e.target == a && e.type == EventType.MOVE){
+								if(e.target == a && e.evtype == EventType.MOVE){
 									e.dead = true;
 									break;
 								}
@@ -1245,7 +1247,7 @@ namespace Forays{
 						if(value > 0 && target.actor() == null){
 							Actor a = Actor.Create(ActorType.TROLL,target.row,target.col);
 							foreach(Event e in Q.list){
-								if(e.target == M.actor[target.row,target.col] && e.type == EventType.MOVE){
+								if(e.target == M.actor[target.row,target.col] && e.evtype == EventType.MOVE){
 									e.tiebreaker = this.tiebreaker;
 									break;
 								}
@@ -1295,7 +1297,7 @@ namespace Forays{
 						if(value > 0 && target.actor() == null){
 							Actor a = Actor.Create(ActorType.TROLL_SEER,target.row,target.col);
 							foreach(Event e in Q.list){
-								if(e.target == M.actor[target.row,target.col] && e.type == EventType.MOVE){
+								if(e.target == M.actor[target.row,target.col] && e.evtype == EventType.MOVE){
 									e.tiebreaker = this.tiebreaker;
 									break;
 								}
@@ -1474,7 +1476,7 @@ namespace Forays{
 					if(M.AllActors().Count == 1 && !Q.Contains(EventType.POLTERGEIST)){
 						List<Tile> trolls = new List<Tile>();
 						foreach (Event current in Q.list){
-							if(current.type == EventType.REGENERATING_FROM_DEATH){
+							if(current.evtype == EventType.REGENERATING_FROM_DEATH){
 								trolls.Add((current.target) as Tile);
 							}
 						}
@@ -1662,7 +1664,7 @@ namespace Forays{
 			if(one.tiebreaker > two.tiebreaker){
 				return false;
 			}
-			if(one.type == EventType.MOVE && two.type != EventType.MOVE){
+			if(one.evtype == EventType.MOVE && two.evtype != EventType.MOVE){
 				return true;
 			}
 			return false;
@@ -1680,7 +1682,7 @@ namespace Forays{
 			if(one.tiebreaker < two.tiebreaker){
 				return false;
 			}
-			if(one.type != EventType.MOVE && two.type == EventType.MOVE){
+			if(one.evtype != EventType.MOVE && two.evtype == EventType.MOVE){
 				return true;
 			}
 			return false;
@@ -1698,10 +1700,10 @@ namespace Forays{
 			if(one.tiebreaker > two.tiebreaker){
 				return false;
 			}
-			if(one.type == EventType.MOVE){
+			if(one.evtype == EventType.MOVE){
 				return true;
 			}
-			if(one.type != EventType.MOVE && two.type != EventType.MOVE){
+			if(one.evtype != EventType.MOVE && two.evtype != EventType.MOVE){
 				return true;
 			}
 			return false;
@@ -1719,10 +1721,10 @@ namespace Forays{
 			if(one.tiebreaker < two.tiebreaker){
 				return false;
 			}
-			if(one.type != EventType.MOVE){
+			if(one.evtype != EventType.MOVE){
 				return true;
 			}
-			if(one.type == EventType.MOVE && two.type == EventType.MOVE){
+			if(one.evtype == EventType.MOVE && two.evtype == EventType.MOVE){
 				return true;
 			}
 			return false;

@@ -1323,7 +1323,7 @@ namespace Forays{
 				Tile t = goodtiles.Random();
 				int light = player.light_radius;
 				player.light_radius = 0;
-                player.Move(t.row, t.col);
+                await player.Move(t.row, t.col);
 				player.UpdateRadius(0,light,true);
 			}
 			else{
@@ -1341,7 +1341,7 @@ namespace Forays{
 						int fire = player.attrs[Forays.AttrType.ON_FIRE];
 						player.light_radius = 0;
 						player.attrs[Forays.AttrType.ON_FIRE] = 0;
-                        player.Move(rr, rc);
+                        await player.Move(rr, rc);
 						player.UpdateRadius(0,Math.Max(light,fire),true);
 						player.light_radius = light;
 						player.attrs[Forays.AttrType.ON_FIRE] = fire;
@@ -1573,7 +1573,7 @@ namespace Forays{
 			current_level = 21;
 			int boss_hp = -1;
 			foreach(Event e in Q.list){
-				if(e.type == EventType.BOSS_ARRIVE){
+				if(e.evtype == EventType.BOSS_ARRIVE){
 					boss_hp = e.value;
 					break;
 				}
@@ -1607,8 +1607,8 @@ namespace Forays{
 			wiz_dark = false;
 			List<Event> newlist = new List<Event>();
 			foreach (Event current in Q.list){
-				if(current.target == Event.player || current.type == EventType.CEILING_COLLAPSE || current.type == EventType.FLOOR_COLLAPSE){
-					if(current.type == EventType.FLOOR_COLLAPSE){
+				if(current.target == Event.player || current.evtype == EventType.CEILING_COLLAPSE || current.evtype == EventType.FLOOR_COLLAPSE){
+					if(current.evtype == EventType.FLOOR_COLLAPSE){
 						current.target = null;
 					}
 					newlist.Insert(newlist.Count, current);
@@ -1695,7 +1695,7 @@ namespace Forays{
 				int fire = player.attrs[Forays.AttrType.ON_FIRE];
 				player.light_radius = 0;
 				player.attrs[Forays.AttrType.ON_FIRE] = 0;
-                player.Move(t.row, t.col);
+                await player.Move(t.row, t.col);
 				player.UpdateRadius(0,Math.Max(light,fire),true);
 				player.light_radius = light;
 				player.attrs[Forays.AttrType.ON_FIRE] = fire;
@@ -1713,7 +1713,7 @@ namespace Forays{
 					if(good && tile[rr,rc].passable && actor[rr,rc] == null){
 						int light = player.light_radius;
 						player.light_radius = 0;
-                        player.Move(rr, rc);
+                        await player.Move(rr, rc);
 						player.UpdateRadius(0,light,true);
 						done = true;
 					}

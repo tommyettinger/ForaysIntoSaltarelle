@@ -47,8 +47,8 @@ namespace Forays{
 				add = true;
 			}
 			if(add && s.Length > 0){
-				if(s.Match(new System.Text.RegularExpressions.Regex("^[a-z]")).Length > 0){
-					s.Replace(new System.Text.RegularExpressions.Regex("^[a-z]"), (sr) => sr.ToUpper());
+				if(s.Match(new System.Text.RegularExpressions.Regex(", [a-z]")).Length > 0){
+                    s.Replace(new System.Text.RegularExpressions.Regex(", [a-z]"), (sr) => sr[2].ToString().ToUpper());
 //					c[0] = Char.ToUpper(s[0]);
 					//s = new string(c);
 				}

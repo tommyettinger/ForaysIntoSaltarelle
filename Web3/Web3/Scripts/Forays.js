@@ -3148,6 +3148,7 @@
 		this.armors = [];
 		this.magic_items = [];
 		$Forays_PhysicalObject.call(this);
+		this.set_type(7);
 		this.set_f(new Array(13));
 		this.set_inv([]);
 		this.weapons = [];
@@ -3263,136 +3264,148 @@
 			}
 		},
 		move: function(r, c) {
-			var $state = 0, $t1;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
 			var $sm = Function.mkdel(this, function() {
-				$sm1:
-				for (;;) {
-					switch ($state) {
-						case 0: {
-							$state = -1;
-							$t1 = ss.Task.run(Function.mkdel(this, function() {
-								this.move$1(r, c, true);
-							}));
-							$state = 1;
-							$t1.continueWith($sm);
-							return;
-						}
-						case 1: {
-							$state = -1;
-							$t1.getResult();
-							$state = -1;
-							break $sm1;
-						}
-						default: {
-							break $sm1;
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								$t1 = this.move$1(r, c, true);
+								$state = 1;
+								$t1.continueWith($sm);
+								return;
+							}
+							case 1: {
+								$state = -1;
+								$t1.getResult();
+								$state = -1;
+								break $sm1;
+							}
+							default: {
+								break $sm1;
+							}
 						}
 					}
+					$tcs.setResult(null);
+				}
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
 				}
 			});
 			$sm();
+			return $tcs.task;
 		},
 		move$1: function(r, c, trigger_traps) {
-			var $state = 0, $t1, $t2, a, torch, $t3, a1, torch1, other_torch;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, a, torch, $t3, a1, torch1, other_torch;
 			var $sm = Function.mkdel(this, function() {
-				$sm1:
-				for (;;) {
-					switch ($state) {
-						case 0: {
-							$state = -1;
-							if (r >= 0 && r < $Forays_Actor.$ROWS && c >= 0 && c < $Forays_Actor.$COLS) {
-								if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
-									if (this.hasAttr(96)) {
-										$t1 = this.actorsAtDistance(1);
-										for ($t2 = 0; $t2 < $t1.length; $t2++) {
-											a = $t1[$t2];
-											if (a.attrs.get_item(97) === a.directionOf(this)) {
-												if (a.distanceFrom$2(r, c) > 1) {
-													this.attrs.set_item(96, this.attrs.get_item(96) - 1);
-													a.attrs.set_item(97, 0);
-												}
-												else {
-													a.attrs.set_item(97, a.directionOf$1(new $Forays_pos(r, c)));
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								if (r >= 0 && r < $Forays_Actor.$ROWS && c >= 0 && c < $Forays_Actor.$COLS) {
+									if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
+										if (this.hasAttr(96)) {
+											$t1 = this.actorsAtDistance(1);
+											for ($t2 = 0; $t2 < $t1.length; $t2++) {
+												a = $t1[$t2];
+												if (a.attrs.get_item(97) === a.directionOf(this)) {
+													if (a.distanceFrom$2(r, c) > 1) {
+														this.attrs.set_item(96, this.attrs.get_item(96) - 1);
+														a.attrs.set_item(97, 0);
+													}
+													else {
+														a.attrs.set_item(97, a.directionOf$1(new $Forays_pos(r, c)));
+													}
 												}
 											}
 										}
-									}
-									torch = false;
-									if (this.lightRadius() > 0) {
-										torch = true;
-										this.updateRadius(this.lightRadius(), 0);
-									}
-									$Forays_PhysicalObject.get_m().actor.set_item(r, c, this);
-									if (this.get_row() >= 0 && this.get_row() < $Forays_Actor.$ROWS && this.get_col() >= 0 && this.get_col() < $Forays_Actor.$COLS) {
-										$Forays_PhysicalObject.get_m().actor.set_item(this.get_row(), this.get_col(), null);
-										if (ss.referenceEquals(this, $Forays_Actor.get_player()) && ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv())) {
-											$Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().set_ignored(true);
+										torch = false;
+										if (this.lightRadius() > 0) {
+											torch = true;
+											this.updateRadius(this.lightRadius(), 0);
 										}
-									}
-									this.set_row(r);
-									this.set_col(c);
-									if (torch) {
-										this.updateRadius(0, this.lightRadius());
-									}
-									if (trigger_traps && this.tile().isTrap() && !this.hasAttr(10) && !this.hasAttr(9) && (this.get_type() === 0 || ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()))) {
-										//prevents wandering monsters from triggering traps
-										$t3 = this.tile().triggerTrap();
-										$state = 1;
-										$t3.continueWith($sm);
-										return;
-									}
-									$state = -1;
-									break $sm1;
-								}
-								else {
-									//default is now to swap places, rather than do nothing, since everything checks anyway.
-									a1 = $Forays_PhysicalObject.get_m().actor.get_item(r, c);
-									torch1 = false;
-									other_torch = false;
-									if (this.lightRadius() > 0) {
-										torch1 = true;
-										this.updateRadius(this.lightRadius(), 0);
-									}
-									if (a1.lightRadius() > 0) {
-										other_torch = true;
-										a1.updateRadius(a1.lightRadius(), 0);
-									}
-									if (this.get_row() >= 0 && this.get_row() < $Forays_Actor.$ROWS && this.get_col() >= 0 && this.get_col() < $Forays_Actor.$COLS) {
-										if (ss.referenceEquals(this, $Forays_Actor.get_player()) && ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv())) {
-											$Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().set_ignored(true);
+										$Forays_PhysicalObject.get_m().actor.set_item(r, c, this);
+										if (this.get_row() >= 0 && this.get_row() < $Forays_Actor.$ROWS && this.get_col() >= 0 && this.get_col() < $Forays_Actor.$COLS) {
+											$Forays_PhysicalObject.get_m().actor.set_item(this.get_row(), this.get_col(), null);
+											if (ss.referenceEquals(this, $Forays_Actor.get_player()) && ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv())) {
+												$Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().set_ignored(true);
+											}
 										}
+										this.set_row(r);
+										this.set_col(c);
+										if (torch) {
+											this.updateRadius(0, this.lightRadius());
+										}
+										if (trigger_traps && this.tile().isTrap() && !this.hasAttr(10) && !this.hasAttr(9) && (this.get_type() === 0 || ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()))) {
+											//prevents wandering monsters from triggering traps
+											$t3 = this.tile().triggerTrap();
+											$state = 1;
+											$t3.continueWith($sm);
+											return;
+										}
+										$state = -1;
+										break $sm1;
 									}
-									$Forays_PhysicalObject.get_m().actor.set_item(r, c, this);
-									$Forays_PhysicalObject.get_m().actor.set_item(this.get_row(), this.get_col(), a1);
-									a1.set_row(this.get_row());
-									a1.set_col(this.get_col());
-									this.set_row(r);
-									this.set_col(c);
-									if (torch1) {
-										this.updateRadius(0, this.lightRadius());
+									else {
+										//default is now to swap places, rather than do nothing, since everything checks anyway.
+										a1 = $Forays_PhysicalObject.get_m().actor.get_item(r, c);
+										torch1 = false;
+										other_torch = false;
+										if (this.lightRadius() > 0) {
+											torch1 = true;
+											this.updateRadius(this.lightRadius(), 0);
+										}
+										if (a1.lightRadius() > 0) {
+											other_torch = true;
+											a1.updateRadius(a1.lightRadius(), 0);
+										}
+										if (this.get_row() >= 0 && this.get_row() < $Forays_Actor.$ROWS && this.get_col() >= 0 && this.get_col() < $Forays_Actor.$COLS) {
+											if (ss.referenceEquals(this, $Forays_Actor.get_player()) && ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv())) {
+												$Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().set_ignored(true);
+											}
+										}
+										$Forays_PhysicalObject.get_m().actor.set_item(r, c, this);
+										$Forays_PhysicalObject.get_m().actor.set_item(this.get_row(), this.get_col(), a1);
+										a1.set_row(this.get_row());
+										a1.set_col(this.get_col());
+										this.set_row(r);
+										this.set_col(c);
+										if (torch1) {
+											this.updateRadius(0, this.lightRadius());
+										}
+										if (other_torch) {
+											a1.updateRadius(0, a1.lightRadius());
+										}
+										$state = -1;
+										break $sm1;
 									}
-									if (other_torch) {
-										a1.updateRadius(0, a1.lightRadius());
-									}
-									$state = -1;
-									break $sm1;
 								}
+								$state = -1;
+								break $sm1;
 							}
-							$state = -1;
-							break $sm1;
-						}
-						case 1: {
-							$state = -1;
-							$t3.getResult();
-							$state = -1;
-							break $sm1;
-						}
-						default: {
-							break $sm1;
+							case 1: {
+								$state = -1;
+								$t3.getResult();
+								$state = -1;
+								break $sm1;
+							}
+							default: {
+								break $sm1;
+							}
 						}
 					}
+					$tcs.setResult(null);
+				}
+				catch ($t4) {
+					$tcs.setException(ss.Exception.wrap($t4));
 				}
 			});
 			$sm();
+			return $tcs.task;
 		},
 		grabPreventsMovement: function(o) {
 			if (!this.hasAttr(96) || this.distanceFrom(o) > 1) {
@@ -3440,11 +3453,15 @@
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + value);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctor8(this, duration, attr, value));
 		},
-		gainAttr$2: function(attr, duration, msg, objs) {
+		gainAttr$3: function(attr, duration, msg, objs) {
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + 1);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, duration, attr, msg, objs));
 		},
-		gainAttr$3: function(attr, duration, value, msg, objs) {
+		gainAttr$2: function(attr, duration, msg) {
+			this.attrs.set_item(attr, this.attrs.get_item(attr) + 1);
+			$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, duration, attr, msg));
+		},
+		gainAttr$4: function(attr, duration, value, msg, objs) {
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + value);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctore(this, duration, attr, value, msg, objs));
 		},
@@ -3632,7 +3649,7 @@
 			return this.get_symbol().toString();
 		},
 		input: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), skip_input, $t1, $t2, drake_on_next_level, $t3, $t4, a, $t5, $t6, e, $t7, old_magic_penalty, old_resting_status, $t8, $t9, $t11, old_magic_penalty1, old_resting_status1, $t10, $t12, $t13, a1, duration, i, rr, rc, seen, damage, banshee, dist, $t14, $t15, a2, $t16, $t17, hplimit, strength, $t18, $t19, $t20, $t21, $t22, $t23, $t26, $t24, $t25, $t27, $t28, $t29;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), skip_input, $t1, $t2, drake_on_next_level, $t3, $t4, a, $t5, $t6, e, $t7, old_magic_penalty, old_resting_status, $t8, $t9, $t11, old_magic_penalty1, old_resting_status1, $t10, $t12, $t13, a1, duration, i, rr, rc, $t14, seen, $t15, damage, banshee, dist, $t16, $t17, a2, $t18, $t19, hplimit, strength, $t20, $t21, $t22, $t23, $t24, $t25, $t28, $t26, $t27, $t29, $t30, $t31;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -3690,21 +3707,21 @@
 									$t3 = $Forays_PhysicalObject.get_m().allActors();
 									for ($t4 = 0; $t4 < $t3.length; $t4++) {
 										a = $t3[$t4];
-										if (a.get_type() === 2 && a.tile().is$1(35)) {
-											drake_on_next_level = true;
-											break;
-										}
+										//if(a.type == ActorType.FIRE_DRAKE && a.tile().Is(TileType.CHASM)){
+										//	drake_on_next_level = true;
+										//	break;
+										//}
 									}
 									$t5 = $Forays_Actor.get_q().list;
 									for ($t6 = 0; $t6 < $t5.length; $t6++) {
 										e = $t5[$t6];
-										if (e.get_type() === 21) {
+										if (e.get_evtype() === 21) {
 											if (e.get_attr() === 69) {
 												//if this attr is set, it means that the drake is supposed to be on the level above you.
 												drake_on_next_level = false;
 											}
 											else {
-												drake_on_next_level = true;
+												//drake_on_next_level = true;
 											}
 											break;
 										}
@@ -3820,39 +3837,61 @@
 								if (this.hasAttr(42) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
 									this.attrs.set_item(42, this.attrs.get_item(42) - 1);
 									if (!this.hasAttr(42)) {
-										for (i = 0; i < 9999; ++i) {
-											rr = $Forays_Global.roll$1(1, 20);
-											rc = $Forays_Global.roll$1(1, 64);
-											if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
-												if (this.get_type() === 0) {
-													$Forays_Actor.get_b().add('You are suddenly somewhere else. ', []);
-													this.interrupt();
-													this.move(rr, rc);
-												}
-												else {
-													seen = false;
-													if ($Forays_Actor.get_player().canSee(this)) {
-														seen = true;
-													}
-													if ($Forays_Actor.get_player().canSee(this.tile())) {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' suddenly disappears. ', [this]);
-													}
-													this.move(rr, rc);
-													if ($Forays_Actor.get_player().canSee(this.tile())) {
-														if (seen) {
-															$Forays_Actor.get_b().add(this.get_the_name() + ' reappears. ', [this]);
-														}
-														else {
-															$Forays_Actor.get_b().add(this.get_a_name() + ' suddenly appears! ', [this]);
-														}
-													}
-												}
-												break;
-											}
+										i = 0;
+										$state = 13;
+										continue $sm1;
+									}
+									$state = 12;
+									continue $sm1;
+								}
+								$state = 12;
+								continue $sm1;
+							}
+							case 11: {
+								$state = -1;
+								$t10.getResult();
+								$Forays_Actor.get_player().magic_penalty = old_magic_penalty1;
+								//falling to a new level doesn't let you rest again during the boss fight
+								$Forays_Actor.get_player().attrs.set_item(78, old_resting_status1);
+								$tcs.setResult(null);
+								return;
+							}
+							case 13: {
+								$state = -1;
+								if (!(i < 9999)) {
+									$state = 15;
+									continue $sm1;
+								}
+								rr = $Forays_Global.roll$1(1, 20);
+								rc = $Forays_Global.roll$1(1, 64);
+								if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
+									if (this.get_type() === 0) {
+										$Forays_Actor.get_b().add('You are suddenly somewhere else. ', []);
+										this.interrupt();
+										$t14 = this.move(rr, rc);
+										$state = 17;
+										$t14.continueWith($sm);
+										return;
+									}
+									else {
+										seen = false;
+										if ($Forays_Actor.get_player().canSee(this)) {
+											seen = true;
 										}
-										this.attrs.set_item(42, $Forays_Global.roll$1(2, 10) + 5);
+										if ($Forays_Actor.get_player().canSee(this.tile())) {
+											$Forays_Actor.get_b().add(this.get_the_name() + ' suddenly disappears. ', [this]);
+										}
+										$t15 = this.move(rr, rc);
+										$state = 18;
+										$t15.continueWith($sm);
+										return;
 									}
 								}
+								$state = 14;
+								continue $sm1;
+							}
+							case 12: {
+								$state = -1;
 								if (this.hasAttr(37)) {
 									this.attrs.set_item(37, this.attrs.get_item(37) - 1);
 									$Forays_Global.flushInput();
@@ -3903,9 +3942,9 @@
 								if (this.hasAttr(34) && !this.hasAttr(30) && !this.hasAttr(28)) {
 									banshee = null;
 									dist = 100;
-									$t14 = $Forays_PhysicalObject.get_m().allActors();
-									for ($t15 = 0; $t15 < $t14.length; $t15++) {
-										a2 = $t14[$t15];
+									$t16 = $Forays_PhysicalObject.get_m().allActors();
+									for ($t17 = 0; $t17 < $t16.length; $t17++) {
+										a2 = $t16[$t17];
 										if (a2.get_type() === 22 && this.distanceFrom(a2) < dist && this.hasLOS$1(a2.get_row(), a2.get_col())) {
 											banshee = a2;
 											dist = this.distanceFrom(a2);
@@ -3914,14 +3953,14 @@
 									if (this.get_type() === 0) {
 										if (ss.isValue(banshee)) {
 											$Forays_Actor.get_b().addDependingOnLastPartialMessage('You flee. ');
-											$t16 = this.aI_Step$1(banshee, true);
-											$state = 13;
-											$t16.continueWith($sm);
+											$t18 = this.aI_Step$1(banshee, true);
+											$state = 20;
+											$t18.continueWith($sm);
 											return;
 										}
 										else {
 											$Forays_Actor.get_b().addDependingOnLastPartialMessage('You feel unsettled. ');
-											$state = 12;
+											$state = 19;
 											continue $sm1;
 										}
 									}
@@ -3929,50 +3968,77 @@
 										//same story
 										if (ss.isValue(banshee)) {
 											$Forays_Actor.get_b().add(this.you('flee') + '. ', [this]);
-											$t17 = this.aI_Step$1(banshee, true);
-											$state = 15;
-											$t17.continueWith($sm);
+											$t19 = this.aI_Step$1(banshee, true);
+											$state = 22;
+											$t19.continueWith($sm);
 											return;
 										}
 										else {
 											$Forays_Actor.get_b().add(this.youFeel() + ' unsettled. ', [this]);
-											$state = 14;
+											$state = 21;
 											continue $sm1;
 										}
 									}
 								}
-								$state = 12;
+								$state = 19;
 								continue $sm1;
 							}
-							case 11: {
+							case 17: {
 								$state = -1;
-								$t10.getResult();
-								$Forays_Actor.get_player().magic_penalty = old_magic_penalty1;
-								//falling to a new level doesn't let you rest again during the boss fight
-								$Forays_Actor.get_player().attrs.set_item(78, old_resting_status1);
-								$tcs.setResult(null);
-								return;
-							}
-							case 13: {
-								$state = -1;
-								$t16.getResult();
-								$state = 12;
+								$t14.getResult();
+								$state = 16;
 								continue $sm1;
 							}
-							case 15: {
+							case 18: {
 								$state = -1;
-								$t17.getResult();
-								$state = 14;
+								$t15.getResult();
+								if ($Forays_Actor.get_player().canSee(this.tile())) {
+									if (seen) {
+										$Forays_Actor.get_b().add(this.get_the_name() + ' reappears. ', [this]);
+									}
+									else {
+										$Forays_Actor.get_b().add(this.get_a_name() + ' suddenly appears! ', [this]);
+									}
+								}
+								$state = 16;
+								continue $sm1;
+							}
+							case 16: {
+								$state = 15;
 								continue $sm1;
 							}
 							case 14: {
 								$state = -1;
-								this.q1();
-								skip_input = true;
+								++i;
+								$state = 13;
+								continue $sm1;
+							}
+							case 15: {
+								$state = -1;
+								this.attrs.set_item(42, $Forays_Global.roll$1(2, 10) + 5);
 								$state = 12;
 								continue $sm1;
 							}
-							case 12: {
+							case 20: {
+								$state = -1;
+								$t18.getResult();
+								$state = 19;
+								continue $sm1;
+							}
+							case 22: {
+								$state = -1;
+								$t19.getResult();
+								$state = 21;
+								continue $sm1;
+							}
+							case 21: {
+								$state = -1;
+								this.q1();
+								skip_input = true;
+								$state = 19;
+								continue $sm1;
+							}
+							case 19: {
 								$state = -1;
 								if (this.get_curhp() < this.get_maxhp()) {
 									if (this.hasAttr(24) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
@@ -4004,23 +4070,23 @@
 									if (this.tile().is(6) && strength < 3) {
 										strength = 3;
 									}
-									$t18 = this.takeDamage$2(4, 2, $Forays_Global.roll(strength + 2) - 1, null, '*succumbed to poison');
-									$state = 17;
-									$t18.continueWith($sm);
+									$t20 = this.takeDamage$2(4, 2, $Forays_Global.roll(strength + 2) - 1, null, '*succumbed to poison');
+									$state = 24;
+									$t20.continueWith($sm);
 									return;
 								}
-								$state = 16;
+								$state = 23;
 								continue $sm1;
 							}
-							case 17: {
+							case 24: {
 								$state = -1;
-								if (true !== $t18.getResult()) {
+								if (true !== $t20.getResult()) {
 									return;
 								}
-								$state = 16;
+								$state = 23;
 								continue $sm1;
 							}
-							case 16: {
+							case 23: {
 								$state = -1;
 								if (this.hasAttr(31) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
 									if (this.get_type() === 52) {
@@ -4029,23 +4095,23 @@
 									else {
 										$Forays_Actor.get_b().add(this.youAre() + ' on fire! ', [this]);
 									}
-									$t19 = this.takeDamage$2(1, 0, $Forays_Global.roll$1(this.attrs.get_item(31), 6), null, '*burned to death');
-									$state = 19;
-									$t19.continueWith($sm);
+									$t21 = this.takeDamage$2(1, 0, $Forays_Global.roll$1(this.attrs.get_item(31), 6), null, '*burned to death');
+									$state = 26;
+									$t21.continueWith($sm);
 									return;
 								}
-								$state = 18;
+								$state = 25;
 								continue $sm1;
 							}
-							case 19: {
+							case 26: {
 								$state = -1;
-								if (true !== $t19.getResult()) {
+								if (true !== $t21.getResult()) {
 									return;
 								}
-								$state = 18;
+								$state = 25;
 								continue $sm1;
 							}
-							case 18: {
+							case 25: {
 								$state = -1;
 								if (this.hasAttr(43) && this.tile().isLit() && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
 									if (this.get_type() === 0) {
@@ -4054,107 +4120,107 @@
 									else {
 										$Forays_Actor.get_b().add('The light burns ' + this.get_the_name() + '. ', [this]);
 									}
-									$t20 = this.takeDamage$2(0, 2, $Forays_Global.roll(6), null, '*shriveled in the light');
-									$state = 21;
-									$t20.continueWith($sm);
+									$t22 = this.takeDamage$2(0, 2, $Forays_Global.roll(6), null, '*shriveled in the light');
+									$state = 28;
+									$t22.continueWith($sm);
 									return;
 								}
-								$state = 20;
+								$state = 27;
 								continue $sm1;
 							}
-							case 21: {
+							case 28: {
 								$state = -1;
-								if (true !== $t20.getResult()) {
+								if (true !== $t22.getResult()) {
 									return;
 								}
-								$state = 20;
+								$state = 27;
 								continue $sm1;
 							}
-							case 20: {
+							case 27: {
 								$state = -1;
 								if (this.hasAttr(94) && ss.referenceEquals(this, $Forays_Actor.get_player()) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
 									if (this.attrs.get_item(94) === 2) {
 										if (this.attrs.get_item(92) >= this.get_curhp() && !this.hasAttr(67)) {
 											$Forays_Actor.get_b().add('You can\'t resist the poison any longer. ', []);
 											$Forays_Actor.get_b().add('You lose consciousness. ', []);
-											$t21 = this.takeDamage$2(0, 2, this.get_curhp(), null, '*eaten alive by a pack of compys');
-											$state = 24;
-											$t21.continueWith($sm);
+											$t23 = this.takeDamage$2(0, 2, this.get_curhp(), null, '*eaten alive by a pack of compys');
+											$state = 31;
+											$t23.continueWith($sm);
 											return;
 										}
 										else {
 											$Forays_Actor.get_b().add('You manage to stay awake! ', []);
 											this.attrs.set_item(94, 0);
-											$state = 23;
+											$state = 30;
 											continue $sm1;
 										}
 									}
-									$state = 23;
+									$state = 30;
 									continue $sm1;
 								}
-								$state = 22;
+								$state = 29;
 								continue $sm1;
 							}
-							case 24: {
+							case 31: {
 								$state = -1;
-								if (true !== $t21.getResult()) {
+								if (true !== $t23.getResult()) {
 									return;
 								}
-								$state = 23;
+								$state = 30;
 								continue $sm1;
 							}
-							case 23: {
+							case 30: {
 								$state = -1;
 								if (this.hasAttr(94)) {
 									//it needs to go to 2 to ensure the proper timing
 									this.attrs.set_item(94, this.attrs.get_item(94) + 1);
 								}
-								$state = 22;
+								$state = 29;
 								continue $sm1;
 							}
-							case 22: {
+							case 29: {
 								$state = -1;
 								if (!skip_input) {
 									if (this.get_type() === 0) {
-										$t22 = this.inputHuman();
-										$state = 26;
-										$t22.continueWith($sm);
+										$t24 = this.inputHuman();
+										$state = 33;
+										$t24.continueWith($sm);
 										return;
 									}
 									else {
-										$t23 = this.inputAI();
-										$state = 27;
-										$t23.continueWith($sm);
+										$t25 = this.inputAI();
+										$state = 34;
+										$t25.continueWith($sm);
 										return;
 									}
 								}
-								$state = 25;
+								$state = 32;
 								continue $sm1;
 							}
-							case 26: {
+							case 33: {
 								$state = -1;
-								$t22.getResult();
-								$state = 25;
+								$t24.getResult();
+								$state = 32;
 								continue $sm1;
 							}
-							case 27: {
+							case 34: {
 								$state = -1;
-								$t23.getResult();
-								$state = 25;
+								$t25.getResult();
+								$state = 32;
 								continue $sm1;
 							}
-							case 25: {
+							case 32: {
 								$state = -1;
 								if (this.hasAttr(0)) {
 									//monsters only
 									if (($Forays_Actor.get_player().isWithinSightRangeOf$1(this.get_row(), this.get_col()) || $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).isLit()) && $Forays_Actor.get_player().hasLOS$1(this.get_row(), this.get_col())) {
 										if (this.isHiddenFrom($Forays_Actor.get_player())) {
 											//if they're stealthed and near the player...
-											$t26 = this.stealth() * this.distanceFrom($Forays_Actor.get_player()) * 10;
-											$t24 = this.attrs;
-											$t25 = this.attrs.get_item(77);
-											$t24.set_item(77, $t25 + 1);
-											if ($t26 - $t25 * 5 < $Forays_Global.roll$1(1, 100)) {
+											$t28 = this.stealth() * this.distanceFrom($Forays_Actor.get_player()) * 10;
+											$t26 = this.attrs;
+											$t27 = this.attrs.get_item(77);
+											$t26.set_item(77, $t27 + 1);
+											if ($t28 - $t27 * 5 < $Forays_Global.roll$1(1, 100)) {
 												this.attrs.set_item(77, -1);
 												if (this.distanceFrom($Forays_Actor.get_player()) > 3) {
 													$Forays_Actor.get_b().add('You notice ' + this.get_a_name() + '. ', []);
@@ -4173,10 +4239,10 @@
 										this.attrs.set_item(77, 0);
 									}
 									else {
-										$t27 = this.attrs;
-										$t28 = this.attrs.get_item(77);
-										$t27.set_item(77, $t28 - 1);
-										if ($t28 === -10) {
+										$t29 = this.attrs;
+										$t30 = this.attrs.get_item(77);
+										$t29.set_item(77, $t30 - 1);
+										if ($t30 === -10) {
 											//check this value for balance
 											this.attrs.set_item(77, 0);
 										}
@@ -4198,27 +4264,27 @@
 												this.updateRadius(0, 1);
 											}
 											this.attrs.set_item(31, 1);
-											$t29 = $Forays_Help.tutorialTip(4);
-											$state = 29;
-											$t29.continueWith($sm);
+											$t31 = $Forays_Help.tutorialTip(4);
+											$state = 36;
+											$t31.continueWith($sm);
 											return;
 										}
-										$state = 28;
+										$state = 35;
 										continue $sm1;
 									}
-									$state = 28;
+									$state = 35;
 									continue $sm1;
 								}
-								$state = 28;
+								$state = 35;
 								continue $sm1;
 							}
-							case 29: {
+							case 36: {
 								$state = -1;
-								$t29.getResult();
-								$state = 28;
+								$t31.getResult();
+								$state = 35;
 								continue $sm1;
 							}
-							case 28: {
+							case 35: {
 								$state = -1;
 								if (this.hasAttr(33)) {
 									//this hack is necessary because of
@@ -4241,15 +4307,15 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t30) {
-					$tcs.setException(ss.Exception.wrap($t30));
+				catch ($t32) {
+					$tcs.setException(ss.Exception.wrap($t32));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		inputHuman: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, damage, grenade, $t4, $t5, t, monster, $t6, $t7, a, $t8, i, added, $t9, $t10, item, monsters_visible, $t11, $t12, a1, $t13, $t14, monsters_visible1, $t15, $t16, a2, t1, stopped_by_terrain, hplimit, $t17, opposite, num_floors, floor_dir, $t18, $t19, t2, $t20, $t21, $t22, monsters_visible2, $t23, $t24, a3, $t25, $t26, $t27, $t28, $t29, $t30, command, ch, alt, ctrl, shift, dir, monsters_visible3, $t31, $t32, a5, $t33, $t34, update, oldradius, i1, $t35, dir2, total, $t39, $t40, t3, t4, $t41, $t42, $t43, $t46, active_feats, passive_feats, $t48, ft, line1, letter, $t49, ft1, s, $t50, ft2, s1, extras, $t51, ft3, ft21, $t52, ft4, selected_feat, done, $t57, $t58, a7, ls, sp, bonus_marked, $t59, spell, cs, topborder, basefail, bottomborder, $t60, monsters_visible5, $t61, $t62, a8, can_recover_spells, $t63, $t64, stairs, $t68, $t69, t6, done2, $t71, $t72, $t79, num, letter1, line2, $t84, $t85, s2, s21, letter2, line3, $t90, $t91, s3, s22, $t92, num1, letter3, line4, $t94, $t95, s4, s23, $t100, new_weapon1, old_weapon1, $t102, new_armor1, old_armor1, $t103, $t104, $t105, i7, $t106, $t107, s5, $t108, done7, $t112, commandhelp, i9, $t113, ls3, $t114, l, $t115, dir1, monsters_visible4, $t36, $t37, a6, $t38, t5, $t44, $t141, $t45, line, $t47, $t53, i2, can_recover_spells1, done1, $t70, $t142, ls1, sp1, bonus_marked1, $t73, spell1, cs1, topborder1, basefail1, bottomborder1, $t74, i4, added1, $t80, $t81, item1, space_left, i5, newitem, added2, $t82, $t83, item2, $t86, $t93, $t96, changes, new_weapon, new_armor, old_weapon, old_armor, weapon_changed, armor_changed, cursed_weapon, $t101, done5, w1, done6, a10, ls2, $t109, $t143, $t116, $t117, $t118, t8, $t119, $t120, cch, $t121, $t122, t11, i10, $t123, $t124, $t125, t12, $t126, $t127, a11, $t128, $t129, $t130, f, $t131, $t132, t13, $t133, $t134, t14, $t135, i11, $t136, $t137, a12, $t138, $t139, t16, $t140, hplimit1, ii, $t54, $t55, $t65, $t66, i3, unknown, $t75, $t76, spell2, forgotten, learned, $t77, $t78, t7, ii1, $t87, $t88, ii2, $t97, $t98, done3, w, done4, a9, list, sp2, bonus_marked2, $t110, spell3, cs2, topborder2, basefail2, bottomborder2, $t111, line5, t9, line6, t10, line7, t15, line8, t17, $t56, $t67, i6, newitem1, $t89, $t99, i8, count, newitem2;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, damage, grenade, $t4, $t5, t, monster, $t6, $t7, a, $t8, i, added, $t9, $t10, item, monsters_visible, $t11, $t12, a1, $t13, $t14, monsters_visible1, $t15, $t16, a2, t1, stopped_by_terrain, hplimit, $t17, opposite, num_floors, floor_dir, $t18, $t19, t2, $t20, $t21, $t22, monsters_visible2, $t23, $t24, a3, $t25, $t26, $t27, $t28, $t29, $t30, command, ch, alt, ctrl, shift, dir, monsters_visible3, $t31, $t32, a5, $t33, $t34, update, oldradius, i1, $t35, dir2, total, $t39, $t40, t3, t4, $t41, $t42, $t44, $t48, active_feats, passive_feats, $t50, ft, line1, letter, $t51, ft1, s, $t52, ft2, s1, extras, $t53, ft3, ft21, $t54, ft4, selected_feat, done, $t59, $t60, a7, ls, sp, bonus_marked, $t61, spell, cs, topborder, basefail, bottomborder, $t62, monsters_visible5, $t64, $t65, a8, can_recover_spells, $t66, $t67, stairs, $t72, $t73, t6, done2, $t75, $t76, $t83, num, letter1, line2, $t88, $t89, s2, s21, letter2, line3, $t94, $t95, s3, s22, $t96, num1, letter3, line4, $t98, $t99, s4, s23, $t104, new_weapon1, old_weapon1, $t106, new_armor1, old_armor1, $t107, $t108, $t109, i7, $t110, $t111, s5, $t112, done7, $t117, commandhelp, i9, $t118, ls3, $t119, l, $t120, dir1, monsters_visible4, $t36, $t37, a6, $t38, $t43, t5, $t45, $t147, $t47, line, $t49, $t55, i2, $t63, can_recover_spells1, done1, $t74, $t148, ls1, sp1, bonus_marked1, $t77, spell1, cs1, topborder1, basefail1, bottomborder1, $t78, i4, added1, $t84, $t85, item1, space_left, i5, newitem, added2, $t86, $t87, item2, $t90, $t97, $t100, changes, new_weapon, new_armor, old_weapon, old_armor, weapon_changed, armor_changed, cursed_weapon, $t105, done5, w1, done6, a10, ls2, $t113, $t149, $t121, $t122, $t123, t8, $t124, $t125, cch, $t126, $t127, t11, i10, $t128, $t129, $t130, t12, $t131, $t132, a11, $t133, $t134, $t135, $t136, f, $t137, $t138, t13, $t139, $t140, t14, $t141, i11, $t142, $t143, a12, $t144, $t145, t16, $t146, hplimit1, $t46, ii, $t56, $t57, $t68, $t69, i3, unknown, $t79, $t80, spell2, forgotten, learned, $t81, $t82, t7, ii1, $t91, $t92, ii2, $t101, $t102, done3, w, done4, a9, $t114, line5, t9, line6, t10, line7, t15, line8, t17, $t58, $t70, $t71, i6, newitem1, $t93, $t103, list, sp2, bonus_marked2, $t115, spell3, cs2, topborder2, basefail2, bottomborder2, $t116, count, newitem2, i8;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -4336,7 +4402,7 @@
 										$Forays_Actor.get_b().add('You break free! ', []);
 									}
 									this.q1();
-									return;
+									return true;
 								}
 								if ($Forays_Global.option(1) && ss.isValue(this.tile().get_inv()) && !this.tile().get_inv().get_ignored() && !this.tile().is(3)) {
 									grenade = false;
@@ -4381,13 +4447,13 @@
 							case 6: {
 								$state = -1;
 								this.q1();
-								$tcs.setResult(null);
+								$tcs.setResult(true);
 								return;
 							}
 							case 9: {
 								$state = -1;
 								if ($t8.getResult()) {
-									return;
+									return true;
 								}
 								i = this.tile().get_inv();
 								i.set_row(-1);
@@ -4408,7 +4474,7 @@
 									this.get_inv().add(i);
 								}
 								this.q1();
-								$tcs.setResult(null);
+								$tcs.setResult(true);
 								return;
 							}
 							case 8: {
@@ -4463,7 +4529,7 @@
 									}
 								}
 								//QS();
-								$tcs.setResult(null);
+								$tcs.setResult(true);
 								return;
 							}
 							case 10: {
@@ -4490,7 +4556,7 @@
 												if (this.hasAttr(80)) {
 													this.attrs.set_item(80, this.attrs.get_item(80) - 1);
 													this.q1();
-													return;
+													return true;
 												}
 												else {
 													this.attrs.set_item(79, 0);
@@ -4498,7 +4564,7 @@
 											}
 											else {
 												this.q1();
-												return;
+												return true;
 											}
 											$state = 13;
 											continue $sm1;
@@ -4554,13 +4620,13 @@
 							case 14: {
 								$state = -1;
 								$t17.getResult();
-								$tcs.setResult(null);
+								$tcs.setResult(true);
 								return;
 							}
 							case 15: {
 								$state = -1;
 								$t20.getResult();
-								$tcs.setResult(null);
+								$tcs.setResult(true);
 								return;
 							}
 							case 17: {
@@ -4614,7 +4680,7 @@
 											this.attrs.set_item(78, this.attrs.get_item(78) + 1);
 											$Forays_Actor.get_b().add('You rest... ', []);
 											this.q1();
-											$tcs.setResult(null);
+											$tcs.setResult(true);
 											return;
 										}
 									}
@@ -4732,6 +4798,7 @@
 									shift = true;
 								}
 								if (ch === '7' || ch === '8' || ch === '9' || ch === '4' || ch === '6' || ch === '1' || ch === '2' || ch === '3') {
+									$('#debug').replaceWith('<div id="debug"><p>DEBUG Key Down, Key is ' + command.key + ', Char is ' + String.fromCharCode(command.keyChar) + ', ch is ' + ch + '</p></div>');
 									dir = ch.charCodeAt(0) - 48;
 									//ascii 0-9 are 48-57
 									if (shift || alt || ctrl) {
@@ -4830,7 +4897,7 @@
 											if (this.grabPreventsMovement(t4)) {
 												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ', []);
 												this.q0();
-												$tcs.setResult(null);
+												$tcs.setResult(true);
 												return;
 											}
 											else {
@@ -4848,9 +4915,9 @@
 										}
 									}
 									else {
-										$t43 = this.getDirection$1('Operate something in which direction? ');
+										$t44 = this.getDirection$1('Operate something in which direction? ');
 										$state = 37;
-										$t43.continueWith($sm);
+										$t44.continueWith($sm);
 										return;
 									}
 								}
@@ -4868,9 +4935,9 @@
 											continue $sm1;
 										}
 										else {
-											$t46 = this.getTarget$2(12);
+											$t48 = this.getTarget$2(12);
 											$state = 39;
-											$t46.continueWith($sm);
+											$t48.continueWith($sm);
 											return;
 										}
 									}
@@ -4884,8 +4951,8 @@
 								else if (ch === 'f') {
 									active_feats = [];
 									passive_feats = [];
-									for ($t48 = 0; $t48 < $Forays_Actor.feats_in_order.length; $t48++) {
-										ft = $Forays_Actor.feats_in_order[$t48];
+									for ($t50 = 0; $t50 < $Forays_Actor.feats_in_order.length; $t50++) {
+										ft = $Forays_Actor.feats_in_order[$t50];
 										if ($Forays_Feat.isActivated(ft)) {
 											active_feats.add(ft);
 										}
@@ -4899,8 +4966,8 @@
 										$Forays_Screen.writeMapString$2(line1, 0, $Forays_Extensions.padToMapSize('Active feats:'));
 										++line1;
 										letter = 97;
-										for ($t49 = 0; $t49 < active_feats.length; $t49++) {
-											ft1 = active_feats[$t49];
+										for ($t51 = 0; $t51 < active_feats.length; $t51++) {
+											ft1 = active_feats[$t51];
 											s = '[' + String.fromCharCode(letter) + '] ' + $Forays_Feat.name$1(ft1);
 											$Forays_Screen.writeMapString$2(line1, 0, $Forays_Extensions.padToMapSize(s));
 											$Forays_Screen.writeMapChar$2(line1, 1, String.fromCharCode(letter), 8);
@@ -4913,8 +4980,8 @@
 									if (passive_feats.length > 0) {
 										$Forays_Screen.writeMapString$2(line1, 0, $Forays_Extensions.padToMapSize('Passive feats:'));
 										++line1;
-										for ($t50 = 0; $t50 < passive_feats.length; $t50++) {
-											ft2 = passive_feats[$t50];
+										for ($t52 = 0; $t52 < passive_feats.length; $t52++) {
+											ft2 = passive_feats[$t52];
 											s1 = '    ' + $Forays_Feat.name$1(ft2);
 											$Forays_Screen.writeMapString$2(line1, 0, $Forays_Extensions.padToMapSize(s1));
 											++line1;
@@ -4930,8 +4997,8 @@
 									}
 									else if ($Forays_Actor.partial_feats_in_order.length + line1 > 21) {
 										extras = $Forays_Actor.partial_feats_in_order.length + line1 - 21;
-										for ($t51 = 0; $t51 < $Forays_Actor.partial_feats_in_order.length; $t51++) {
-											ft3 = $Forays_Actor.partial_feats_in_order[$t51];
+										for ($t53 = 0; $t53 < $Forays_Actor.partial_feats_in_order.length; $t53++) {
+											ft3 = $Forays_Actor.partial_feats_in_order[$t53];
 											if (line1 === 21) {
 												//don't print the bottommost feats again
 												break;
@@ -4952,8 +5019,8 @@
 										}
 									}
 									else {
-										for ($t52 = 0; $t52 < $Forays_Actor.partial_feats_in_order.length; $t52++) {
-											ft4 = $Forays_Actor.partial_feats_in_order[$t52];
+										for ($t54 = 0; $t54 < $Forays_Actor.partial_feats_in_order.length; $t54++) {
+											ft4 = $Forays_Actor.partial_feats_in_order[$t54];
 											$Forays_Screen.writeMapString$2(line1, 0, '    ' + $Forays_Feat.name$1(ft4).padRight(21));
 											$Forays_Screen.writeMapString$2(line1, 25, '(' + -this.feats.get_item(ft4) + '/' + $Forays_Feat.maxRank(ft4) + ')'.padRight(37));
 											++line1;
@@ -4979,9 +5046,9 @@
 									continue $sm1;
 								}
 								else if (ch === 'z') {
-									$t57 = this.actorsWithinDistance(2);
-									for ($t58 = 0; $t58 < $t57.length; $t58++) {
-										a7 = $t57[$t58];
+									$t59 = this.actorsWithinDistance(2);
+									for ($t60 = 0; $t60 < $t59.length; $t60++) {
+										a7 = $t59[$t60];
 										if (a7.hasAttr(75) && a7.hasLOE(this)) {
 											if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 												if (this.canSee(a7)) {
@@ -4992,15 +5059,15 @@
 												}
 											}
 											this.q0();
-											return;
+											return true;
 										}
 									}
 									ls = [];
 									sp = [];
 									//foreach(SpellType spell in Enum.GetValues(typeof(SpellType))){
 									bonus_marked = false;
-									for ($t59 = 0; $t59 < $Forays_Actor.spells_in_order.length; $t59++) {
-										spell = $Forays_Actor.spells_in_order[$t59];
+									for ($t61 = 0; $t61 < $Forays_Actor.spells_in_order.length; $t61++) {
+										spell = $Forays_Actor.spells_in_order[$t61];
 										if (this.hasSpell(spell)) {
 											//string s = Spell.Name(spell).PadRight(15) + Spell.Level(spell).ToString().PadLeft(3);
 											//s = s + FailRate(spell).ToString().PadLeft(9) + "%";
@@ -5026,9 +5093,9 @@
 										}
 										bottomborder = new $Forays_colorstring.$ctor6('------------Base fail rate: ', 2, basefail.toString().padLeft(3) + '%', this.failColor$1(basefail), '----------[', 2, '?', 8, '] for help'.padRight(22, 45), 2);
 										//int i = Select("Cast which spell? ",topborder,bottomborder,ls);
-										$t60 = this.select$6('Cast which spell? ', topborder, bottomborder, ls, false, false, true, true, 3);
+										$t62 = this.select$6('Cast which spell? ', topborder, bottomborder, ls, false, false, true, true, 3);
 										$state = 42;
-										$t60.continueWith($sm);
+										$t62.continueWith($sm);
 										return;
 									}
 									else {
@@ -5042,9 +5109,9 @@
 									if (this.attrs.get_item(78) !== -1) {
 										//gets set to -1 if you've rested on this level
 										monsters_visible5 = false;
-										$t61 = $Forays_PhysicalObject.get_m().allActors();
-										for ($t62 = 0; $t62 < $t61.length; $t62++) {
-											a8 = $t61[$t62];
+										$t64 = $Forays_PhysicalObject.get_m().allActors();
+										for ($t65 = 0; $t65 < $t64.length; $t65++) {
+											a8 = $t64[$t65];
 											if (!ss.referenceEquals(a8, this) && this.canSee(a8) && this.hasLOS$1(a8.get_row(), a8.get_col())) {
 												//check LOS, prevents detected mobs from stopping you
 												monsters_visible5 = true;
@@ -5056,9 +5123,9 @@
 												can_recover_spells = true;
 											}
 											if (this.get_curhp() < this.get_maxhp() || can_recover_spells) {
-												$t63 = this.stunnedThisTurn();
+												$t66 = this.stunnedThisTurn();
 												$state = 44;
-												$t63.continueWith($sm);
+												$t66.continueWith($sm);
 												return;
 											}
 											else {
@@ -5084,16 +5151,16 @@
 								}
 								else if (ch === '>') {
 									if ($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_type() === 4) {
-										$t64 = this.stunnedThisTurn();
+										$t67 = this.stunnedThisTurn();
 										$state = 46;
-										$t64.continueWith($sm);
+										$t67.continueWith($sm);
 										return;
 									}
 									else {
 										stairs = null;
-										$t68 = $Forays_PhysicalObject.get_m().allTiles();
-										for ($t69 = 0; $t69 < $t68.length; $t69++) {
-											t6 = $t68[$t69];
+										$t72 = $Forays_PhysicalObject.get_m().allTiles();
+										for ($t73 = 0; $t73 < $t72.length; $t73++) {
+											t6 = $t72[$t73];
 											if (t6.get_type() === 4 && t6.get_seen()) {
 												stairs = t6;
 												break;
@@ -5123,15 +5190,15 @@
 								else if (ch === 'g' || ch === ';') {
 									if (ss.isNullOrUndefined(this.tile().get_inv())) {
 										if (this.tile().get_type() === 5) {
-											$t71 = this.stunnedThisTurn();
+											$t75 = this.stunnedThisTurn();
 											$state = 49;
-											$t71.continueWith($sm);
+											$t75.continueWith($sm);
 											return;
 										}
 										else if (this.tile().isShrine()) {
-											$t72 = this.stunnedThisTurn();
+											$t76 = this.stunnedThisTurn();
 											$state = 50;
-											$t72.continueWith($sm);
+											$t76.continueWith($sm);
 											return;
 										}
 										else {
@@ -5142,9 +5209,9 @@
 										}
 									}
 									else {
-										$t79 = this.stunnedThisTurn();
+										$t83 = this.stunnedThisTurn();
 										$state = 51;
-										$t79.continueWith($sm);
+										$t83.continueWith($sm);
 										return;
 									}
 								}
@@ -5160,9 +5227,9 @@
 										$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Actor.$COLS, 45));
 										letter1 = 97;
 										line2 = 1;
-										$t84 = this.inventoryList();
-										for ($t85 = 0; $t85 < $t84.length; $t85++) {
-											s2 = $t84[$t85];
+										$t88 = this.inventoryList();
+										for ($t89 = 0; $t89 < $t88.length; $t89++) {
+											s2 = $t88[$t89];
 											s21 = '[' + String.fromCharCode(letter1) + '] ' + s2;
 											$Forays_Screen.writeMapString$2(line2, 0, s21.padRight($Forays_Actor.$COLS));
 											$Forays_Screen.writeMapChar(line2, 1, new $Forays_colorchar.$ctor1(8, letter1));
@@ -5193,9 +5260,9 @@
 										$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Actor.$COLS, 45));
 										letter2 = 97;
 										line3 = 1;
-										$t90 = this.inventoryList();
-										for ($t91 = 0; $t91 < $t90.length; $t91++) {
-											s3 = $t90[$t91];
+										$t94 = this.inventoryList();
+										for ($t95 = 0; $t95 < $t94.length; $t95++) {
+											s3 = $t94[$t95];
 											s22 = '[' + String.fromCharCode(letter2) + '] ' + s3;
 											$Forays_Screen.writeMapString$2(line3, 0, s22.padRight($Forays_Actor.$COLS));
 											$Forays_Screen.writeMapChar(line3, 1, new $Forays_colorchar.$ctor1(8, letter2));
@@ -5209,9 +5276,9 @@
 										}
 										$Forays_Actor.get_b().displayNow$1('In your pack: ');
 										$Forays_Game.console.cursorVisible = true;
-										$t92 = $Forays_Game.console.readKey(true);
+										$t96 = $Forays_Game.console.readKey(true);
 										$state = 55;
-										$t92.continueWith($sm);
+										$t96.continueWith($sm);
 										return;
 									}
 								}
@@ -5228,9 +5295,9 @@
 										$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Actor.$COLS, 45));
 										letter3 = 97;
 										line4 = 1;
-										$t94 = this.inventoryList();
-										for ($t95 = 0; $t95 < $t94.length; $t95++) {
-											s4 = $t94[$t95];
+										$t98 = this.inventoryList();
+										for ($t99 = 0; $t99 < $t98.length; $t99++) {
+											s4 = $t98[$t99];
 											s23 = '[' + String.fromCharCode(letter3) + '] ' + s4;
 											$Forays_Screen.writeMapString$2(line4, 0, s23.padRight($Forays_Actor.$COLS));
 											$Forays_Screen.writeMapChar(line4, 1, new $Forays_colorchar.$ctor1(8, letter3));
@@ -5250,9 +5317,9 @@
 									}
 								}
 								else if (ch === 'e') {
-									$t100 = this.displayEquipment();
+									$t104 = this.displayEquipment();
 									$state = 58;
-									$t100.continueWith($sm);
+									$t104.continueWith($sm);
 									return;
 								}
 								else if (ch === '!' || ch === '@' || ch === '#' || ch === '$' || ch === '%') {
@@ -5293,9 +5360,9 @@
 											continue $sm1;
 										}
 										else {
-											$t102 = this.stunnedThisTurn();
+											$t106 = this.stunnedThisTurn();
 											$state = 60;
-											$t102.continueWith($sm);
+											$t106.continueWith($sm);
 											return;
 										}
 									}
@@ -5323,39 +5390,39 @@
 										continue $sm1;
 									}
 									else {
-										$t103 = this.stunnedThisTurn();
+										$t107 = this.stunnedThisTurn();
 										$state = 62;
-										$t103.continueWith($sm);
+										$t107.continueWith($sm);
 										return;
 									}
 								}
 								else if (ch === 't') {
-									$t104 = this.stunnedThisTurn();
+									$t108 = this.stunnedThisTurn();
 									$state = 63;
-									$t104.continueWith($sm);
+									$t108.continueWith($sm);
 									return;
 								}
 								else if (ch === '\r') {
-									$t105 = this.getTarget$5(true, -1, true);
+									$t109 = this.getTarget$5(true, -1, true);
 									$state = 64;
-									$t105.continueWith($sm);
+									$t109.continueWith($sm);
 									return;
 								}
 								else if (ch === 'p') {
 									$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Actor.$COLS, 45));
 									i7 = 1;
-									$t106 = $Forays_Actor.get_b().getMessages();
-									for ($t107 = 0; $t107 < $t106.length; $t107++) {
-										s5 = $t106[$t107];
+									$t110 = $Forays_Actor.get_b().getMessages();
+									for ($t111 = 0; $t111 < $t110.length; $t111++) {
+										s5 = $t110[$t111];
 										$Forays_Screen.writeMapString$2(i7, 0, s5.padRight($Forays_Actor.$COLS));
 										++i7;
 									}
 									$Forays_Screen.writeMapString$2(21, 0, ''.padRight($Forays_Actor.$COLS, 45));
 									$Forays_Actor.get_b().displayNow$1('Previous messages: ');
 									$Forays_Game.console.cursorVisible = true;
-									$t108 = $Forays_Game.console.readKey(true);
+									$t112 = $Forays_Game.console.readKey(true);
 									$state = 65;
-									$t108.continueWith($sm);
+									$t112.continueWith($sm);
 									return;
 								}
 								else if (ch === 'c') {
@@ -5370,9 +5437,9 @@
 									continue $sm1;
 								}
 								else if (ch === '?' || ch === '/') {
-									$t112 = $Forays_Help.displayHelp();
+									$t117 = $Forays_Help.displayHelp();
 									$state = 67;
-									$t112.continueWith($sm);
+									$t117.continueWith($sm);
 									return;
 								}
 								else if (ch === '-') {
@@ -5386,9 +5453,9 @@
 									$Forays_Screen.writeMapString$2(21, 0, ''.padRight($Forays_Actor.$COLS, 45));
 									$Forays_Actor.get_b().displayNow$1('Commands: ');
 									$Forays_Game.console.cursorVisible = true;
-									$t113 = $Forays_Game.console.readKey(true);
+									$t118 = $Forays_Game.console.readKey(true);
 									$state = 68;
-									$t113.continueWith($sm);
+									$t118.continueWith($sm);
 									return;
 								}
 								else if (ch === 'q') {
@@ -5400,9 +5467,9 @@
 									ls3.add('Quit game immediately - don\'t save anything');
 									ls3.add('Continue playing');
 									$Forays_Game.console.cursorVisible = true;
-									$t114 = this.select('Quit? ', ls3);
+									$t119 = this.select('Quit? ', ls3);
 									$state = 69;
-									$t114.continueWith($sm);
+									$t119.continueWith($sm);
 									return;
 								}
 								else if (ch === '~') {
@@ -5428,9 +5495,9 @@
 										l.add('remove all enemies, spawn boss');
 										l.add('detect monsters forever');
 										l.add('trigger floor collapse');
-										$t115 = this.select('Activate which cheat? ', l);
+										$t120 = this.select('Activate which cheat? ', l);
 										$state = 71;
-										$t115.continueWith($sm);
+										$t120.continueWith($sm);
 										return;
 									}
 									else {
@@ -5505,7 +5572,7 @@
 							case 35: {
 								$state = -1;
 								if ($t41.getResult()) {
-									return;
+									return true;
 								}
 								t4.toggle(this);
 								this.q1();
@@ -5515,28 +5582,32 @@
 							case 36: {
 								$state = -1;
 								if ($t42.getResult()) {
-									return;
+									return true;
 								}
 								if ($Forays_Global.roll(5) <= 4) {
 									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '. ', []);
 									t4.toggle(this);
 									this.q1();
+									$state = 34;
+									continue $sm1;
 								}
 								else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
 									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '! ', []);
 									this.q1();
+									$state = 34;
+									continue $sm1;
 								}
 								else {
 									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '! ', []);
-									this.move(t4.get_row(), t4.get_col());
-									this.q1();
+									$t43 = this.move(t4.get_row(), t4.get_col());
+									$state = 75;
+									$t43.continueWith($sm);
+									return;
 								}
-								$state = 34;
-								continue $sm1;
 							}
 							case 37: {
 								$state = -1;
-								dir2 = $t43.getResult();
+								dir2 = $t44.getResult();
 								if (dir2 !== -1) {
 									t5 = this.tileInDirection(dir2);
 									if (t5.isKnownTrap()) {
@@ -5544,35 +5615,35 @@
 											if (this.grabPreventsMovement(t5)) {
 												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ', []);
 												this.q0();
-												return;
+												return true;
 											}
-											$t44 = this.stunnedThisTurn();
-											$state = 75;
-											$t44.continueWith($sm);
-											return;
-										}
-										else {
-											$Forays_Actor.get_b().add('You don\'t know how to disable that trap. ', []);
-											this.q0();
-											$tcs.setResult(null);
-											return;
-										}
-									}
-									else {
-										$t141 = t5.get_type();
-										if ($t141 === 3 || $t141 === 2 || $t141 === 28) {
 											$t45 = this.stunnedThisTurn();
 											$state = 76;
 											$t45.continueWith($sm);
 											return;
 										}
-										else if ($t141 === 5) {
+										else {
+											$Forays_Actor.get_b().add('You don\'t know how to disable that trap. ', []);
+											this.q0();
+											$tcs.setResult(true);
+											return;
+										}
+									}
+									else {
+										$t147 = t5.get_type();
+										if ($t147 === 3 || $t147 === 2 || $t147 === 28) {
+											$t47 = this.stunnedThisTurn();
+											$state = 77;
+											$t47.continueWith($sm);
+											return;
+										}
+										else if ($t147 === 5) {
 											$Forays_Actor.get_b().add('Stand on the chest and press \'g\' to retrieve its contents. ', []);
 											this.q0();
 											$state = 34;
 											continue $sm1;
 										}
-										else if ($t141 === 4) {
+										else if ($t147 === 4) {
 											$Forays_Actor.get_b().add('Stand on the stairs and press \'>\' to descend. ', []);
 											this.q0();
 											$state = 34;
@@ -5599,12 +5670,12 @@
 							}
 							case 39: {
 								$state = -1;
-								line = $t46.getResult();
+								line = $t48.getResult();
 								if (ss.isValue(line)) {
 									//if(DistanceFrom(t) > 1 || t.actor() == null){
-									$t47 = this.fireArrow$1(line);
-									$state = 77;
-									$t47.continueWith($sm);
+									$t49 = this.fireArrow$1(line);
+									$state = 78;
+									$t49.continueWith($sm);
 									return;
 								}
 								else {
@@ -5620,27 +5691,28 @@
 							case 40: {
 								$state = -1;
 								if (!!done) {
-									$state = 78;
+									$state = 79;
 									continue $sm1;
 								}
-								$t53 = $Forays_Game.console.readKey(true);
-								$state = 79;
-								$t53.continueWith($sm);
+								$t55 = $Forays_Game.console.readKey(true);
+								$state = 80;
+								$t55.continueWith($sm);
 								return;
 							}
 							case 42: {
 								$state = -1;
-								i2 = $t60.getResult();
+								i2 = $t62.getResult();
 								if (i2 !== -1) {
-									if (!this.castSpell(sp[i2])) {
-										this.q0();
-									}
+									$t63 = this.castSpell(sp[i2]);
+									$state = 81;
+									$t63.continueWith($sm);
+									return;
 								}
 								else {
 									this.q0();
+									$state = 41;
+									continue $sm1;
 								}
-								$state = 41;
-								continue $sm1;
 							}
 							case 41: {
 								$state = 29;
@@ -5648,7 +5720,7 @@
 							}
 							case 44: {
 								$state = -1;
-								if ($t63.getResult()) {
+								if ($t66.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5664,7 +5736,7 @@
 							}
 							case 46: {
 								$state = -1;
-								if ($t64.getResult()) {
+								if ($t67.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5676,21 +5748,21 @@
 									$Forays_Actor.get_b().displayNow$1('Really take the stairs without resting first?(y/n): ');
 									$Forays_Game.console.cursorVisible = true;
 									done1 = false;
-									$state = 81;
+									$state = 83;
 									continue $sm1;
 								}
-								$state = 80;
+								$state = 82;
 								continue $sm1;
 							}
 							case 47: {
 								$state = -1;
 								if (!!done2) {
-									$state = 82;
+									$state = 84;
 									continue $sm1;
 								}
-								$t70 = $Forays_Game.console.readKey(true);
-								$state = 83;
-								$t70.continueWith($sm);
+								$t74 = $Forays_Game.console.readKey(true);
+								$state = 85;
+								$t74.continueWith($sm);
 								return;
 							}
 							case 45: {
@@ -5699,7 +5771,7 @@
 							}
 							case 49: {
 								$state = -1;
-								if ($t71.getResult()) {
+								if ($t75.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5710,42 +5782,42 @@
 							}
 							case 50: {
 								$state = -1;
-								if ($t72.getResult()) {
+								if ($t76.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
-								$t142 = this.tile().get_type();
-								if ($t142 === 21) {
+								$t148 = this.tile().get_type();
+								if ($t148 === 21) {
 									this.increaseSkill(0);
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								else if ($t142 === 22) {
+								else if ($t148 === 22) {
 									this.increaseSkill(1);
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								else if ($t142 === 23) {
+								else if ($t148 === 23) {
 									this.increaseSkill(2);
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								else if ($t142 === 24) {
+								else if ($t148 === 24) {
 									this.increaseSkill(3);
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								else if ($t142 === 25) {
+								else if ($t148 === 25) {
 									this.increaseSkill(4);
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								else if ($t142 === 27) {
+								else if ($t148 === 27) {
 									ls1 = [];
 									sp1 = [];
 									bonus_marked1 = false;
-									for ($t73 = 0; $t73 < $Forays_Actor.spells_in_order.length; $t73++) {
-										spell1 = $Forays_Actor.spells_in_order[$t73];
+									for ($t77 = 0; $t77 < $Forays_Actor.spells_in_order.length; $t77++) {
+										spell1 = $Forays_Actor.spells_in_order[$t77];
 										if (this.hasSpell(spell1)) {
 											cs1 = new $Forays_colorstring.$ctor2($Forays_Spell.name$1(spell1).padRight(15) + $Forays_Spell.level(spell1).toString().padLeft(3), 2);
 											cs1.strings.add(new $Forays_cstr.$ctor1(this.failRate(spell1).toString().padLeft(9) + '%', this.failColor(spell1)));
@@ -5767,24 +5839,24 @@
 											basefail1 += $Forays_Armor.addedFailRate(this.armors[0]);
 										}
 										bottomborder1 = new $Forays_colorstring.$ctor6('------------Base fail rate: ', 2, basefail1.toString().padLeft(3) + '%', this.failColor$1(basefail1), '----------[', 2, '?', 8, '] for help'.padRight(22, 45), 2);
-										$t74 = this.select$6('Trade one of your spells for another? ', topborder1, bottomborder1, ls1, false, false, true, true, 3);
-										$state = 86;
-										$t74.continueWith($sm);
+										$t78 = this.select$6('Trade one of your spells for another? ', topborder1, bottomborder1, ls1, false, false, true, true, 3);
+										$state = 88;
+										$t78.continueWith($sm);
 										return;
 									}
-									$state = 85;
+									$state = 87;
 									continue $sm1;
 								}
 								else {
-									$state = 84;
+									$state = 86;
 									continue $sm1;
 								}
-								$state = 84;
+								$state = 86;
 								continue $sm1;
 							}
 							case 51: {
 								$state = -1;
-								if ($t79.getResult()) {
+								if ($t83.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5799,9 +5871,9 @@
 										i4.set_col(-1);
 										$Forays_Actor.get_b().add('You pick up ' + i4.theName() + '. ', []);
 										added1 = false;
-										$t80 = this.get_inv();
-										for ($t81 = 0; $t81 < $t80.length; $t81++) {
-											item1 = $t80[$t81];
+										$t84 = this.get_inv();
+										for ($t85 = 0; $t85 < $t84.length; $t85++) {
+											item1 = $t84[$t85];
 											if (item1.get_type() === i4.get_type() && !item1.get_do_not_stack() && !i4.get_do_not_stack()) {
 												item1.set_quantity(item1.get_quantity() + i4.get_quantity());
 												added1 = true;
@@ -5821,9 +5893,9 @@
 										i5.set_quantity(i5.get_quantity() - space_left);
 										$Forays_Actor.get_b().add('You pick up ' + newitem.theName() + ', but have no room for the other ' + i5.get_quantity().toString() + '. ', []);
 										added2 = false;
-										$t82 = this.get_inv();
-										for ($t83 = 0; $t83 < $t82.length; $t83++) {
-											item2 = $t82[$t83];
+										$t86 = this.get_inv();
+										for ($t87 = 0; $t87 < $t86.length; $t87++) {
+											item2 = $t86[$t87];
 											if (item2.get_type() === newitem.get_type() && !item2.get_do_not_stack() && !newitem.get_do_not_stack()) {
 												item2.set_quantity(item2.get_quantity() + newitem.get_quantity());
 												added2 = true;
@@ -5850,12 +5922,12 @@
 							case 53: {
 								$state = -1;
 								if (!true) {
-									$state = 87;
+									$state = 89;
 									continue $sm1;
 								}
-								$t86 = $Forays_Game.console.readKey(true);
-								$state = 88;
-								$t86.continueWith($sm);
+								$t90 = $Forays_Game.console.readKey(true);
+								$state = 90;
+								$t90.continueWith($sm);
 								return;
 							}
 							case 52: {
@@ -5864,15 +5936,15 @@
 							}
 							case 55: {
 								$state = -1;
-								command = $t92.getResult();
+								command = $t96.getResult();
 								ch = $Forays_Actor.convertInput(command);
 								if (ch === '?') {
-									$t93 = $Forays_Help.displayHelp$1(4);
-									$state = 90;
-									$t93.continueWith($sm);
+									$t97 = $Forays_Help.displayHelp$1(4);
+									$state = 92;
+									$t97.continueWith($sm);
 									return;
 								}
-								$state = 89;
+								$state = 91;
 								continue $sm1;
 							}
 							case 54: {
@@ -5882,12 +5954,12 @@
 							case 57: {
 								$state = -1;
 								if (!true) {
-									$state = 91;
+									$state = 93;
 									continue $sm1;
 								}
-								$t96 = $Forays_Game.console.readKey(true);
-								$state = 92;
-								$t96.continueWith($sm);
+								$t100 = $Forays_Game.console.readKey(true);
+								$state = 94;
+								$t100.continueWith($sm);
 								return;
 							}
 							case 56: {
@@ -5896,7 +5968,7 @@
 							}
 							case 58: {
 								$state = -1;
-								changes = $t100.getResult();
+								changes = $t104.getResult();
 								new_weapon = $Forays_Weapon.baseWeapon(changes[0]);
 								new_armor = $Forays_Armor.baseArmor(changes[1]);
 								old_weapon = this.weapons[0];
@@ -5913,19 +5985,19 @@
 										$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ', []);
 									}
 									this.q0();
-									$state = 93;
+									$state = 95;
 									continue $sm1;
 								}
 								else {
-									$t101 = this.stunnedThisTurn();
-									$state = 94;
-									$t101.continueWith($sm);
+									$t105 = this.stunnedThisTurn();
+									$state = 96;
+									$t105.continueWith($sm);
 									return;
 								}
 							}
 							case 60: {
 								$state = -1;
-								if ($t102.getResult()) {
+								if ($t106.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5956,7 +6028,7 @@
 							}
 							case 62: {
 								$state = -1;
-								if ($t103.getResult()) {
+								if ($t107.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -5981,7 +6053,7 @@
 							}
 							case 63: {
 								$state = -1;
-								if ($t104.getResult()) {
+								if ($t108.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -6016,14 +6088,14 @@
 							}
 							case 64: {
 								$state = -1;
-								$t105.getResult();
+								$t109.getResult();
 								this.q0();
 								$state = 29;
 								continue $sm1;
 							}
 							case 65: {
 								$state = -1;
-								$t108.getResult();
+								$t112.getResult();
 								this.q0();
 								$state = 29;
 								continue $sm1;
@@ -6031,7 +6103,7 @@
 							case 66: {
 								$state = -1;
 								if (!!done7) {
-									$state = 95;
+									$state = 97;
 									continue $sm1;
 								}
 								ls2 = [];
@@ -6043,28 +6115,28 @@
 								ls2.add('Don\'t use roman numerals for automatic naming'.padRight(58) + ($Forays_Global.option(2) ? 'yes ' : 'no ').padLeft(4));
 								ls2.add('Never show tutorial tips'.padRight(58) + ($Forays_Global.option(5) ? 'yes ' : 'no ').padLeft(4));
 								ls2.add('Reset tutorial tips before each game'.padRight(58) + ($Forays_Global.option(6) ? 'yes ' : 'no ').padLeft(4));
-								$t109 = this.select$3('Options: ', ls2, true, false, false);
-								$state = 96;
-								$t109.continueWith($sm);
+								$t113 = this.select$3('Options: ', ls2, true, false, false);
+								$state = 98;
+								$t113.continueWith($sm);
 								return;
 							}
 							case 67: {
 								$state = -1;
-								$t112.getResult();
+								$t117.getResult();
 								this.q0();
 								$state = 29;
 								continue $sm1;
 							}
 							case 68: {
 								$state = -1;
-								$t113.getResult();
+								$t118.getResult();
 								this.q0();
 								$state = 29;
 								continue $sm1;
 							}
 							case 69: {
 								$state = -1;
-								switch ($t114.getResult()) {
+								switch ($t119.getResult()) {
 									case 0: {
 										$Forays_Global.saveGame($Forays_Actor.get_b(), $Forays_PhysicalObject.get_m(), $Forays_Actor.get_q());
 										$Forays_Global.gamE_OVER = true;
@@ -6104,17 +6176,17 @@
 							}
 							case 71: {
 								$state = -1;
-								$t143 = $t115.getResult();
-								if ($t143 === 0) {
-									$t116 = (new $Forays_Item.$ctor2(13, 'prismatic orb', '*', 1)).use(this);
-									$state = 97;
-									$t116.continueWith($sm);
+								$t149 = $t120.getResult();
+								if ($t149 === 0) {
+									$t121 = (new $Forays_Item.$ctor2(13, 'prismatic orb', '*', 1)).use(this);
+									$state = 99;
+									$t121.continueWith($sm);
 									return;
 								}
-								else if ($t143 === 1) {
-									$t117 = this.tilesWithinDistance(3);
-									for ($t118 = 0; $t118 < $t117.length; $t118++) {
-										t8 = $t117[$t118];
+								else if ($t149 === 1) {
+									$t122 = this.tilesWithinDistance(3);
+									for ($t123 = 0; $t123 < $t122.length; $t123++) {
+										t8 = $t122[$t123];
 										t8.transformTo(5);
 									}
 									this.q0();
@@ -6123,28 +6195,28 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 2) {
-									$t119 = this.getTarget$4(-1, -1);
-									$state = 98;
-									$t119.continueWith($sm);
+								else if ($t149 === 2) {
+									$t124 = this.getTarget$4(-1, -1);
+									$state = 100;
+									$t124.continueWith($sm);
 									return;
 								}
-								else if ($t143 === 3) {
+								else if ($t149 === 3) {
 									//ConsoleKeyInfo command2 = Game.Console.ReadKey(true);
 									//Game.Console.Write(command2.Key);
-									$t120 = this.getTarget$4(-1, -1);
-									$state = 99;
-									$t120.continueWith($sm);
+									$t125 = this.getTarget$4(-1, -1);
+									$state = 101;
+									$t125.continueWith($sm);
 									return;
 								}
-								else if ($t143 === 4) {
+								else if ($t149 === 4) {
 									$Forays_Game.console.cursorVisible = false;
 									cch.c = ' ';
 									cch.color = 0;
 									cch.bgcolor = 0;
-									$t121 = $Forays_PhysicalObject.get_m().allTiles();
-									for ($t122 = 0; $t122 < $t121.length; $t122++) {
-										t11 = $t121[$t122];
+									$t126 = $Forays_PhysicalObject.get_m().allTiles();
+									for ($t127 = 0; $t127 < $t126.length; $t127++) {
+										t11 = $t126[$t127];
 										t11.set_seen(false);
 										$Forays_Screen.writeMapChar(t11.get_row(), t11.get_col(), cch);
 									}
@@ -6153,13 +6225,13 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 5) {
+								else if ($t149 === 5) {
 									this.set_curhp(this.get_maxhp());
 									this.q0();
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 6) {
+								else if ($t149 === 6) {
 									if (!this.hasAttr(103)) {
 										this.attrs.set_item(103, this.attrs.get_item(103) + 1);
 										$Forays_Actor.get_b().add('On. ', []);
@@ -6172,7 +6244,7 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 7) {
+								else if ($t149 === 7) {
 									for (i10 = 0; i10 < 50; ++i10) {
 										$Forays_Item.create($Forays_Item.randomItem(), this);
 									}
@@ -6180,42 +6252,42 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 8) {
+								else if ($t149 === 8) {
 									$Forays_PhysicalObject.get_m().spawnMob$1(19);
 									this.q1();
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 9) {
-									$t123 = (new $Forays_Item.$ctor2(7, 'rune of passage', '&', 1)).use(this);
-									$state = 100;
-									$t123.continueWith($sm);
-									return;
-								}
-								else if ($t143 === 10) {
-									$t124 = $Forays_PhysicalObject.get_m().allTiles();
-									for ($t125 = 0; $t125 < $t124.length; $t125++) {
-										t12 = $t124[$t125];
-										t12.set_seen(true);
-									}
-									$Forays_PhysicalObject.get_m().draw();
-									$t126 = $Forays_PhysicalObject.get_m().allActors();
-									for ($t127 = 0; $t127 < $t126.length; $t127++) {
-										a11 = $t126[$t127];
-										$Forays_Screen.writeMapChar(a11.get_row(), a11.get_col(), new $Forays_colorchar.$ctor6(a11.get_color(), 0, a11.get_symbol()));
-									}
-									$t128 = $Forays_Game.console.readKey(true);
-									$state = 101;
+								else if ($t149 === 9) {
+									$t128 = (new $Forays_Item.$ctor2(7, 'rune of passage', '&', 1)).use(this);
+									$state = 102;
 									$t128.continueWith($sm);
 									return;
 								}
-								else if ($t143 === 11) {
-									$Forays_PhysicalObject.get_m().generateLevel();
-									this.q0();
-									$state = 70;
-									continue $sm1;
+								else if ($t149 === 10) {
+									$t129 = $Forays_PhysicalObject.get_m().allTiles();
+									for ($t130 = 0; $t130 < $t129.length; $t130++) {
+										t12 = $t129[$t130];
+										t12.set_seen(true);
+									}
+									$Forays_PhysicalObject.get_m().draw();
+									$t131 = $Forays_PhysicalObject.get_m().allActors();
+									for ($t132 = 0; $t132 < $t131.length; $t132++) {
+										a11 = $t131[$t132];
+										$Forays_Screen.writeMapChar(a11.get_row(), a11.get_col(), new $Forays_colorchar.$ctor6(a11.get_color(), 0, a11.get_symbol()));
+									}
+									$t133 = $Forays_Game.console.readKey(true);
+									$state = 103;
+									$t133.continueWith($sm);
+									return;
 								}
-								else if ($t143 === 12) {
+								else if ($t149 === 11) {
+									$t134 = $Forays_PhysicalObject.get_m().generateLevel();
+									$state = 104;
+									$t134.continueWith($sm);
+									return;
+								}
+								else if ($t149 === 12) {
 									//Tile t = await GetTarget();
 									//if(t != null){
 									//TileType oldtype = t.type;
@@ -6249,9 +6321,9 @@
 									this.skills.set_item(2, 10);
 									this.skills.set_item(3, 10);
 									this.skills.set_item(4, 10);
-									$t129 = $Forays_Extensions.getValues($Forays_FeatType);
-									for ($t130 = 0; $t130 < $t129.length; $t130++) {
-										f = $t129[$t130];
+									$t135 = $Forays_Extensions.getValues($Forays_FeatType);
+									for ($t136 = 0; $t136 < $t135.length; $t136++) {
+										f = $t135[$t136];
 										if (f !== 21 && f !== 20) {
 											this.feats.set_item(f, 1);
 										}
@@ -6261,34 +6333,34 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 13) {
+								else if ($t149 === 13) {
 									//LevelUp();
-									$t131 = this.tilesWithinDistance(2);
-									for ($t132 = 0; $t132 < $t131.length; $t132++) {
-										t13 = $t131[$t132];
+									$t137 = this.tilesWithinDistance(2);
+									for ($t138 = 0; $t138 < $t137.length; $t138++) {
+										t13 = $t137[$t138];
 										t13.transformTo($Forays_Global.roll(5) + 20);
 									}
 									this.q0();
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 14) {
-									$t133 = this.tilesAtDistance(1);
-									for ($t134 = 0; $t134 < $t133.length; $t134++) {
-										t14 = $t133[$t134];
+								else if ($t149 === 14) {
+									$t139 = this.tilesAtDistance(1);
+									for ($t140 = 0; $t140 < $t139.length; $t140++) {
+										t14 = $t139[$t140];
 										t14.transformTo($Forays_Tile.randomTrap());
 									}
 									this.q0();
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 15) {
-									$t135 = this.getTarget$4(-1, -1);
-									$state = 102;
-									$t135.continueWith($sm);
+								else if ($t149 === 15) {
+									$t141 = this.getTarget$4(-1, -1);
+									$state = 105;
+									$t141.continueWith($sm);
 									return;
 								}
-								else if ($t143 === 16) {
+								else if ($t149 === 16) {
 									for (i11 = 0; i11 < 100; ++i11) {
 										$Forays_PhysicalObject.get_m().spawnMob$1(3);
 									}
@@ -6299,19 +6371,19 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 17) {
-									$t136 = $Forays_PhysicalObject.get_m().allActors();
-									for ($t137 = 0; $t137 < $t136.length; $t137++) {
-										a12 = $t136[$t137];
+								else if ($t149 === 17) {
+									$t142 = $Forays_PhysicalObject.get_m().allActors();
+									for ($t143 = 0; $t143 < $t142.length; $t143++) {
+										a12 = $t142[$t143];
 										if (!ss.referenceEquals(a12, this)) {
 											$Forays_Actor.get_q().killEvents$1(a12, 0);
 											$Forays_PhysicalObject.get_m().removeTargets(a12);
 											$Forays_PhysicalObject.get_m().actor.set_item$1(a12.p, null);
 										}
 									}
-									$t138 = $Forays_PhysicalObject.get_m().allTiles();
-									for ($t139 = 0; $t139 < $t138.length; $t139++) {
-										t16 = $t138[$t139];
+									$t144 = $Forays_PhysicalObject.get_m().allTiles();
+									for ($t145 = 0; $t145 < $t144.length; $t145++) {
+										t16 = $t144[$t145];
 										if (t16.get_passable() && ss.isNullOrUndefined(t16.actor())) {
 											$Forays_Actor.create$1(2, t16.get_row(), t16.get_col(), true, false);
 											break;
@@ -6321,7 +6393,7 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 18) {
+								else if ($t149 === 18) {
 									if (this.attrs.get_item(40) === 0) {
 										this.attrs.set_item(40, 1);
 									}
@@ -6332,10 +6404,10 @@
 									$state = 70;
 									continue $sm1;
 								}
-								else if ($t143 === 19) {
-									$t140 = this.getTarget$4(-1, -1);
-									$state = 103;
-									$t140.continueWith($sm);
+								else if ($t149 === 19) {
+									$t146 = this.getTarget$4(-1, -1);
+									$state = 106;
+									$t146.continueWith($sm);
 									return;
 								}
 								else {
@@ -6355,8 +6427,9 @@
 								if (ch !== 'x') {
 									this.attrs.set_item(81, 0);
 								}
-								$state = -1;
-								break $sm1;
+								$Forays_PhysicalObject.get_m().draw();
+								$tcs.setResult(false);
+								return;
 							}
 							case 74: {
 								$state = -1;
@@ -6382,29 +6455,40 @@
 							}
 							case 75: {
 								$state = -1;
-								if ($t44.getResult()) {
-									return;
-								}
-								if ($Forays_Global.roll(5) <= 4) {
-									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '. ', []);
-									t5.toggle(this);
-									this.q1();
-								}
-								else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
-									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
-									this.q1();
-								}
-								else {
-									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
-									this.move(t5.get_row(), t5.get_col());
-									this.q1();
-								}
+								$t43.getResult();
+								this.q1();
 								$state = 34;
 								continue $sm1;
 							}
 							case 76: {
 								$state = -1;
 								if ($t45.getResult()) {
+									return true;
+								}
+								if ($Forays_Global.roll(5) <= 4) {
+									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '. ', []);
+									t5.toggle(this);
+									this.q1();
+									$state = 34;
+									continue $sm1;
+								}
+								else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
+									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
+									this.q1();
+									$state = 34;
+									continue $sm1;
+								}
+								else {
+									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
+									$t46 = this.move(t5.get_row(), t5.get_col());
+									$state = 107;
+									$t46.continueWith($sm);
+									return;
+								}
+							}
+							case 77: {
+								$state = -1;
+								if ($t47.getResult()) {
 									$state = 34;
 									continue $sm1;
 								}
@@ -6413,9 +6497,9 @@
 								$state = 34;
 								continue $sm1;
 							}
-							case 77: {
+							case 78: {
 								$state = -1;
-								$t47.getResult();
+								$t49.getResult();
 								//}
 								//else{
 								//B.Add("You can't fire at adjacent targets. ");
@@ -6424,9 +6508,9 @@
 								$state = 38;
 								continue $sm1;
 							}
-							case 79: {
+							case 80: {
 								$state = -1;
-								command = $t53.getResult();
+								command = $t55.getResult();
 								ch = $Forays_Actor.convertInput(command);
 								ii = ch.charCodeAt(0) - 97;
 								if (active_feats.length > ii && ii >= 0) {
@@ -6436,9 +6520,9 @@
 									continue $sm1;
 								}
 								else if (ch === '?') {
-									$t54 = $Forays_Help.displayHelp$1(2);
-									$state = 104;
-									$t54.continueWith($sm);
+									$t56 = $Forays_Help.displayHelp$1(2);
+									$state = 108;
+									$t56.continueWith($sm);
 									return;
 								}
 								else {
@@ -6447,43 +6531,51 @@
 									continue $sm1;
 								}
 							}
-							case 78: {
+							case 79: {
 								$state = -1;
 								$Forays_PhysicalObject.get_m().redrawWithStrings();
 								if (selected_feat !== 21) {
-									$t55 = this.stunnedThisTurn();
-									$state = 106;
-									$t55.continueWith($sm);
+									$t57 = this.stunnedThisTurn();
+									$state = 110;
+									$t57.continueWith($sm);
 									return;
 								}
 								else {
 									this.q0();
-									$state = 105;
+									$state = 109;
 									continue $sm1;
 								}
 							}
 							case 81: {
 								$state = -1;
-								if (!!done1) {
-									$state = 80;
-									continue $sm1;
+								if (true !== $t63.getResult()) {
+									this.q0();
 								}
-								$t65 = $Forays_Game.console.readKey(true);
-								$state = 107;
-								$t65.continueWith($sm);
-								return;
-							}
-							case 80: {
-								$state = -1;
-								$Forays_Actor.get_b().add('You walk down the stairs. ', []);
-								$t66 = $Forays_Actor.get_b().printAll();
-								$state = 108;
-								$t66.continueWith($sm);
-								return;
+								$state = 41;
+								continue $sm1;
 							}
 							case 83: {
 								$state = -1;
-								command = $t70.getResult();
+								if (!!done1) {
+									$state = 82;
+									continue $sm1;
+								}
+								$t68 = $Forays_Game.console.readKey(true);
+								$state = 111;
+								$t68.continueWith($sm);
+								return;
+							}
+							case 82: {
+								$state = -1;
+								$Forays_Actor.get_b().add('You walk down the stairs. ', []);
+								$t69 = $Forays_Actor.get_b().printAll();
+								$state = 112;
+								$t69.continueWith($sm);
+								return;
+							}
+							case 85: {
+								$state = -1;
+								command = $t74.getResult();
 								switch (command.keyChar) {
 									case 121:
 									case 89:
@@ -6494,27 +6586,27 @@
 									}
 									default: {
 										this.q0();
-										return;
+										return true;
 									}
 								}
 								$state = 47;
 								continue $sm1;
 							}
-							case 82: {
+							case 84: {
 								$state = -1;
 								this.findPath$3(stairs, -1, true);
 								this.q0();
 								$state = 45;
 								continue $sm1;
 							}
-							case 86: {
+							case 88: {
 								$state = -1;
-								i3 = $t74.getResult();
+								i3 = $t78.getResult();
 								if (i3 !== -1) {
 									unknown = [];
-									$t75 = $Forays_Extensions.getValues($Forays_SpellType);
-									for ($t76 = 0; $t76 < $t75.length; $t76++) {
-										spell2 = $t75[$t76];
+									$t79 = $Forays_Extensions.getValues($Forays_SpellType);
+									for ($t80 = 0; $t80 < $t79.length; $t80++) {
+										spell2 = $t79[$t80];
 										if (!this.hasSpell(spell2) && spell2 !== 20 && spell2 !== 21 && spell2 !== 22 && spell2 !== 24 && spell2 !== 23) {
 											unknown.add(spell2);
 										}
@@ -6531,14 +6623,14 @@
 								else {
 									this.q0();
 								}
-								$state = 85;
+								$state = 87;
 								continue $sm1;
 							}
-							case 85: {
-								$state = 84;
+							case 87: {
+								$state = 86;
 								continue $sm1;
 							}
-							case 84: {
+							case 86: {
 								$state = -1;
 								if (this.tile().get_type() !== 27) {
 									this.q1();
@@ -6549,9 +6641,9 @@
 								else if (this.tile().get_type() !== 27) {
 									this.tile().transformTo(26);
 								}
-								$t77 = this.tilesAtDistance(2);
-								for ($t78 = 0; $t78 < $t77.length; $t78++) {
-									t7 = $t77[$t78];
+								$t81 = this.tilesAtDistance(2);
+								for ($t82 = 0; $t82 < $t81.length; $t82++) {
+									t7 = $t81[$t82];
 									if (t7.isShrine()) {
 										t7.transformTo(26);
 									}
@@ -6559,34 +6651,34 @@
 								$state = 48;
 								continue $sm1;
 							}
-							case 88: {
+							case 90: {
 								$state = -1;
-								command = $t86.getResult();
+								command = $t90.getResult();
 								ch = $Forays_Actor.convertInput(command);
 								ii1 = ch.charCodeAt(0) - 97;
 								if (ii1 >= 0 && ii1 < this.inventoryList().length) {
 									num = ii1;
-									$state = 87;
+									$state = 89;
 									continue $sm1;
 								}
 								else {
 									if (ch === '?') {
-										$t87 = $Forays_Help.displayHelp$1(4);
-										$state = 110;
-										$t87.continueWith($sm);
+										$t91 = $Forays_Help.displayHelp$1(4);
+										$state = 114;
+										$t91.continueWith($sm);
 										return;
 									}
-									$state = 109;
+									$state = 113;
 									continue $sm1;
 								}
 							}
-							case 87: {
+							case 89: {
 								$state = -1;
 								$Forays_PhysicalObject.get_m().redrawWithStrings();
 								if (num !== -1) {
-									$t88 = this.stunnedThisTurn();
-									$state = 111;
-									$t88.continueWith($sm);
+									$t92 = this.stunnedThisTurn();
+									$state = 115;
+									$t92.continueWith($sm);
 									return;
 								}
 								else {
@@ -6595,48 +6687,48 @@
 									continue $sm1;
 								}
 							}
-							case 90: {
+							case 92: {
 								$state = -1;
-								$t93.getResult();
-								$state = 89;
+								$t97.getResult();
+								$state = 91;
 								continue $sm1;
 							}
-							case 89: {
+							case 91: {
 								$state = -1;
 								$Forays_PhysicalObject.get_m().redrawWithStrings();
 								this.q0();
 								$state = 54;
 								continue $sm1;
 							}
-							case 92: {
+							case 94: {
 								$state = -1;
-								command = $t96.getResult();
+								command = $t100.getResult();
 								ch = $Forays_Actor.convertInput(command);
 								ii2 = ch.charCodeAt(0) - 97;
 								if (ii2 >= 0 && ii2 < this.inventoryList().length) {
 									num1 = ii2;
-									$state = 91;
+									$state = 93;
 									continue $sm1;
 								}
 								else {
 									if (ch === '?') {
-										$t97 = $Forays_Help.displayHelp$1(4);
-										$state = 113;
-										$t97.continueWith($sm);
+										$t101 = $Forays_Help.displayHelp$1(4);
+										$state = 117;
+										$t101.continueWith($sm);
 										return;
 									}
-									$state = 112;
+									$state = 116;
 									continue $sm1;
 								}
 							}
-							case 91: {
+							case 93: {
 								$state = -1;
 								$Forays_PhysicalObject.get_m().redrawWithStrings();
 								//if(i != -1){
 								if (num1 !== -1) {
-									$t98 = this.stunnedThisTurn();
-									$state = 114;
-									$t98.continueWith($sm);
+									$t102 = this.stunnedThisTurn();
+									$state = 118;
+									$t102.continueWith($sm);
 									return;
 								}
 								else {
@@ -6645,9 +6737,9 @@
 									continue $sm1;
 								}
 							}
-							case 94: {
+							case 96: {
 								$state = -1;
-								if ($t101.getResult()) {
+								if ($t105.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -6691,121 +6783,38 @@
 								else {
 									this.q1();
 								}
-								$state = 93;
-								continue $sm1;
-							}
-							case 93: {
-								$state = 29;
-								continue $sm1;
-							}
-							case 96: {
-								$state = -1;
-								$t109.getResult();
-								$Forays_Game.console.cursorVisible = true;
-								ch = $Forays_Actor.convertInput($Forays_Game.console.readKey(true).getResult());
-								if (ch === 'a') {
-									$Forays_Global.options[0] = !$Forays_Global.option(0);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'b') {
-									$Forays_Global.options[1] = !$Forays_Global.option(1);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'c') {
-									$Forays_Global.options[3] = !$Forays_Global.option(3);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'd') {
-									$Forays_Global.options[4] = !$Forays_Global.option(4);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'e') {
-									if (this.skills.get_item(2) > 0) {
-										$Forays_PhysicalObject.get_m().redrawWithStrings();
-										list = [];
-										sp2 = [];
-										bonus_marked2 = false;
-										for ($t110 = 0; $t110 < $Forays_Actor.spells_in_order.length; $t110++) {
-											spell3 = $Forays_Actor.spells_in_order[$t110];
-											if (this.hasSpell(spell3)) {
-												cs2 = new $Forays_colorstring.$ctor2($Forays_Spell.name$1(spell3).padRight(15) + $Forays_Spell.level(spell3).toString().padLeft(3), 2);
-												cs2.strings.add(new $Forays_cstr.$ctor1(this.failRate(spell3).toString().padLeft(9) + '%', this.failColor(spell3)));
-												if (this.hasFeat(8) && $Forays_Spell.isDamaging(spell3) && !bonus_marked2) {
-													bonus_marked2 = true;
-													cs2 = $Forays_colorstring.op_Addition(cs2, $Forays_Spell.descriptionWithIncreasedDamage(spell3));
-												}
-												else {
-													cs2 = $Forays_colorstring.op_Addition(cs2, $Forays_Spell.description(spell3));
-												}
-												list.add(cs2);
-												sp2.add(spell3);
-											}
-										}
-										if (sp2.length > 0) {
-											topborder2 = new $Forays_colorstring.$ctor2('------------------Level---Fail rate--------Description------------', 2);
-											basefail2 = this.magic_penalty * 5;
-											if (!this.hasFeat(5)) {
-												basefail2 += $Forays_Armor.addedFailRate(this.armors[0]);
-											}
-											bottomborder2 = new $Forays_colorstring.$ctor4('------------Base fail rate: ', 2, basefail2.toString().padLeft(3) + '%', this.failColor$1(basefail2), ''.padRight(37, 45), 2);
-											$t111 = this.select$6('Automatically cast which spell? ', topborder2, bottomborder2, list, false, false, false, false, 0);
-											$state = 116;
-											$t111.continueWith($sm);
-											return;
-										}
-										$state = 115;
-										continue $sm1;
-									}
-									$state = 115;
-									continue $sm1;
-								}
-								else if (ch === 'f') {
-									$Forays_Global.options[2] = !$Forays_Global.option(2);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'g') {
-									$Forays_Global.options[5] = !$Forays_Global.option(5);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === 'h') {
-									$Forays_Global.options[6] = !$Forays_Global.option(6);
-									$state = 66;
-									continue $sm1;
-								}
-								else if (ch === '' || ch === ' ' || ch === '\r') {
-									done7 = true;
-									$state = 66;
-									continue $sm1;
-								}
-								else {
-									$state = 66;
-									continue $sm1;
-								}
-								$state = 66;
+								$state = 95;
 								continue $sm1;
 							}
 							case 95: {
+								$state = 29;
+								continue $sm1;
+							}
+							case 98: {
+								$state = -1;
+								$t113.getResult();
+								$Forays_Game.console.cursorVisible = true;
+								$t114 = $Forays_Game.console.readKey(true);
+								$state = 119;
+								$t114.continueWith($sm);
+								return;
+							}
+							case 97: {
 								$state = -1;
 								this.q0();
 								$state = 29;
 								continue $sm1;
 							}
-							case 97: {
+							case 99: {
 								$state = -1;
-								$t116.getResult();
+								$t121.getResult();
 								this.q1();
 								$state = 70;
 								continue $sm1;
 							}
-							case 98: {
+							case 100: {
 								$state = -1;
-								line5 = $t119.getResult();
+								line5 = $t124.getResult();
 								if (ss.isValue(line5)) {
 									t9 = $Forays_Extensions.last($Forays_Tile).call(null, line5);
 									//if(t != null && t.inv == null){
@@ -6836,9 +6845,9 @@
 								$state = 70;
 								continue $sm1;
 							}
-							case 99: {
+							case 101: {
 								$state = -1;
-								line6 = $t120.getResult();
+								line6 = $t125.getResult();
 								if (ss.isValue(line6)) {
 									t10 = $Forays_Extensions.last($Forays_Tile).call(null, line6);
 									if (ss.isValue(t10)) {
@@ -6849,23 +6858,30 @@
 								$state = 70;
 								continue $sm1;
 							}
-							case 100: {
+							case 102: {
 								$state = -1;
-								$t123.getResult();
+								$t128.getResult();
 								this.q1();
 								$state = 70;
 								continue $sm1;
 							}
-							case 101: {
+							case 103: {
 								$state = -1;
-								$t128.getResult();
+								$t133.getResult();
 								this.q0();
 								$state = 70;
 								continue $sm1;
 							}
-							case 102: {
+							case 104: {
 								$state = -1;
-								line7 = $t135.getResult();
+								$t134.getResult();
+								this.q0();
+								$state = 70;
+								continue $sm1;
+							}
+							case 105: {
+								$state = -1;
+								line7 = $t141.getResult();
 								if (ss.isValue(line7)) {
 									t15 = $Forays_Extensions.last($Forays_Tile).call(null, line7);
 									if (ss.isValue(t15)) {
@@ -6876,9 +6892,9 @@
 								$state = 70;
 								continue $sm1;
 							}
-							case 103: {
+							case 106: {
 								$state = -1;
-								line8 = $t140.getResult();
+								line8 = $t146.getResult();
 								if (ss.isValue(line8)) {
 									t17 = $Forays_Extensions.last($Forays_Tile).call(null, line8);
 									if (ss.isValue(t17)) {
@@ -6891,31 +6907,38 @@
 								$state = 70;
 								continue $sm1;
 							}
-							case 104: {
+							case 107: {
 								$state = -1;
-								$t54.getResult();
+								$t46.getResult();
+								this.q1();
+								$state = 34;
+								continue $sm1;
+							}
+							case 108: {
+								$state = -1;
+								$t56.getResult();
 								done = true;
 								$state = 40;
 								continue $sm1;
 							}
-							case 106: {
+							case 110: {
 								$state = -1;
-								if ($t55.getResult()) {
+								if ($t57.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
-								$t56 = this.useFeat(selected_feat);
-								$state = 117;
-								$t56.continueWith($sm);
+								$t58 = this.useFeat(selected_feat);
+								$state = 120;
+								$t58.continueWith($sm);
 								return;
 							}
-							case 105: {
+							case 109: {
 								$state = 29;
 								continue $sm1;
 							}
-							case 107: {
+							case 111: {
 								$state = -1;
-								command = $t65.getResult();
+								command = $t68.getResult();
 								switch (command.keyChar) {
 									case 121:
 									case 89: {
@@ -6924,41 +6947,42 @@
 									}
 									default: {
 										this.q0();
-										return;
+										return true;
 									}
 								}
-								$state = 81;
+								$state = 83;
 								continue $sm1;
 							}
-							case 108: {
+							case 112: {
 								$state = -1;
-								$t66.getResult();
+								$t69.getResult();
 								if ($Forays_PhysicalObject.get_m().get_current_level() < 20) {
-									$Forays_PhysicalObject.get_m().generateLevel();
-									$state = 118;
-									continue $sm1;
+									$t70 = $Forays_PhysicalObject.get_m().generateLevel();
+									$state = 122;
+									$t70.continueWith($sm);
+									return;
 								}
 								else {
-									$t67 = $Forays_PhysicalObject.get_m().generateBossLevel(false);
-									$state = 119;
-									$t67.continueWith($sm);
+									$t71 = $Forays_PhysicalObject.get_m().generateBossLevel(false);
+									$state = 123;
+									$t71.continueWith($sm);
 									return;
 								}
 							}
-							case 110: {
+							case 114: {
 								$state = -1;
-								$t87.getResult();
+								$t91.getResult();
 								num = -1;
-								$state = 87;
+								$state = 89;
 								continue $sm1;
 							}
-							case 109: {
-								$state = 87;
+							case 113: {
+								$state = 89;
 								continue $sm1;
 							}
-							case 111: {
+							case 115: {
 								$state = -1;
-								if ($t88.getResult()) {
+								if ($t92.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
@@ -7013,76 +7037,156 @@
 								}
 								else {
 									$Forays_Actor.get_b().displayNow$1('Drop how many? (1-' + i6.get_quantity() + '): ');
-									$t89 = $Forays_Global.enterInt();
-									$state = 120;
-									$t89.continueWith($sm);
+									$t93 = $Forays_Global.enterInt();
+									$state = 124;
+									$t93.continueWith($sm);
 									return;
 								}
 							}
-							case 113: {
+							case 117: {
 								$state = -1;
-								$t97.getResult();
+								$t101.getResult();
 								num1 = -1;
-								$state = 91;
+								$state = 93;
 								continue $sm1;
 							}
-							case 112: {
-								$state = 91;
+							case 116: {
+								$state = 93;
 								continue $sm1;
 							}
-							case 114: {
+							case 118: {
 								$state = -1;
-								if ($t98.getResult()) {
+								if ($t102.getResult()) {
 									$state = 29;
 									continue $sm1;
 								}
 								//if(inv[i].Use(this)){
-								$t99 = this.get_inv()[num1].use(this);
-								$state = 121;
-								$t99.continueWith($sm);
+								$t103 = this.get_inv()[num1].use(this);
+								$state = 125;
+								$t103.continueWith($sm);
 								return;
-							}
-							case 116: {
-								$state = -1;
-								i8 = $t111.getResult();
-								if (i8 !== -1) {
-									this.get_f()[0] = sp2[i8];
-								}
-								else {
-									this.get_f()[0] = 24;
-								}
-								$state = 115;
-								continue $sm1;
-							}
-							case 115: {
-								$state = 66;
-								continue $sm1;
-							}
-							case 117: {
-								$state = -1;
-								if (true !== $t56.getResult()) {
-									this.q0();
-								}
-								$state = 105;
-								continue $sm1;
 							}
 							case 119: {
 								$state = -1;
-								$t67.getResult();
-								$Forays_Actor.get_b().add('You enter a sweltering cavern. ', []);
-								$Forays_Actor.get_b().add('Bones lie scattered across the sulfurous ground. ', []);
-								$state = 118;
+								ch = $Forays_Actor.convertInput($t114.getResult());
+								if (ch === 'a') {
+									$Forays_Global.options[0] = !$Forays_Global.option(0);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'b') {
+									$Forays_Global.options[1] = !$Forays_Global.option(1);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'c') {
+									$Forays_Global.options[3] = !$Forays_Global.option(3);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'd') {
+									$Forays_Global.options[4] = !$Forays_Global.option(4);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'e') {
+									if (this.skills.get_item(2) > 0) {
+										$Forays_PhysicalObject.get_m().redrawWithStrings();
+										list = [];
+										sp2 = [];
+										bonus_marked2 = false;
+										for ($t115 = 0; $t115 < $Forays_Actor.spells_in_order.length; $t115++) {
+											spell3 = $Forays_Actor.spells_in_order[$t115];
+											if (this.hasSpell(spell3)) {
+												cs2 = new $Forays_colorstring.$ctor2($Forays_Spell.name$1(spell3).padRight(15) + $Forays_Spell.level(spell3).toString().padLeft(3), 2);
+												cs2.strings.add(new $Forays_cstr.$ctor1(this.failRate(spell3).toString().padLeft(9) + '%', this.failColor(spell3)));
+												if (this.hasFeat(8) && $Forays_Spell.isDamaging(spell3) && !bonus_marked2) {
+													bonus_marked2 = true;
+													cs2 = $Forays_colorstring.op_Addition(cs2, $Forays_Spell.descriptionWithIncreasedDamage(spell3));
+												}
+												else {
+													cs2 = $Forays_colorstring.op_Addition(cs2, $Forays_Spell.description(spell3));
+												}
+												list.add(cs2);
+												sp2.add(spell3);
+											}
+										}
+										if (sp2.length > 0) {
+											topborder2 = new $Forays_colorstring.$ctor2('------------------Level---Fail rate--------Description------------', 2);
+											basefail2 = this.magic_penalty * 5;
+											if (!this.hasFeat(5)) {
+												basefail2 += $Forays_Armor.addedFailRate(this.armors[0]);
+											}
+											bottomborder2 = new $Forays_colorstring.$ctor4('------------Base fail rate: ', 2, basefail2.toString().padLeft(3) + '%', this.failColor$1(basefail2), ''.padRight(37, 45), 2);
+											$t116 = this.select$6('Automatically cast which spell? ', topborder2, bottomborder2, list, false, false, false, false, 0);
+											$state = 127;
+											$t116.continueWith($sm);
+											return;
+										}
+										$state = 126;
+										continue $sm1;
+									}
+									$state = 126;
+									continue $sm1;
+								}
+								else if (ch === 'f') {
+									$Forays_Global.options[2] = !$Forays_Global.option(2);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'g') {
+									$Forays_Global.options[5] = !$Forays_Global.option(5);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === 'h') {
+									$Forays_Global.options[6] = !$Forays_Global.option(6);
+									$state = 66;
+									continue $sm1;
+								}
+								else if (ch === '' || ch === ' ' || ch === '\r') {
+									done7 = true;
+									$state = 66;
+									continue $sm1;
+								}
+								else {
+									$state = 66;
+									continue $sm1;
+								}
+								$state = 66;
 								continue $sm1;
 							}
-							case 118: {
+							case 120: {
+								$state = -1;
+								if (true !== $t58.getResult()) {
+									this.q0();
+								}
+								$state = 109;
+								continue $sm1;
+							}
+							case 122: {
+								$state = -1;
+								$t70.getResult();
+								$state = 121;
+								continue $sm1;
+							}
+							case 123: {
+								$state = -1;
+								$t71.getResult();
+								$Forays_Actor.get_b().add('You enter a sweltering cavern. ', []);
+								$Forays_Actor.get_b().add('Bones lie scattered across the sulfurous ground. ', []);
+								$state = 121;
+								continue $sm1;
+							}
+							case 121: {
 								$state = -1;
 								this.q0();
 								$state = 45;
 								continue $sm1;
 							}
-							case 120: {
+							case 124: {
 								$state = -1;
-								count = $t89.getResult();
+								count = $t93.getResult();
 								if (count === 0) {
 									this.q0();
 								}
@@ -7115,9 +7219,9 @@
 								$state = 52;
 								continue $sm1;
 							}
-							case 121: {
+							case 125: {
 								$state = -1;
-								if ($t99.getResult()) {
+								if ($t103.getResult()) {
 									this.q1();
 								}
 								else {
@@ -7126,22 +7230,37 @@
 								$state = 56;
 								continue $sm1;
 							}
+							case 127: {
+								$state = -1;
+								i8 = $t116.getResult();
+								if (i8 !== -1) {
+									this.get_f()[0] = sp2[i8];
+								}
+								else {
+									this.get_f()[0] = 24;
+								}
+								$state = 126;
+								continue $sm1;
+							}
+							case 126: {
+								$state = 66;
+								continue $sm1;
+							}
 							default: {
 								break $sm1;
 							}
 						}
 					}
-					$tcs.setResult(null);
 				}
-				catch ($t144) {
-					$tcs.setException(ss.Exception.wrap($t144));
+				catch ($t150) {
+					$tcs.setException(ss.Exception.wrap($t150));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		playerWalk: function(dir) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, grabbers, $t4, $t5, a, $t6, $t8, done, $t7;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, $t4, grabbers, $t5, $t6, a, $t7, $t11, done, $t8, $t9, $t10;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -7154,22 +7273,21 @@
 										if (!this.actorInDirection(dir).isHiddenFrom(this)) {
 											if (this.get_f()[0] === 24) {
 												$t1 = this.attack(0, this.actorInDirection(dir));
-												$state = 1;
+												$state = 2;
 												$t1.continueWith($sm);
 												return;
 											}
 											else {
-												if (!this.castSpell$1(this.get_f()[0], this.tileInDirection(dir))) {
-													this.q0();
-												}
-												$state = -1;
-												break $sm1;
+												$t2 = this.castSpell$1(this.get_f()[0], this.tileInDirection(dir));
+												$state = 3;
+												$t2.continueWith($sm);
+												return;
 											}
 										}
 										else {
 											this.actorInDirection(dir).attrs.set_item(77, -1);
-											$t2 = this.actorInDirection(dir).attrs;
-											$t2.set_item(14, $t2.get_item(14) + 1);
+											$t3 = this.actorInDirection(dir).attrs;
+											$t3.set_item(14, $t3.get_item(14) + 1);
 											if (!this.isHiddenFrom(this.actorInDirection(dir))) {
 												$Forays_Actor.get_b().add('You walk straight into ' + this.actorInDirection(dir).aVisible() + '! ', []);
 											}
@@ -7179,27 +7297,27 @@
 													$Forays_Actor.get_b().add(this.actorInDirection(dir).get_the_name() + ' looks just as surprised as you. ', []);
 												}
 												this.actorInDirection(dir).player_visibility_duration = -1;
-												$t3 = this.actorInDirection(dir).attrs;
-												$t3.set_item(15, $t3.get_item(15) + 1);
+												$t4 = this.actorInDirection(dir).attrs;
+												$t4.set_item(15, $t4.get_item(15) + 1);
 											}
 											this.q1();
-											$state = -1;
-											break $sm1;
+											$state = 1;
+											continue $sm1;
 										}
 									}
 									else if (this.tileInDirection(dir).get_passable()) {
 										if (this.grabPreventsMovement(this.tileInDirection(dir))) {
 											grabbers = [];
-											$t4 = this.actorsAtDistance(1);
-											for ($t5 = 0; $t5 < $t4.length; $t5++) {
-												a = $t4[$t5];
+											$t5 = this.actorsAtDistance(1);
+											for ($t6 = 0; $t6 < $t5.length; $t6++) {
+												a = $t5[$t6];
 												if (a.attrs.get_item(97) === a.directionOf(this)) {
 													grabbers.add(a);
 												}
 											}
 											$Forays_Actor.get_b().add($Forays_Extensions.random($Forays_Actor).call(null, grabbers).get_the_name() + ' prevents you from moving away! ', []);
 											this.q0();
-											return;
+											return true;
 										}
 										if (this.tileInDirection(dir).get_type() === 4) {
 											if (!$Forays_Global.option(4)) {
@@ -7217,111 +7335,151 @@
 										}
 										if (this.tileInDirection(dir).is$1(31)) {
 											$Forays_Actor.get_b().add('There is a healing pool here. ', []);
-											$t6 = $Forays_Help.tutorialTip(9);
-											$state = 3;
-											$t6.continueWith($sm);
+											$t7 = $Forays_Help.tutorialTip(9);
+											$state = 5;
+											$t7.continueWith($sm);
 											return;
 										}
-										$state = 2;
+										$state = 4;
 										continue $sm1;
 									}
 									else if (this.tileInDirection(dir).get_type() === 3 || this.tileInDirection(dir).get_type() === 28) {
-										$t8 = this.stunnedThisTurn();
-										$state = 4;
-										$t8.continueWith($sm);
+										$t11 = this.stunnedThisTurn();
+										$state = 6;
+										$t11.continueWith($sm);
 										return;
 									}
 									else {
 										$Forays_Actor.get_b().add('There is ' + this.tileInDirection(dir).get_a_name() + ' in the way. ', []);
 										this.q0();
-										$state = -1;
-										break $sm1;
+										$state = 1;
+										continue $sm1;
 									}
 								}
 								else {
 									this.q0();
-									$state = -1;
-									break $sm1;
+									$state = 1;
+									continue $sm1;
 								}
 							}
-							case 1: {
+							case 2: {
 								$state = -1;
 								$t1.getResult();
-								$state = -1;
-								break $sm1;
+								$state = 1;
+								continue $sm1;
 							}
 							case 3: {
 								$state = -1;
-								$t6.getResult();
-								$state = 2;
+								if (true !== $t2.getResult()) {
+									this.q0();
+								}
+								$state = 1;
 								continue $sm1;
 							}
-							case 2: {
+							case 5: {
+								$state = -1;
+								$t7.getResult();
+								$state = 4;
+								continue $sm1;
+							}
+							case 4: {
 								$state = -1;
 								if (this.tileInDirection(dir).is$1(35) && !this.hasAttr(10)) {
 									this.interrupt();
 									$Forays_Actor.get_b().displayNow$1('Jump into the chasm?(y/n): ');
 									$Forays_Game.console.cursorVisible = true;
 									done = false;
-									while (!done) {
-										switch ($Forays_Game.console.readKey(true).getResult().keyChar) {
-											case 121:
-											case 89: {
-												done = true;
-												break;
-											}
-											default: {
-												this.q0();
-												return;
-											}
-										}
-									}
+									$state = 8;
+									continue $sm1;
 								}
+								$state = 7;
+								continue $sm1;
+							}
+							case 6: {
+								$state = -1;
+								if ($t11.getResult()) {
+									return true;
+								}
+								this.tileInDirection(dir).toggle(this);
+								this.q1();
+								$state = 1;
+								continue $sm1;
+							}
+							case 1: {
+								$state = -1;
+								$tcs.setResult(false);
+								return;
+							}
+							case 8: {
+								$state = -1;
+								if (!!done) {
+									$state = 7;
+									continue $sm1;
+								}
+								$t8 = $Forays_Game.console.readKey(true);
+								$state = 9;
+								$t8.continueWith($sm);
+								return;
+							}
+							case 7: {
+								$state = -1;
 								if (ss.isValue(this.tileInDirection(dir).get_inv())) {
 									$Forays_Actor.get_b().add('You see ' + this.tileInDirection(dir).get_inv().aName() + '. ', []);
 								}
-								this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
+								$t9 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
+								$state = 10;
+								$t9.continueWith($sm);
+								return;
+							}
+							case 9: {
+								$state = -1;
+								switch ($t8.getResult().keyChar) {
+									case 121:
+									case 89: {
+										done = true;
+										break;
+									}
+									default: {
+										this.q0();
+										return true;
+									}
+								}
+								$state = 8;
+								continue $sm1;
+							}
+							case 10: {
+								$state = -1;
+								$t9.getResult();
 								this.QS();
 								if (!$Forays_Help.displayed.get_item(5) && !this.hasAttr(29) && !this.hasAttr(31) && !this.hasAttr(32) && this.get_curhp() % 10 > 0 && this.get_curhp() % 10 <= 5 && !$Forays_Extensions.any($Forays_Actor).call(null, $Forays_PhysicalObject.get_m().allActors(), Function.mkdel(this, function(a1) {
 									return !ss.referenceEquals(a1, this) && this.canSee(a1);
 								})) && !$Forays_Extensions.any($Forays_Tile).call(null, this.tilesWithinDistance(1), function(t) {
 									return t.is(9) || t.is(10) || t.is(0) || t.is(6) || t.is(3) || t.is$1(29);
 								})) {
-									$t7 = $Forays_Help.tutorialTip(5);
-									$state = 5;
-									$t7.continueWith($sm);
+									$t10 = $Forays_Help.tutorialTip(5);
+									$state = 11;
+									$t10.continueWith($sm);
 									return;
 								}
-								$state = -1;
-								break $sm1;
+								$state = 1;
+								continue $sm1;
 							}
-							case 4: {
+							case 11: {
 								$state = -1;
-								if ($t8.getResult()) {
-									return;
-								}
-								this.tileInDirection(dir).toggle(this);
-								this.q1();
-								$state = -1;
-								break $sm1;
-							}
-							case 5: {
-								$state = -1;
-								$t7.getResult();
+								$t10.getResult();
 								//not poisoned or on fire, can recover at least 5hp, can't see any enemies, and isn't adjacent to hazardous terrain
 								this.interrupt();
-								$state = -1;
-								break $sm1;
+								$state = 1;
+								continue $sm1;
 							}
 							default: {
 								break $sm1;
 							}
 						}
 					}
-					$tcs.setResult(null);
 				}
-				catch ($t9) {
-					$tcs.setException(ss.Exception.wrap($t9));
+				catch ($t12) {
+					$tcs.setException(ss.Exception.wrap($t12));
 				}
 			});
 			$sm();
@@ -7884,7 +8042,7 @@
 			return $tcs.task;
 		},
 		activeAI: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t228, idx, $t1, $t3, $t4, brightest, current_brightest, $t5, $t6, t, pos_radius, pos_obj, $t7, o, $t8, open, $t10, $t11, t1, $t12, $t13, dir, $t14, $t15, $t16, $t17, dir1, $t18, $t19, $t20, cooldown, $t22, $t23, $t24, cooldown1, $t26, $t27, $t28, openspaces, $t29, $t30, t3, $t31, t4, $t32, newtile, $t33, $t34, $t35, invocation, $t36, $t37, a, $t38, $t39, $t229, $t40, $t41, $t43, $t44, $t46, $t47, $t48, $t49, $t50, $t60, $t61, $t62, $t63, $t64, $t65, $t67, $t68, i, a3, targets, done, $t82, $t84, $t85, action, $t86, tilelist, dir2, t5, $t87, $t88, $t89, target_r, target_c, $t90, $t91, line, next, found1, $t92, t7, $t94, $t93, $t102, $t103, target_pos, $t104, $t108, area, $t109, $t110, t9, current, num, i6, tries, open1, $t111, $t112, t10, possible, $t113, $t114, dir3, cw, a5, $t115, a6, $t118, $t121, $t122, $t123, tiles, $t124, $t125, t11, $t126, $t127, t12, i7, t13, $t128, $t129, count, walls, $t130, $t131, t14, $t132, $t133, t15, $t134, $t135, $t136, thrall, safe, $t138, $t139, closest, dist, $t141, $t142, t18, in_line, $t143, t19, tile, $t144, $t145, t21, safe1, $t146, $t147, safe2, $t148, $t149, $t150, tiles1, $t152, $t153, tile1, t29, $t154, $t156, $t157, $t158, $t162, $t163, $t164, $t165, $t166, $t168, $t230, $t169, $t170, $t172, $t173, $t175, $t176, $t177, i8, rr, rc, $t178, $t179, $t184, $t185, $t186, $t187, $t188, $t198, line1, $t199, target_r1, target_c1, $t200, summon, tiles2, $t205, $t206, tile2, $t207, $t208, tile3, t31, $t209, blast, $t231, $t210, $t212, $t213, $t214, $t216, $t217, $t218, $t219, t32, $t220, $t221, t33, cooldown2, $t222, $t223, $t224, $t225, $t226, $t227, $t2, $t9, $t21, $t25, $t42, $t45, a1, $t51, $t52, $t66, a2, $t69, $t70, actor, $t83, i1, a4, b, valid_tiles, i2, j, tilelist1, found, distance, i3, j1, t6, item, $t95, $t96, t8, e, $t97, $t98, e2, $t99, $t100, first_bite, $t105, $t107, $t116, $t119, $t137, $t140, $t151, $t155, valid_dirs, $t159, $t160, t30, $t161, $t167, $t171, $t174, a7, $t180, $t181, a8, $t189, $t190, rowchange, colchange, $t201, $t211, $t215, valid_spells, close_spells, ranged_spells, $t232, $t53, $t54, $t56, $t58, $t59, $t233, $t71, $t72, $t74, $t76, $t78, $t80, $t101, $t106, $t117, $t120, $t182, $t183, wall, wall_distance_to_center, center, i9, valid_spells1, ranged_spells1, $t234, $t191, $t192, $t194, $t196, $t197, $t202, $t203, $t204, $t55, $t57, $t73, $t75, $t77, $t79, $t81, $t193, $t195;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t263, idx, $t1, $t3, $t4, brightest, current_brightest, $t5, $t6, t, pos_radius, pos_obj, $t7, o, $t8, open, $t10, $t11, t1, $t12, $t13, dir, $t14, $t15, $t16, $t17, dir1, $t18, $t19, $t20, $t21, cooldown, $t23, $t24, $t25, cooldown1, $t27, $t28, $t29, openspaces, $t30, $t31, t3, $t32, t4, $t33, newtile, $t34, $t36, $t37, invocation, $t38, $t39, a, $t40, $t41, $t264, $t42, $t43, $t45, $t46, $t48, $t49, $t50, $t51, $t52, $t67, $t68, $t69, $t70, $t71, $t72, $t74, $t75, i, a3, targets, done, $t101, $t103, $t104, action, $t105, tilelist, dir2, t5, $t106, $t110, $t111, target_r, target_c, $t112, $t113, line, next, found1, $t114, t7, $t116, $t115, $t125, $t126, target_pos, $t127, $t131, area, $t132, $t133, t9, current, num, i6, tries, open1, $t134, $t135, t10, possible, $t136, $t137, dir3, cw, $t138, a6, $t142, $t145, $t146, $t147, tiles, $t148, $t149, t11, $t150, $t151, t12, i7, t13, $t152, $t153, count, walls, $t154, $t155, t14, $t156, $t157, t15, $t158, $t159, $t160, thrall, $t162, safe, $t163, $t164, closest, dist, $t166, $t167, t18, in_line, $t168, t19, tile, $t169, safe1, $t172, $t173, safe2, $t174, $t175, $t176, tiles1, $t178, $t179, tile1, t29, $t180, $t182, $t183, $t184, $t188, $t189, $t190, $t191, $t192, $t194, $t265, $t195, $t196, $t198, $t199, $t201, $t202, $t203, i8, $t205, $t206, $t212, $t213, $t214, $t215, $t216, $t233, line1, $t234, target_r1, target_c1, $t235, summon, tiles2, $t240, $t241, tile2, $t242, $t243, tile3, t31, $t244, blast, $t266, $t245, $t247, $t248, $t249, $t251, $t252, $t253, $t254, t32, $t255, $t256, t33, cooldown2, $t257, $t258, $t259, $t260, $t261, $t262, $t2, $t9, $t22, $t26, $t35, $t44, $t47, a1, $t53, $t54, $t73, a2, $t76, $t77, actor, $t102, $t107, i1, valid_tiles, i2, j, tilelist1, found, distance, i3, j1, t6, $t109, item, $t117, $t118, t8, e, $t119, $t120, e2, $t121, $t122, $t123, first_bite, $t128, $t130, a5, $t139, $t143, $t161, $t165, $t170, $t171, t21, $t177, $t181, valid_dirs, $t185, $t186, t30, $t187, $t193, $t197, $t200, rr, rc, $t204, a7, $t207, $t208, a8, $t217, $t218, rowchange, colchange, $t236, $t246, $t250, valid_spells, close_spells, ranged_spells, $t267, $t55, $t56, $t58, $t61, $t62, $t64, $t65, $t66, $t268, $t78, $t79, $t80, $t81, $t82, $t83, $t84, $t86, $t87, $t90, $t91, $t94, $t95, $t98, a4, b, $t108, $t124, $t129, $t140, $t144, $t209, $t210, $t211, wall, wall_distance_to_center, center, i9, $t219, $t237, $t238, $t239, $t57, $t59, $t60, $t63, $t85, $t88, $t92, $t96, $t99, $t141, valid_spells1, ranged_spells1, $t269, $t220, $t221, $t223, $t230, $t231, $t232, $t89, $t93, $t97, $t100, $t222, $t224, $t227, $t228, $t225, $t226, $t229;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -7895,8 +8053,8 @@
 								if (this.path.length > 0) {
 									this.path.clear();
 								}
-								$t228 = this.get_type();
-								if ($t228 === 4 || $t228 === 62) {
+								$t263 = this.get_type();
+								if ($t263 === 4 || $t263 === 62) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										idx = $Forays_Global.roll$1(1, 2) - 1;
 										$t1 = this.attack(idx, this.get_target());
@@ -7917,7 +8075,7 @@
 										return;
 									}
 								}
-								else if ($t228 === 7) {
+								else if ($t263 === 7) {
 									brightest = null;
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite() && !$Forays_PhysicalObject.get_m().get_wiz_dark()) {
 										current_brightest = [];
@@ -8038,7 +8196,7 @@
 										}
 									}
 								}
-								else if ($t228 === 8 || $t228 === 63) {
+								else if ($t263 === 8 || $t263 === 63) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										$t16 = this.attack(0, this.get_target());
 										$state = 13;
@@ -8052,53 +8210,59 @@
 										return;
 									}
 								}
-								else if ($t228 === 9) {
+								else if ($t263 === 9) {
 									if (this.hasAttr(69)) {
 										dir1 = $Forays_Global.randomDirection();
 										if (!this.tileInDirection(dir1).get_passable()) {
 											$Forays_Actor.get_b().add(this.you('stagger') + ' into ' + this.tileInDirection(dir1).get_the_name() + '. ', [this]);
+											$state = 16;
+											continue $sm1;
 										}
 										else if (ss.isValue(this.actorInDirection(dir1))) {
 											$Forays_Actor.get_b().add(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir1).theVisible() + '. ', [this, this.actorInDirection(dir1)]);
+											$state = 16;
+											continue $sm1;
 										}
 										else if (this.grabPreventsMovement(this.tileInDirection(dir1))) {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' staggers and almost falls over. ', [this]);
+											$state = 16;
+											continue $sm1;
 										}
 										else {
 											$Forays_Actor.get_b().add(this.you('stagger') + '. ', [this]);
-											this.move(this.tileInDirection(dir1).get_row(), this.tileInDirection(dir1).get_col());
+											$t18 = this.move(this.tileInDirection(dir1).get_row(), this.tileInDirection(dir1).get_col());
+											$state = 17;
+											$t18.continueWith($sm);
+											return;
 										}
-										this.QS();
-										$state = 15;
-										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t18 = this.attack(0, this.get_target());
-										$state = 16;
-										$t18.continueWith($sm);
-										return;
-									}
-									else {
-										$t19 = this.aI_Step(this.get_target());
-										$state = 17;
+										$t19 = this.attack(0, this.get_target());
+										$state = 18;
 										$t19.continueWith($sm);
 										return;
 									}
-								}
-								else if ($t228 === 10 || $t228 === 54) {
-									if (this.distanceFrom(this.get_target()) === 1) {
-										$t20 = this.attack(0, this.get_target());
+									else {
+										$t20 = this.aI_Step(this.get_target());
 										$state = 19;
 										$t20.continueWith($sm);
 										return;
 									}
+								}
+								else if ($t263 === 10 || $t263 === 54) {
+									if (this.distanceFrom(this.get_target()) === 1) {
+										$t21 = this.attack(0, this.get_target());
+										$state = 21;
+										$t21.continueWith($sm);
+										return;
+									}
 									else {
 										this.QS();
-										$state = 18;
+										$state = 20;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 11) {
+								else if ($t263 === 11) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										if (!this.hasAttr(70)) {
 											//burst attack cooldown
@@ -8106,21 +8270,21 @@
 											cooldown = 100 * ($Forays_Global.roll$1(1, 3) + 8);
 											$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, cooldown, 70));
 											this.animateExplosion(this, 1, 17, '*');
-											$t22 = this.attack(2, this.get_target());
-											$state = 21;
-											$t22.continueWith($sm);
-											return;
-										}
-										else if ($Forays_Global.coinFlip()) {
-											$t23 = this.attack(0, this.get_target());
-											$state = 22;
+											$t23 = this.attack(2, this.get_target());
+											$state = 23;
 											$t23.continueWith($sm);
 											return;
 										}
-										else {
-											$t24 = this.aI_Step$1(this.get_target(), true);
-											$state = 23;
+										else if ($Forays_Global.coinFlip()) {
+											$t24 = this.attack(0, this.get_target());
+											$state = 24;
 											$t24.continueWith($sm);
+											return;
+										}
+										else {
+											$t25 = this.aI_Step$1(this.get_target(), true);
+											$state = 25;
+											$t25.continueWith($sm);
 											return;
 										}
 									}
@@ -8132,42 +8296,42 @@
 											$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, cooldown1, 69));
 										}
 										this.animateBoltProjectile(this.get_target(), 17);
-										$t26 = this.attack(1, this.get_target());
-										$state = 24;
-										$t26.continueWith($sm);
-										return;
-									}
-									else if (!this.hasAttr(70)) {
-										$t27 = this.aI_Step(this.get_target());
+										$t27 = this.attack(1, this.get_target());
 										$state = 26;
 										$t27.continueWith($sm);
 										return;
 									}
-									else {
-										$t28 = this.aI_Sidestep(this.get_target());
-										$state = 27;
+									else if (!this.hasAttr(70)) {
+										$t28 = this.aI_Step(this.get_target());
+										$state = 28;
 										$t28.continueWith($sm);
 										return;
 									}
+									else {
+										$t29 = this.aI_Sidestep(this.get_target());
+										$state = 29;
+										$t29.continueWith($sm);
+										return;
+									}
 								}
-								else if ($t228 === 12) {
+								else if ($t263 === 12) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										if (this.get_curhp() <= 18 && !this.hasAttr(69)) {
 											this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 											openspaces = [];
-											$t29 = this.get_target().tilesAtDistance(1);
-											for ($t30 = 0; $t30 < $t29.length; $t30++) {
-												t3 = $t29[$t30];
+											$t30 = this.get_target().tilesAtDistance(1);
+											for ($t31 = 0; $t31 < $t30.length; $t31++) {
+												t3 = $t30[$t31];
 												if (t3.get_passable() && ss.isNullOrUndefined(t3.actor())) {
 													openspaces.add(t3);
 												}
 											}
-											for ($t31 = 0; $t31 < openspaces.length; $t31++) {
-												t4 = openspaces[$t31];
+											for ($t32 = 0; $t32 < openspaces.length; $t32++) {
+												t4 = openspaces[$t32];
 												if (ss.isNullOrUndefined(this.group)) {
-													$t32 = [];
-													$t32.add(this);
-													this.group = $t32;
+													$t33 = [];
+													$t33.add(this);
+													this.group = $t33;
 												}
 												$Forays_Actor.create$1(53, t4.get_row(), t4.get_col(), true, true);
 												t4.actor().player_visibility_duration = -1;
@@ -8178,36 +8342,29 @@
 											openspaces.add(this.tile());
 											newtile = openspaces[$Forays_Global.roll(openspaces.length) - 1];
 											if (!ss.referenceEquals(newtile, this.tile())) {
-												this.move$1(newtile.get_row(), newtile.get_col(), false);
-											}
-											if (openspaces.length > 1) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' is suddenly standing all around ' + this.get_target().get_the_name() + '. ', []);
-												this.q1();
-												$state = 28;
-												continue $sm1;
-											}
-											else {
-												$t33 = this.attack(0, this.get_target());
-												$state = 29;
-												$t33.continueWith($sm);
+												$t34 = this.move$1(newtile.get_row(), newtile.get_col(), false);
+												$state = 32;
+												$t34.continueWith($sm);
 												return;
 											}
+											$state = 31;
+											continue $sm1;
 										}
 										else {
-											$t34 = this.attack(0, this.get_target());
-											$state = 30;
-											$t34.continueWith($sm);
+											$t36 = this.attack(0, this.get_target());
+											$state = 33;
+											$t36.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t35 = this.aI_Step(this.get_target());
-										$state = 31;
-										$t35.continueWith($sm);
+										$t37 = this.aI_Step(this.get_target());
+										$state = 34;
+										$t37.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 13) {
+								else if ($t263 === 13) {
 									if (this.get_curhp() <= 10 && !this.hasAttr(69)) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										switch ($Forays_Global.roll(4)) {
@@ -8243,9 +8400,9 @@
 											this.updateRadius(this.lightRadius(), 2);
 										}
 										this.attrs.set_item(31, Math.max(this.attrs.get_item(31), 2));
-										$t36 = this.actorsAtDistance(1);
-										for ($t37 = 0; $t37 < $t36.length; $t37++) {
-											a = $t36[$t37];
+										$t38 = this.actorsAtDistance(1);
+										for ($t39 = 0; $t39 < $t38.length; $t39++) {
+											a = $t38[$t39];
 											if (!a.hasAttr(61) && !a.hasAttr(64) && !a.hasAttr(31) && !a.hasAttr(32) && !a.hasAttr(33)) {
 												if (a.get_name() === 'you') {
 													$Forays_Actor.get_b().add('You start to catch fire! ', []);
@@ -8257,82 +8414,82 @@
 											}
 										}
 										this.q1();
-										$state = 32;
+										$state = 35;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t38 = this.attack(0, this.get_target());
-										$state = 33;
-										$t38.continueWith($sm);
+										$t40 = this.attack(0, this.get_target());
+										$state = 36;
+										$t40.continueWith($sm);
 										return;
 									}
 									else {
-										$t39 = this.aI_Step(this.get_target());
-										$state = 34;
-										$t39.continueWith($sm);
+										$t41 = this.aI_Step(this.get_target());
+										$state = 37;
+										$t41.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 14 || $t228 === 64) {
-									$t229 = this.distanceFrom(this.get_target());
-									if ($t229 === 1) {
+								else if ($t263 === 14 || $t263 === 64) {
+									$t264 = this.distanceFrom(this.get_target());
+									if ($t264 === 1) {
 										if (this.get_target().enemiesAdjacent() > 1) {
-											$t40 = this.attack(0, this.get_target());
-											$state = 37;
-											$t40.continueWith($sm);
+											$t42 = this.attack(0, this.get_target());
+											$state = 40;
+											$t42.continueWith($sm);
 											return;
 										}
 										else {
-											$t41 = this.aI_Step$1(this.get_target(), true);
-											$state = 38;
-											$t41.continueWith($sm);
-											return;
-										}
-									}
-									else if ($t229 === 2) {
-										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-											$t43 = this.fireArrow(this.get_target());
-											$state = 40;
+											$t43 = this.aI_Step$1(this.get_target(), true);
+											$state = 41;
 											$t43.continueWith($sm);
 											return;
 										}
-										else {
-											$t44 = this.aI_Step$1(this.get_target(), true);
-											$state = 41;
-											$t44.continueWith($sm);
+									}
+									else if ($t264 === 2) {
+										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+											$t45 = this.fireArrow(this.get_target());
+											$state = 43;
+											$t45.continueWith($sm);
 											return;
 										}
-									}
-									else if ($t229 === 3 || $t229 === 4 || $t229 === 5 || $t229 === 6 || $t229 === 7 || $t229 === 8) {
-										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-											$t46 = this.fireArrow(this.get_target());
-											$state = 43;
+										else {
+											$t46 = this.aI_Step$1(this.get_target(), true);
+											$state = 44;
 											$t46.continueWith($sm);
 											return;
 										}
+									}
+									else if ($t264 === 3 || $t264 === 4 || $t264 === 5 || $t264 === 6 || $t264 === 7 || $t264 === 8) {
+										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+											$t48 = this.fireArrow(this.get_target());
+											$state = 46;
+											$t48.continueWith($sm);
+											return;
+										}
 										else {
-											$t47 = this.aI_Sidestep(this.get_target());
-											$state = 44;
-											$t47.continueWith($sm);
+											$t49 = this.aI_Sidestep(this.get_target());
+											$state = 47;
+											$t49.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t48 = this.aI_Step(this.get_target());
-										$state = 45;
-										$t48.continueWith($sm);
+										$t50 = this.aI_Step(this.get_target());
+										$state = 48;
+										$t50.continueWith($sm);
 										return;
 									}
-									$state = 35;
+									$state = 38;
 									continue $sm1;
 								}
-								else if ($t228 === 15) {
-									$t49 = this.actorsWithinDistance(2);
-									$t50 = 0;
-									$state = 46;
+								else if ($t263 === 15) {
+									$t51 = this.actorsWithinDistance(2);
+									$t52 = 0;
+									$state = 49;
 									continue $sm1;
 								}
-								else if ($t228 === 17) {
+								else if ($t263 === 17) {
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 3) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										this.animateProjectile(this.get_target(), 13, '%');
@@ -8343,50 +8500,50 @@
 											$Forays_Actor.get_b().add('A bola whirls toward ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
 										}
 										this.attrs.set_item(77, -1);
-										$t60 = this.get_target().attrs;
-										$t60.set_item(35, $t60.get_item(35) + 1);
-										$t61 = this.get_target();
-										$t61.set_speed($t61.get_speed() + 100);
+										$t67 = this.get_target().attrs;
+										$t67.set_item(35, $t67.get_item(35) + 1);
+										$t68 = this.get_target();
+										$t68.set_speed($t68.get_speed() + 100);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this.get_target(), ($Forays_Global.roll(3) + 5) * 100, 35, this.get_target().youAre() + ' no longer slowed. ', [this.get_target()]));
 										$Forays_Actor.get_b().add(this.get_target().youAre() + ' slowed by the bola. ', [this.get_target()]);
 										this.q1();
-										$state = 47;
+										$state = 50;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t62 = this.attack(0, this.get_target());
-										$state = 48;
-										$t62.continueWith($sm);
-										return;
-									}
-									else {
-										$t63 = this.aI_Step(this.get_target());
-										$state = 49;
-										$t63.continueWith($sm);
-										return;
-									}
-								}
-								else if ($t228 === 18 || $t228 === 57) {
-									if (this.distanceFrom(this.get_target()) === 1) {
-										$t64 = this.attack(1, this.get_target());
+										$t69 = this.attack(0, this.get_target());
 										$state = 51;
-										$t64.continueWith($sm);
+										$t69.continueWith($sm);
 										return;
 									}
 									else {
-										$t65 = this.aI_Step(this.get_target());
+										$t70 = this.aI_Step(this.get_target());
 										$state = 52;
-										$t65.continueWith($sm);
+										$t70.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 20) {
-									$t67 = this.actorsWithinDistance(2);
-									$t68 = 0;
-									$state = 53;
+								else if ($t263 === 18 || $t263 === 57) {
+									if (this.distanceFrom(this.get_target()) === 1) {
+										$t71 = this.attack(1, this.get_target());
+										$state = 54;
+										$t71.continueWith($sm);
+										return;
+									}
+									else {
+										$t72 = this.aI_Step(this.get_target());
+										$state = 55;
+										$t72.continueWith($sm);
+										return;
+									}
+								}
+								else if ($t263 === 20) {
+									$t74 = this.actorsWithinDistance(2);
+									$t75 = 0;
+									$state = 56;
 									continue $sm1;
 								}
-								else if ($t228 === 22) {
+								else if ($t263 === 22) {
 									if (!this.hasAttr(69)) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, ($Forays_Global.roll(5) + 5) * 100, 69));
@@ -8415,42 +8572,42 @@
 												return;
 											}
 										}
-										$t82 = 0;
-										$state = 55;
+										$t101 = 0;
+										$state = 58;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t84 = this.attack(0, this.get_target());
-										$state = 56;
-										$t84.continueWith($sm);
+										$t103 = this.attack(0, this.get_target());
+										$state = 59;
+										$t103.continueWith($sm);
 										return;
 									}
 									else {
-										$t85 = this.aI_Step(this.get_target());
-										$state = 57;
-										$t85.continueWith($sm);
+										$t104 = this.aI_Step(this.get_target());
+										$state = 60;
+										$t104.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 24) {
+								else if ($t263 === 24) {
 									action = 0;
 									if (this.distanceFrom(this.get_target()) === 1) {
 										if ($Forays_Global.coinFlip()) {
 											action = 2;
 											//disappear
-											$state = 58;
+											$state = 61;
 											continue $sm1;
 										}
 										else if ($Forays_Global.coinFlip()) {
-											$t86 = this.attack(0, this.get_target());
-											$state = 59;
-											$t86.continueWith($sm);
+											$t105 = this.attack(0, this.get_target());
+											$state = 62;
+											$t105.continueWith($sm);
 											return;
 										}
 										else {
 											action = 1;
 											//blink
-											$state = 58;
+											$state = 61;
 											continue $sm1;
 										}
 									}
@@ -8466,16 +8623,15 @@
 										}
 										if (tilelist.length > 0) {
 											t5 = tilelist[$Forays_Global.roll$1(1, tilelist.length) - 1];
-											this.move(t5.get_row(), t5.get_col());
-											$t87 = this.attack(0, this.get_target());
-											$state = 60;
-											$t87.continueWith($sm);
+											$t106 = this.move(t5.get_row(), t5.get_col());
+											$state = 63;
+											$t106.continueWith($sm);
 											return;
 										}
 										else {
 											action = 2;
 											//disappear
-											$state = 58;
+											$state = 61;
 											continue $sm1;
 										}
 									}
@@ -8488,38 +8644,38 @@
 											action = 2;
 											//disappear
 										}
-										$state = 58;
+										$state = 61;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 25) {
+								else if ($t263 === 25) {
 									if (this.distanceFrom(this.get_target()) === 1) {
-										$t88 = this.attack($Forays_Global.roll(3) - 1, this.get_target());
-										$state = 62;
-										$t88.continueWith($sm);
+										$t110 = this.attack($Forays_Global.roll(3) - 1, this.get_target());
+										$state = 65;
+										$t110.continueWith($sm);
 										return;
 									}
 									else {
-										$t89 = this.aI_Step(this.get_target());
-										$state = 63;
-										$t89.continueWith($sm);
+										$t111 = this.aI_Step(this.get_target());
+										$state = 66;
+										$t111.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 26) {
+								else if ($t263 === 26) {
 									if (this.get_inv().length === 0) {
 										if (this.distanceFrom(this.get_target()) === 1) {
 											target_r = this.get_target().get_row();
 											target_c = this.get_target().get_col();
-											$t90 = this.attack(0, this.get_target());
-											$state = 65;
-											$t90.continueWith($sm);
+											$t112 = this.attack(0, this.get_target());
+											$state = 68;
+											$t112.continueWith($sm);
 											return;
 										}
 										else {
-											$t91 = this.aI_Step(this.get_target());
-											$state = 66;
-											$t91.continueWith($sm);
+											$t113 = this.aI_Step(this.get_target());
+											$state = 69;
+											$t113.continueWith($sm);
 											return;
 										}
 									}
@@ -8527,8 +8683,8 @@
 										line = this.get_target().getBestExtendedLineOfEffect(this);
 										next = null;
 										found1 = false;
-										for ($t92 = 0; $t92 < line.length; $t92++) {
-											t7 = line[$t92];
+										for ($t114 = 0; $t114 < line.length; $t114++) {
+											t7 = line[$t114];
 											if (found1) {
 												next = t7;
 												break;
@@ -8538,21 +8694,21 @@
 											}
 										}
 										if (ss.isValue(next)) {
-											$t94 = next.get_passable() && ss.isNullOrUndefined(next.actor());
-											if ($t94) {
-												$t93 = this.aI_Step(next);
-												$state = 68;
-												$t93.continueWith($sm);
+											$t116 = next.get_passable() && ss.isNullOrUndefined(next.actor());
+											if ($t116) {
+												$t115 = this.aI_Step(next);
+												$state = 71;
+												$t115.continueWith($sm);
 												return;
 											}
-											$state = 67;
+											$state = 70;
 											continue $sm1;
 										}
-										$state = 64;
+										$state = 67;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 27) {
+								else if ($t263 === 27) {
 									if (this.get_curhp() < this.get_maxhp() && !this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
 										$Forays_Actor.get_b().add(this.get_the_name() + ' curses you! ', []);
 										switch ($Forays_Global.roll(4)) {
@@ -8579,44 +8735,44 @@
 										}
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										this.q1();
-										$state = 69;
+										$state = 72;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t102 = this.attack(0, this.get_target());
-										$state = 70;
-										$t102.continueWith($sm);
+										$t125 = this.attack(0, this.get_target());
+										$state = 73;
+										$t125.continueWith($sm);
 										return;
 									}
 									else {
-										$t103 = this.aI_Step(this.get_target());
-										$state = 71;
-										$t103.continueWith($sm);
+										$t126 = this.aI_Step(this.get_target());
+										$state = 74;
+										$t126.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 28) {
+								else if ($t263 === 28) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										target_pos = this.get_target().p;
-										$t104 = this.attack(0, this.get_target());
-										$state = 73;
-										$t104.continueWith($sm);
+										$t127 = this.attack(0, this.get_target());
+										$state = 76;
+										$t127.continueWith($sm);
 										return;
 									}
 									else {
-										$t108 = this.aI_Step(this.get_target());
-										$state = 74;
-										$t108.continueWith($sm);
+										$t131 = this.aI_Step(this.get_target());
+										$state = 77;
+										$t131.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 29) {
+								else if ($t263 === 29) {
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
 										$Forays_Actor.get_b().add(this.theVisible() + ' breathes poisonous gas. ', []);
 										area = [];
-										$t109 = this.get_target().tilesWithinDistance(1);
-										for ($t110 = 0; $t110 < $t109.length; $t110++) {
-											t9 = $t109[$t110];
+										$t132 = this.get_target().tilesWithinDistance(1);
+										for ($t133 = 0; $t133 < $t132.length; $t133++) {
+											t9 = $t132[$t133];
 											if (t9.get_passable() && this.get_target().hasLOE(t9) && !t9.is(6)) {
 												t9.features.add(6);
 												area.add(t9);
@@ -8633,9 +8789,9 @@
 											else {
 												for (tries = 0; tries < 50; ++tries) {
 													open1 = [];
-													$t111 = current.tilesAtDistance(1);
-													for ($t112 = 0; $t112 < $t111.length; $t112++) {
-														t10 = $t111[$t112];
+													$t134 = current.tilesAtDistance(1);
+													for ($t135 = 0; $t135 < $t134.length; $t135++) {
+														t10 = $t134[$t135];
 														if (t10.get_passable()) {
 															open1.add(t10);
 														}
@@ -8660,79 +8816,72 @@
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor6(area, 600, 16));
 										this.gainAttr(69, ($Forays_Global.roll(6) + 18) * 100);
 										this.q1();
-										$state = 75;
+										$state = 78;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t113 = this.attack(0, this.get_target());
-										$state = 76;
-										$t113.continueWith($sm);
+										$t136 = this.attack(0, this.get_target());
+										$state = 79;
+										$t136.continueWith($sm);
 										return;
 									}
 									else {
-										$t114 = this.aI_Step(this.get_target());
-										$state = 77;
-										$t114.continueWith($sm);
+										$t137 = this.aI_Step(this.get_target());
+										$state = 80;
+										$t137.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 30) {
+								else if ($t263 === 30) {
 									if (this.hasAttr(70)) {
 										dir3 = this.attrs.get_item(70);
 										cw = $Forays_Global.coinFlip();
 										if (this.tileInDirection(dir3).get_passable() && ss.isNullOrUndefined(this.actorInDirection(dir3)) && !this.grabPreventsMovement(this.tileInDirection(dir3))) {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' leaps forward swinging his axe! ', [this]);
-											this.move(this.tileInDirection(dir3).get_row(), this.tileInDirection(dir3).get_col());
-											a5 = this.actorInDirection(this.rotateDirection(dir3, cw));
-											if (ss.isValue(a5)) {
-												$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
-												$t115 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-												$state = 80;
-												$t115.continueWith($sm);
-												return;
-											}
-											$state = 79;
-											continue $sm1;
+											$t138 = this.move(this.tileInDirection(dir3).get_row(), this.tileInDirection(dir3).get_col());
+											$state = 82;
+											$t138.continueWith($sm);
+											return;
 										}
 										else if (ss.isValue(this.actorInDirection(dir3)) || this.grabPreventsMovement(this.tileInDirection(dir3))) {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' swings his axe furiously! ', [this]);
 											a6 = this.actorInDirection(this.rotateDirection(dir3, cw));
 											if (ss.isValue(a6)) {
 												$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
-												$t118 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-												$state = 82;
-												$t118.continueWith($sm);
+												$t142 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+												$state = 84;
+												$t142.continueWith($sm);
 												return;
 											}
-											$state = 81;
+											$state = 83;
 											continue $sm1;
 										}
 										else {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' turns to face ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
 											this.attrs.set_item(70, this.directionOf(this.get_target()));
 											this.q1();
-											$state = 78;
+											$state = 81;
 											continue $sm1;
 										}
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t121 = this.attack(0, this.get_target());
-										$state = 83;
-										$t121.continueWith($sm);
+										$t145 = this.attack(0, this.get_target());
+										$state = 85;
+										$t145.continueWith($sm);
 										return;
 									}
 									else {
-										$t122 = this.aI_Step(this.get_target());
-										$state = 84;
-										$t122.continueWith($sm);
+										$t146 = this.aI_Step(this.get_target());
+										$state = 86;
+										$t146.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 32) {
+								else if ($t263 === 32) {
 									if (this.distanceFrom(this.get_target()) === 1) {
-										$t123 = this.attack(0, this.get_target());
-										$state = 86;
-										$t123.continueWith($sm);
+										$t147 = this.attack(0, this.get_target());
+										$state = 88;
+										$t147.continueWith($sm);
 										return;
 									}
 									else if (this.distanceFrom(this.get_target()) <= 12) {
@@ -8740,17 +8889,17 @@
 											this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 											$Forays_Actor.get_b().add(this.get_the_name() + ' gestures. ', [this]);
 											tiles = [];
-											$t124 = this.get_target().tilesWithinDistance(6);
-											for ($t125 = 0; $t125 < $t124.length; $t125++) {
-												t11 = $t124[$t125];
+											$t148 = this.get_target().tilesWithinDistance(6);
+											for ($t149 = 0; $t149 < $t148.length; $t149++) {
+												t11 = $t148[$t149];
 												if (t11.get_passable() && ss.isNullOrUndefined(t11.actor()) && this.distanceFrom(t11) >= this.distanceFrom(this.get_target()) && this.get_target().hasLOS(t11) && this.get_target().hasLOE(t11)) {
 													tiles.add(t11);
 												}
 											}
 											if (tiles.length === 0) {
-												$t126 = this.get_target().tilesWithinDistance(6);
-												for ($t127 = 0; $t127 < $t126.length; $t127++) {
-													t12 = $t126[$t127];
+												$t150 = this.get_target().tilesWithinDistance(6);
+												for ($t151 = 0; $t151 < $t150.length; $t151++) {
+													t12 = $t150[$t151];
 													//same, but with no distance requirement
 													if (t12.get_passable() && ss.isNullOrUndefined(t12.actor()) && this.get_target().hasLOS(t12) && this.get_target().hasLOE(t12)) {
 														tiles.add(t12);
@@ -8776,29 +8925,29 @@
 												}
 											}
 											this.q1();
-											$state = 85;
+											$state = 87;
 											continue $sm1;
 										}
 										else {
-											$t128 = this.aI_Step(this.get_target());
-											$state = 87;
-											$t128.continueWith($sm);
+											$t152 = this.aI_Step(this.get_target());
+											$state = 89;
+											$t152.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t129 = this.aI_Step(this.get_target());
-										$state = 88;
-										$t129.continueWith($sm);
+										$t153 = this.aI_Step(this.get_target());
+										$state = 90;
+										$t153.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 35) {
+								else if ($t263 === 35) {
 									count = 0;
 									walls = 0;
-									$t130 = this.get_target().tilesAtDistance(1);
-									for ($t131 = 0; $t131 < $t130.length; $t131++) {
-										t14 = $t130[$t131];
+									$t154 = this.get_target().tilesAtDistance(1);
+									for ($t155 = 0; $t155 < $t154.length; $t155++) {
+										t14 = $t154[$t155];
 										if (t14.get_type() === 0) {
 											++walls;
 											if (ss.isNullOrUndefined(t14.actor())) {
@@ -8807,9 +8956,9 @@
 										}
 									}
 									if (this.distanceFrom(this.get_target()) <= 12 && count >= 2 || count === 1 && walls === 1) {
-										$t132 = this.get_target().tilesAtDistance(1);
-										for ($t133 = 0; $t133 < $t132.length; $t133++) {
-											t15 = $t132[$t133];
+										$t156 = this.get_target().tilesAtDistance(1);
+										for ($t157 = 0; $t157 < $t156.length; $t157++) {
+											t15 = $t156[$t157];
 											if (t15.get_type() === 0 && ss.isNullOrUndefined(t15.actor())) {
 												$Forays_Actor.create$1(54, t15.get_row(), t15.get_col(), true, true);
 												$Forays_PhysicalObject.get_m().actor.get_item$1(t15.p).player_visibility_duration = -1;
@@ -8823,27 +8972,27 @@
 											$Forays_Actor.get_b().add('A mud tentacle emerges from the wall! ', []);
 										}
 										this.q1();
-										$state = 89;
+										$state = 91;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t134 = this.attack(0, this.get_target());
-										$state = 90;
-										$t134.continueWith($sm);
+										$t158 = this.attack(0, this.get_target());
+										$state = 92;
+										$t158.continueWith($sm);
 										return;
 									}
 									else {
-										$t135 = this.aI_Step(this.get_target());
-										$state = 91;
-										$t135.continueWith($sm);
+										$t159 = this.aI_Step(this.get_target());
+										$state = 93;
+										$t159.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 36) {
+								else if ($t263 === 36) {
 									if (ss.isNullOrUndefined(this.group)) {
-										$t136 = this.aI_Step$1(this.get_target(), true);
-										$state = 93;
-										$t136.continueWith($sm);
+										$t160 = this.aI_Step$1(this.get_target(), true);
+										$state = 95;
+										$t160.continueWith($sm);
 										return;
 									}
 									else {
@@ -8851,25 +9000,25 @@
 										if (this.canSee(thrall)) {
 											//cooldown 1 is teleport. cooldown 2 is shield.
 											if (this.distanceFrom(this.get_target()) < thrall.distanceFrom(this.get_target()) && this.distanceFrom(thrall) === 1) {
-												this.move(thrall.get_row(), thrall.get_col());
-												this.QS();
-												$state = 92;
-												continue $sm1;
+												$t162 = this.move(thrall.get_row(), thrall.get_col());
+												$state = 96;
+												$t162.continueWith($sm);
+												return;
 											}
 											else if (this.distanceFrom(this.get_target()) === 1 && this.get_curhp() < this.get_maxhp()) {
 												safe = $Forays_Extensions.where($Forays_Tile).call(null, this.tilesAtDistance(1), Function.mkdel(this, function(t16) {
 													return t16.get_passable() && ss.isNullOrUndefined(t16.actor()) && this.get_target().getBestExtendedLineOfEffect(thrall).contains(t16);
 												}));
 												if (this.distanceFrom(thrall) === 1 && safe.length > 0) {
-													$t138 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe));
-													$state = 94;
-													$t138.continueWith($sm);
+													$t163 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe));
+													$state = 97;
+													$t163.continueWith($sm);
 													return;
 												}
 												else {
-													$t139 = this.aI_Step$1(this.get_target(), true);
-													$state = 95;
-													$t139.continueWith($sm);
+													$t164 = this.aI_Step$1(this.get_target(), true);
+													$state = 98;
+													$t164.continueWith($sm);
 													return;
 												}
 											}
@@ -8879,11 +9028,11 @@
 												//the entrancer tries to be smart about placing the thrall in a position that blocks ranged attacks
 												closest = [];
 												dist = 99;
-												$t141 = $Forays_Extensions.where($Forays_Tile).call(null, thrall.tilesWithinDistance(2), function(x) {
+												$t166 = $Forays_Extensions.where($Forays_Tile).call(null, thrall.tilesWithinDistance(2), function(x) {
 													return x.get_passable() && (ss.isNullOrUndefined(x.actor()) || ss.referenceEquals(x.actor(), thrall));
 												});
-												for ($t142 = 0; $t142 < $t141.length; $t142++) {
-													t18 = $t141[$t142];
+												for ($t167 = 0; $t167 < $t166.length; $t167++) {
+													t18 = $t166[$t167];
 													if (t18.distanceFrom(this.get_target()) < dist) {
 														closest.clear();
 														closest.add(t18);
@@ -8894,8 +9043,8 @@
 													}
 												}
 												in_line = [];
-												for ($t143 = 0; $t143 < closest.length; $t143++) {
-													t19 = closest[$t143];
+												for ($t168 = 0; $t168 < closest.length; $t168++) {
+													t19 = closest[$t168];
 													if ($Forays_Extensions.any($Forays_Tile).call(null, this.get_target().getBestExtendedLineOfEffect(t19), Function.mkdel(this, function(x1) {
 														return ss.referenceEquals(x1.actor(), this);
 													}))) {
@@ -8913,17 +9062,10 @@
 													this.gainAttr(69, 400);
 													$Forays_Actor.get_b().add(this.theVisible() + ' teleports ' + thrall.theVisible() + '. ', [this, thrall]);
 													$Forays_PhysicalObject.get_m().draw();
-													thrall.move(tile.get_row(), tile.get_col());
-													$Forays_Actor.get_b().displayNow();
-													$Forays_Screen.animateStorm$1(tile.p, 1, 1, 4, thrall.get_symbol(), thrall.get_color());
-													$t144 = thrall.getBestLineOfEffect(tile);
-													for ($t145 = 0; $t145 < $t144.length; $t145++) {
-														t21 = $t144[$t145];
-														$Forays_Screen.animateStorm$1(t21.p, 1, 1, 4, thrall.get_symbol(), thrall.get_color());
-													}
-													this.q1();
-													$state = 92;
-													continue $sm1;
+													$t169 = thrall.move(tile.get_row(), tile.get_col());
+													$state = 99;
+													$t169.continueWith($sm);
+													return;
 												}
 												else {
 													safe1 = $Forays_Extensions.whereLeast($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, this.get_target().getBestExtendedLineOfEffect(thrall), Function.mkdel(this, function(t20) {
@@ -8934,17 +9076,17 @@
 													if ($Forays_Extensions.any($Forays_Tile).call(null, safe1, Function.mkdel(this, function(t23) {
 														return t23.distanceFrom(this.get_target()) > 2;
 													}))) {
-														$t146 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, safe1, Function.mkdel(this, function(t24) {
+														$t172 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, safe1, Function.mkdel(this, function(t24) {
 															return t24.distanceFrom(this.get_target()) > 2;
 														}))));
-														$state = 97;
-														$t146.continueWith($sm);
+														$state = 101;
+														$t172.continueWith($sm);
 														return;
 													}
 													else {
-														$t147 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe1));
-														$state = 98;
-														$t147.continueWith($sm);
+														$t173 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe1));
+														$state = 102;
+														$t173.continueWith($sm);
 														return;
 													}
 												}
@@ -8957,7 +9099,7 @@
 												thrall.attrs.set_item(73, 25);
 												$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(thrall, 2000, 73, thrall.your() + ' arcane shield dissolves. ', [thrall]));
 												this.q1();
-												$state = 92;
+												$state = 94;
 												continue $sm1;
 											}
 											else {
@@ -8969,17 +9111,17 @@
 												if ($Forays_Extensions.any($Forays_Tile).call(null, safe2, Function.mkdel(this, function(t27) {
 													return t27.distanceFrom(this.get_target()) > 2;
 												}))) {
-													$t148 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, safe2, Function.mkdel(this, function(t28) {
+													$t174 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, safe2, Function.mkdel(this, function(t28) {
 														return t28.distanceFrom(this.get_target()) > 2;
 													}))));
-													$state = 100;
-													$t148.continueWith($sm);
+													$state = 104;
+													$t174.continueWith($sm);
 													return;
 												}
 												else {
-													$t149 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe2));
-													$state = 101;
-													$t149.continueWith($sm);
+													$t175 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, safe2));
+													$state = 105;
+													$t175.continueWith($sm);
 													return;
 												}
 											}
@@ -8987,27 +9129,27 @@
 										else {
 											this.group[1].findPath(this);
 											//call for help
-											$t150 = this.aI_Step$1(this.get_target(), true);
-											$state = 102;
-											$t150.continueWith($sm);
+											$t176 = this.aI_Step$1(this.get_target(), true);
+											$state = 106;
+											$t176.continueWith($sm);
 											return;
 										}
 									}
 								}
-								else if ($t228 === 55) {
+								else if ($t263 === 55) {
 									this.QS();
 									$state = -1;
 									break $sm1;
 								}
-								else if ($t228 === 39) {
+								else if ($t263 === 39) {
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 8) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, $Forays_Global.roll(2) * 100 + 150, 69));
 										$Forays_Actor.get_b().add(this.get_the_name() + ' tosses a grenade toward ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
 										tiles1 = [];
-										$t152 = this.get_target().tilesWithinDistance(1);
-										for ($t153 = 0; $t153 < $t152.length; $t153++) {
-											tile1 = $t152[$t153];
+										$t178 = this.get_target().tilesWithinDistance(1);
+										for ($t179 = 0; $t179 < $t178.length; $t179++) {
+											tile1 = $t178[$t179];
 											if (tile1.get_passable()) {
 												tiles1.add(tile1);
 											}
@@ -9027,201 +9169,184 @@
 										t29.features.add(0);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(t29, 100, 8));
 										this.q1();
-										$state = 103;
+										$state = 107;
 										continue $sm1;
 									}
 									else if (this.get_curhp() <= 18) {
-										$t154 = this.aI_Step$1(this.get_target(), true);
-										$state = 104;
-										$t154.continueWith($sm);
+										$t180 = this.aI_Step$1(this.get_target(), true);
+										$state = 108;
+										$t180.continueWith($sm);
 										return;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t156 = this.attack(0, this.get_target());
-										$state = 105;
-										$t156.continueWith($sm);
-										return;
-									}
-									else {
-										$t157 = this.aI_Step(this.get_target());
-										$state = 106;
-										$t157.continueWith($sm);
-										return;
-									}
-								}
-								else if ($t228 === 40) {
-									if (this.distanceFrom(this.get_target()) === 1) {
-										$t158 = this.attack(0, this.get_target());
-										$state = 108;
-										$t158.continueWith($sm);
-										return;
-									}
-									else {
-										$t162 = this.aI_Step(this.get_target());
+										$t182 = this.attack(0, this.get_target());
 										$state = 109;
-										$t162.continueWith($sm);
+										$t182.continueWith($sm);
+										return;
+									}
+									else {
+										$t183 = this.aI_Step(this.get_target());
+										$state = 110;
+										$t183.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 41) {
+								else if ($t263 === 40) {
+									if (this.distanceFrom(this.get_target()) === 1) {
+										$t184 = this.attack(0, this.get_target());
+										$state = 112;
+										$t184.continueWith($sm);
+										return;
+									}
+									else {
+										$t188 = this.aI_Step(this.get_target());
+										$state = 113;
+										$t188.continueWith($sm);
+										return;
+									}
+								}
+								else if ($t263 === 41) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										if (this.get_target().hasAttr(28)) {
-											$t163 = this.attack(0, this.get_target());
-											$state = 111;
-											$t163.continueWith($sm);
+											$t189 = this.attack(0, this.get_target());
+											$state = 115;
+											$t189.continueWith($sm);
 											return;
 										}
 										else {
-											$t164 = this.attack($Forays_Global.roll$1(1, 2) - 1, this.get_target());
-											$state = 112;
-											$t164.continueWith($sm);
+											$t190 = this.attack($Forays_Global.roll$1(1, 2) - 1, this.get_target());
+											$state = 116;
+											$t190.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t165 = this.aI_Step(this.get_target());
-										$state = 113;
-										$t165.continueWith($sm);
+										$t191 = this.aI_Step(this.get_target());
+										$state = 117;
+										$t191.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 42) {
+								else if ($t263 === 42) {
 									if (this.distanceFrom(this.get_target()) === 1) {
-										$t166 = this.attack(0, this.get_target());
-										$state = 115;
-										$t166.continueWith($sm);
+										$t192 = this.attack(0, this.get_target());
+										$state = 119;
+										$t192.continueWith($sm);
 										return;
 									}
 									else {
-										$t168 = this.aI_Step(this.get_target());
-										$state = 116;
-										$t168.continueWith($sm);
+										$t194 = this.aI_Step(this.get_target());
+										$state = 120;
+										$t194.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 44) {
-									$t230 = this.distanceFrom(this.get_target());
-									if ($t230 === 1) {
+								else if ($t263 === 44) {
+									$t265 = this.distanceFrom(this.get_target());
+									if ($t265 === 1) {
 										if (this.get_target().enemiesAdjacent() > 1) {
-											$t169 = this.attack(0, this.get_target());
-											$state = 119;
-											$t169.continueWith($sm);
-											return;
-										}
-										else {
-											$t170 = this.aI_Step$1(this.get_target(), true);
-											$state = 120;
-											$t170.continueWith($sm);
-											return;
-										}
-									}
-									else if ($t230 === 2) {
-										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-											$t172 = this.fireArrow(this.get_target());
-											$state = 122;
-											$t172.continueWith($sm);
-											return;
-										}
-										else {
-											$t173 = this.aI_Step$1(this.get_target(), true);
+											$t195 = this.attack(0, this.get_target());
 											$state = 123;
-											$t173.continueWith($sm);
-											return;
-										}
-									}
-									else if ($t230 === 3 || $t230 === 4 || $t230 === 5 || $t230 === 6 || $t230 === 7 || $t230 === 8 || $t230 === 9 || $t230 === 10 || $t230 === 11 || $t230 === 12) {
-										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-											$t175 = this.fireArrow(this.get_target());
-											$state = 125;
-											$t175.continueWith($sm);
+											$t195.continueWith($sm);
 											return;
 										}
 										else {
-											$t176 = this.aI_Sidestep(this.get_target());
+											$t196 = this.aI_Step$1(this.get_target(), true);
+											$state = 124;
+											$t196.continueWith($sm);
+											return;
+										}
+									}
+									else if ($t265 === 2) {
+										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+											$t198 = this.fireArrow(this.get_target());
 											$state = 126;
-											$t176.continueWith($sm);
+											$t198.continueWith($sm);
+											return;
+										}
+										else {
+											$t199 = this.aI_Step$1(this.get_target(), true);
+											$state = 127;
+											$t199.continueWith($sm);
+											return;
+										}
+									}
+									else if ($t265 === 3 || $t265 === 4 || $t265 === 5 || $t265 === 6 || $t265 === 7 || $t265 === 8 || $t265 === 9 || $t265 === 10 || $t265 === 11 || $t265 === 12) {
+										if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+											$t201 = this.fireArrow(this.get_target());
+											$state = 129;
+											$t201.continueWith($sm);
+											return;
+										}
+										else {
+											$t202 = this.aI_Sidestep(this.get_target());
+											$state = 130;
+											$t202.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t177 = this.aI_Step(this.get_target());
-										$state = 127;
-										$t177.continueWith($sm);
+										$t203 = this.aI_Step(this.get_target());
+										$state = 131;
+										$t203.continueWith($sm);
 										return;
 									}
-									$state = 117;
+									$state = 121;
 									continue $sm1;
 								}
-								else if ($t228 === 46) {
+								else if ($t263 === 46) {
 									if (this.get_curhp() <= 10 && !this.hasAttr(69)) {
-										for (i8 = 0; i8 < 9999; ++i8) {
-											rr = $Forays_Global.roll$1(1, 20);
-											rc = $Forays_Global.roll$1(1, 64);
-											if (Math.abs(rr - this.get_row()) >= 10 || Math.abs(rc - this.get_col()) >= 10 || Math.abs(rr - this.get_row()) >= 7 && Math.abs(rc - this.get_col()) >= 7) {
-												if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc)) && !this.hasLOS$1(rr, rc)) {
-													$Forays_Actor.get_b().add(this.theVisible() + ' slashes at the air, sending a swirling vortex toward ' + this.get_target().get_the_name() + '. ', [this.get_target()]);
-													this.animateBeam$1(this.get_target(), '*', 4);
-													this.get_target().animateStorm(3, 3, 10, '*', 4);
-													this.get_target().move(rr, rc);
-													$Forays_PhysicalObject.get_m().draw();
-													this.get_target().animateStorm(3, 3, 10, '*', 4);
-													$Forays_Actor.get_b().add(this.get_target().youAre() + ' transported elsewhere. ', []);
-													this.attrs.set_item(69, this.attrs.get_item(69) + 1);
-													break;
-												}
-											}
-										}
-										this.QS();
-										$state = 128;
+										i8 = 0;
+										$state = 133;
 										continue $sm1;
 									}
 									else {
-										$t178 = this.actorsWithinDistance(2);
-										$t179 = 0;
-										$state = 129;
+										$t205 = this.actorsWithinDistance(2);
+										$t206 = 0;
+										$state = 134;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 47) {
+								else if ($t263 === 47) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										if (this.hasAttr(69)) {
 											//no arms
-											$t184 = this.attack(1, this.get_target());
-											$state = 131;
-											$t184.continueWith($sm);
+											$t212 = this.attack(1, this.get_target());
+											$state = 136;
+											$t212.continueWith($sm);
 											return;
 										}
 										else {
-											$t185 = this.attack(0, this.get_target());
-											$state = 132;
-											$t185.continueWith($sm);
+											$t213 = this.attack(0, this.get_target());
+											$state = 137;
+											$t213.continueWith($sm);
 											return;
 										}
 									}
 									else {
 										if (!this.hasAttr(70)) {
 											//no legs
-											$t186 = this.aI_Step(this.get_target());
-											$state = 134;
-											$t186.continueWith($sm);
+											$t214 = this.aI_Step(this.get_target());
+											$state = 139;
+											$t214.continueWith($sm);
 											return;
 										}
-										$state = 133;
+										$state = 138;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 48) {
-									$t187 = this.actorsWithinDistance(2);
-									$t188 = 0;
-									$state = 135;
+								else if ($t263 === 48) {
+									$t215 = this.actorsWithinDistance(2);
+									$t216 = 0;
+									$state = 140;
 									continue $sm1;
 								}
-								else if ($t228 === 49) {
+								else if ($t263 === 49) {
 									if (this.distanceFrom(this.get_target()) <= 12) {
 										if (this.distanceFrom(this.get_target()) === 1) {
-											$t198 = this.attack(0, this.get_target());
-											$state = 137;
-											$t198.continueWith($sm);
+											$t233 = this.attack(0, this.get_target());
+											$state = 142;
+											$t233.continueWith($sm);
 											return;
 										}
 										else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
@@ -9229,50 +9354,50 @@
 											line1.remove(line1[line1.length - 1]);
 											this.animateBoltBeam$1(line1, 11);
 											if ($Forays_Global.roll$1(1, 4) === 4) {
-												$t199 = this.attack(0, this.get_target());
-												$state = 138;
-												$t199.continueWith($sm);
+												$t234 = this.attack(0, this.get_target());
+												$state = 143;
+												$t234.continueWith($sm);
 												return;
 											}
 											else {
 												target_r1 = this.get_target().get_row();
 												target_c1 = this.get_target().get_col();
-												$t200 = this.attack(1, this.get_target());
-												$state = 139;
-												$t200.continueWith($sm);
+												$t235 = this.attack(1, this.get_target());
+												$state = 144;
+												$t235.continueWith($sm);
 												return;
 											}
 										}
 										else {
 											this.q1();
-											$state = 136;
+											$state = 141;
 											continue $sm1;
 										}
 									}
 									else {
 										this.q1();
-										$state = 136;
+										$state = 141;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 50) {
+								else if ($t263 === 50) {
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, ($Forays_Global.roll(4) + 8) * 100, 69));
 										$Forays_Actor.get_b().add(this.get_the_name() + ' calls out to the dead. ', [this]);
 										summon = ($Forays_Global.coinFlip() ? 6 : 18);
 										tiles2 = [];
-										$t205 = this.tilesWithinDistance(2);
-										for ($t206 = 0; $t206 < $t205.length; $t206++) {
-											tile2 = $t205[$t206];
+										$t240 = this.tilesWithinDistance(2);
+										for ($t241 = 0; $t241 < $t240.length; $t241++) {
+											tile2 = $t240[$t241];
 											if (tile2.get_passable() && ss.isNullOrUndefined(tile2.actor()) && this.directionOf(tile2) === this.directionOf(this.get_target())) {
 												tiles2.add(tile2);
 											}
 										}
 										if (tiles2.length === 0) {
-											$t207 = this.tilesWithinDistance(2);
-											for ($t208 = 0; $t208 < $t207.length; $t208++) {
-												tile3 = $t207[$t208];
+											$t242 = this.tilesWithinDistance(2);
+											for ($t243 = 0; $t243 < $t242.length; $t243++) {
+												tile3 = $t242[$t243];
 												if (tile3.get_passable() && ss.isNullOrUndefined(tile3.actor())) {
 													tiles2.add(tile3);
 												}
@@ -9287,63 +9412,63 @@
 											$Forays_Actor.create$1(summon, t31.get_row(), t31.get_col(), true, true);
 											$Forays_PhysicalObject.get_m().actor.get_item(t31.get_row(), t31.get_col()).player_visibility_duration = -1;
 											if (ss.isNullOrUndefined(this.group)) {
-												$t209 = [];
-												$t209.add(this);
-												this.group = $t209;
+												$t244 = [];
+												$t244.add(this);
+												this.group = $t244;
 											}
 											this.group.add($Forays_PhysicalObject.get_m().actor.get_item(t31.get_row(), t31.get_col()));
 											$Forays_PhysicalObject.get_m().actor.get_item(t31.get_row(), t31.get_col()).group = this.group;
 										}
 										this.q1();
-										$state = 140;
+										$state = 145;
 										continue $sm1;
 									}
 									else {
 										blast = false;
-										$t231 = this.distanceFrom(this.get_target());
-										if ($t231 === 1) {
-											$t210 = this.aI_Step$1(this.get_target(), true);
-											$state = 142;
-											$t210.continueWith($sm);
+										$t266 = this.distanceFrom(this.get_target());
+										if ($t266 === 1) {
+											$t245 = this.aI_Step$1(this.get_target(), true);
+											$state = 147;
+											$t245.continueWith($sm);
 											return;
 										}
-										else if ($t231 === 2) {
+										else if ($t266 === 2) {
 											if ($Forays_Global.coinFlip() && ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
 												blast = true;
-												$state = 143;
+												$state = 148;
 												continue $sm1;
 											}
 											else {
-												$t212 = this.aI_Step$1(this.get_target(), true);
-												$state = 144;
-												$t212.continueWith($sm);
+												$t247 = this.aI_Step$1(this.get_target(), true);
+												$state = 149;
+												$t247.continueWith($sm);
 												return;
 											}
 										}
-										else if ($t231 === 3 || $t231 === 4 || $t231 === 5 || $t231 === 6) {
+										else if ($t266 === 3 || $t266 === 4 || $t266 === 5 || $t266 === 6) {
 											if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
 												blast = true;
-												$state = 145;
+												$state = 150;
 												continue $sm1;
 											}
 											else {
-												$t213 = this.aI_Sidestep(this.get_target());
-												$state = 146;
-												$t213.continueWith($sm);
+												$t248 = this.aI_Sidestep(this.get_target());
+												$state = 151;
+												$t248.continueWith($sm);
 												return;
 											}
 										}
 										else {
-											$t214 = this.aI_Step(this.get_target());
-											$state = 147;
-											$t214.continueWith($sm);
+											$t249 = this.aI_Step(this.get_target());
+											$state = 152;
+											$t249.continueWith($sm);
 											return;
 										}
-										$state = 141;
+										$state = 146;
 										continue $sm1;
 									}
 								}
-								else if ($t228 === 51) {
+								else if ($t263 === 51) {
 									if (this.get_curhp() <= 10 && !$Forays_PhysicalObject.get_m().get_wiz_dark()) {
 										if ($Forays_Actor.get_player().canSee(this)) {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' absorbs the light from the air. ', []);
@@ -9356,48 +9481,48 @@
 										$Forays_PhysicalObject.get_m().set_wiz_dark(true);
 										$Forays_PhysicalObject.get_m().set_wiz_lite(false);
 										this.q1();
-										$state = 148;
+										$state = 153;
 										continue $sm1;
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t216 = this.attack(0, this.get_target());
-										$state = 149;
-										$t216.continueWith($sm);
+										$t251 = this.attack(0, this.get_target());
+										$state = 154;
+										$t251.continueWith($sm);
 										return;
 									}
 									else {
-										$t217 = this.aI_Step(this.get_target());
-										$state = 150;
-										$t217.continueWith($sm);
+										$t252 = this.aI_Step(this.get_target());
+										$state = 155;
+										$t252.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t228 === 2) {
+								else if ($t263 === 2) {
 									if ($Forays_Actor.get_player().magic_items.contains(1) && this.distanceFrom($Forays_Actor.get_player()) <= 12 && this.canSee($Forays_Actor.get_player())) {
 										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ', []);
-										$t218 = this.getBestLine($Forays_Actor.get_player());
-										for ($t219 = 0; $t219 < $t218.length; $t219++) {
-											t32 = $t218[$t219];
+										$t253 = this.getBestLine($Forays_Actor.get_player());
+										for ($t254 = 0; $t254 < $t253.length; $t254++) {
+											t32 = $t253[$t254];
 											$Forays_Screen.animateStorm$1(t32.p, 1, 2, 3, '*', 3);
 										}
 										$Forays_Actor.get_b().add('Your ring of resistance melts and drips onto the floor! ', []);
 										$Forays_Actor.get_player().magic_items.remove(1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 100, 1));
-										$state = 151;
+										$state = 156;
 										continue $sm1;
 									}
 									else if ($Forays_Actor.get_player().armors[0] === 5 && this.distanceFrom($Forays_Actor.get_player()) <= 12 && this.canSee($Forays_Actor.get_player())) {
 										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ', []);
-										$t220 = this.getBestLine($Forays_Actor.get_player());
-										for ($t221 = 0; $t221 < $t220.length; $t221++) {
-											t33 = $t220[$t221];
+										$t255 = this.getBestLine($Forays_Actor.get_player());
+										for ($t256 = 0; $t256 < $t255.length; $t256++) {
+											t33 = $t255[$t256];
 											$Forays_Screen.animateStorm$1(t33.p, 1, 2, 3, '*', 3);
 										}
 										$Forays_Actor.get_b().add('The runes drip from your full plate of resistance! ', []);
 										$Forays_Actor.get_player().armors[0] = 2;
 										$Forays_Actor.get_player().updateOnEquip(5, 2);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 100, 1));
-										$state = 151;
+										$state = 156;
 										continue $sm1;
 									}
 									else if (!this.hasAttr(69)) {
@@ -9406,41 +9531,41 @@
 											cooldown2 = ($Forays_Global.roll$1(1, 4) + 1) * 100;
 											$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, cooldown2, 69));
 											this.animateBeam(this.get_target(), 16, '*');
-											$t222 = this.attack(2, this.get_target());
-											$state = 152;
-											$t222.continueWith($sm);
+											$t257 = this.attack(2, this.get_target());
+											$state = 157;
+											$t257.continueWith($sm);
 											return;
 										}
 										else {
-											$t223 = this.aI_Step(this.get_target());
-											$state = 153;
-											$t223.continueWith($sm);
+											$t258 = this.aI_Step(this.get_target());
+											$state = 158;
+											$t258.continueWith($sm);
 											return;
 										}
 									}
 									else if (this.distanceFrom(this.get_target()) === 1) {
-										$t224 = this.attack($Forays_Global.roll$1(1, 2) - 1, this.get_target());
-										$state = 154;
-										$t224.continueWith($sm);
+										$t259 = this.attack($Forays_Global.roll$1(1, 2) - 1, this.get_target());
+										$state = 159;
+										$t259.continueWith($sm);
 										return;
 									}
 									else {
-										$t225 = this.aI_Step(this.get_target());
-										$state = 155;
-										$t225.continueWith($sm);
+										$t260 = this.aI_Step(this.get_target());
+										$state = 160;
+										$t260.continueWith($sm);
 										return;
 									}
 								}
 								else if (this.distanceFrom(this.get_target()) === 1) {
-									$t226 = this.attack(0, this.get_target());
-									$state = 157;
-									$t226.continueWith($sm);
+									$t261 = this.attack(0, this.get_target());
+									$state = 162;
+									$t261.continueWith($sm);
 									return;
 								}
 								else {
-									$t227 = this.aI_Step(this.get_target());
-									$state = 158;
-									$t227.continueWith($sm);
+									$t262 = this.aI_Step(this.get_target());
+									$state = 163;
+									$t262.continueWith($sm);
 									return;
 								}
 								$state = -1;
@@ -9452,7 +9577,7 @@
 								if ($Forays_Global.coinFlip()) {
 									//chance of retreating
 									$t2 = this.aI_Step$1(this.get_target(), true);
-									$state = 159;
+									$state = 164;
 									$t2.continueWith($sm);
 									return;
 								}
@@ -9484,7 +9609,7 @@
 								$t8.getResult();
 								if (ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()) && $Forays_Actor.get_player().get_curhp() > 0) {
 									$t9 = $Forays_Help.tutorialTip(2);
-									$state = 160;
+									$state = 165;
 									$t9.continueWith($sm);
 									return;
 								}
@@ -9548,15 +9673,27 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 16: {
+							case 17: {
 								$state = -1;
 								$t18.getResult();
+								$state = 16;
+								continue $sm1;
+							}
+							case 16: {
+								$state = -1;
+								this.QS();
 								$state = 15;
 								continue $sm1;
 							}
-							case 17: {
+							case 18: {
 								$state = -1;
 								$t19.getResult();
+								$state = 15;
+								continue $sm1;
+							}
+							case 19: {
+								$state = -1;
+								$t20.getResult();
 								this.QS();
 								$state = 15;
 								continue $sm1;
@@ -9565,70 +9702,15 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 19: {
-								$state = -1;
-								$t20.getResult();
-								if (ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()) && $Forays_Actor.get_player().get_curhp() > 0) {
-									$t21 = $Forays_Help.tutorialTip(6);
-									$state = 161;
-									$t21.continueWith($sm);
-									return;
-								}
-								$state = 18;
-								continue $sm1;
-							}
-							case 18: {
-								$state = -1;
-								break $sm1;
-							}
 							case 21: {
 								$state = -1;
-								$t22.getResult();
-								$state = 20;
-								continue $sm1;
-							}
-							case 22: {
-								$state = -1;
-								$t23.getResult();
-								$state = 20;
-								continue $sm1;
-							}
-							case 23: {
-								$state = -1;
-								if ($t24.getResult()) {
-									this.QS();
-									$state = 20;
-									continue $sm1;
-								}
-								else {
-									$t25 = this.attack(0, this.get_target());
-									$state = 162;
-									$t25.continueWith($sm);
+								$t21.getResult();
+								if (ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()) && $Forays_Actor.get_player().get_curhp() > 0) {
+									$t22 = $Forays_Help.tutorialTip(6);
+									$state = 166;
+									$t22.continueWith($sm);
 									return;
 								}
-							}
-							case 24: {
-								$state = -1;
-								$t26.getResult();
-								$state = 20;
-								continue $sm1;
-							}
-							case 26: {
-								$state = -1;
-								$t27.getResult();
-								$state = 25;
-								continue $sm1;
-							}
-							case 27: {
-								$state = -1;
-								$t28.getResult();
-								//message for this? hmm.
-								$state = 25;
-								continue $sm1;
-							}
-							case 25: {
-								$state = -1;
-								this.QS();
 								$state = 20;
 								continue $sm1;
 							}
@@ -9636,335 +9718,395 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 29: {
+							case 23: {
 								$state = -1;
-								$t33.getResult();
-								$state = 28;
+								$t23.getResult();
+								$state = 22;
 								continue $sm1;
 							}
-							case 30: {
+							case 24: {
 								$state = -1;
-								$t34.getResult();
-								$state = 28;
+								$t24.getResult();
+								$state = 22;
 								continue $sm1;
 							}
-							case 31: {
+							case 25: {
 								$state = -1;
-								$t35.getResult();
-								this.QS();
-								$state = 28;
+								if ($t25.getResult()) {
+									this.QS();
+									$state = 22;
+									continue $sm1;
+								}
+								else {
+									$t26 = this.attack(0, this.get_target());
+									$state = 167;
+									$t26.continueWith($sm);
+									return;
+								}
+							}
+							case 26: {
+								$state = -1;
+								$t27.getResult();
+								$state = 22;
 								continue $sm1;
 							}
 							case 28: {
 								$state = -1;
+								$t28.getResult();
+								$state = 27;
+								continue $sm1;
+							}
+							case 29: {
+								$state = -1;
+								$t29.getResult();
+								//message for this? hmm.
+								$state = 27;
+								continue $sm1;
+							}
+							case 27: {
+								$state = -1;
+								this.QS();
+								$state = 22;
+								continue $sm1;
+							}
+							case 22: {
+								$state = -1;
 								break $sm1;
+							}
+							case 32: {
+								$state = -1;
+								$t34.getResult();
+								$state = 31;
+								continue $sm1;
+							}
+							case 31: {
+								$state = -1;
+								if (openspaces.length > 1) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' is suddenly standing all around ' + this.get_target().get_the_name() + '. ', []);
+									this.q1();
+									$state = 30;
+									continue $sm1;
+								}
+								else {
+									$t35 = this.attack(0, this.get_target());
+									$state = 168;
+									$t35.continueWith($sm);
+									return;
+								}
 							}
 							case 33: {
 								$state = -1;
-								$t38.getResult();
-								$state = 32;
+								$t36.getResult();
+								$state = 30;
 								continue $sm1;
 							}
 							case 34: {
 								$state = -1;
-								$t39.getResult();
+								$t37.getResult();
 								this.QS();
-								$state = 32;
+								$state = 30;
 								continue $sm1;
 							}
-							case 32: {
+							case 30: {
 								$state = -1;
 								break $sm1;
 							}
-							case 37: {
+							case 36: {
 								$state = -1;
 								$t40.getResult();
-								$state = 36;
-								continue $sm1;
-							}
-							case 38: {
-								$state = -1;
-								if ($t41.getResult()) {
-									this.QS();
-									$state = 36;
-									continue $sm1;
-								}
-								else {
-									$t42 = this.attack(0, this.get_target());
-									$state = 163;
-									$t42.continueWith($sm);
-									return;
-								}
-							}
-							case 36: {
 								$state = 35;
 								continue $sm1;
 							}
-							case 40: {
+							case 37: {
 								$state = -1;
-								$t43.getResult();
-								$state = 39;
-								continue $sm1;
-							}
-							case 41: {
-								$state = -1;
-								if ($t44.getResult()) {
-									this.QS();
-									$state = 39;
-									continue $sm1;
-								}
-								else {
-									$t45 = this.aI_Sidestep(this.get_target());
-									$state = 164;
-									$t45.continueWith($sm);
-									return;
-								}
-							}
-							case 39: {
-								$state = 35;
-								continue $sm1;
-							}
-							case 43: {
-								$state = -1;
-								$t46.getResult();
-								$state = 42;
-								continue $sm1;
-							}
-							case 44: {
-								$state = -1;
-								if ($t47.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
-								}
-								this.QS();
-								$state = 42;
-								continue $sm1;
-							}
-							case 42: {
-								$state = 35;
-								continue $sm1;
-							}
-							case 45: {
-								$state = -1;
-								$t48.getResult();
+								$t41.getResult();
 								this.QS();
 								$state = 35;
 								continue $sm1;
 							}
 							case 35: {
-								$state = 35;
+								$state = -1;
+								break $sm1;
+							}
+							case 40: {
+								$state = -1;
+								$t42.getResult();
+								$state = 39;
+								continue $sm1;
+							}
+							case 41: {
+								$state = -1;
+								if ($t43.getResult()) {
+									this.QS();
+									$state = 39;
+									continue $sm1;
+								}
+								else {
+									$t44 = this.attack(0, this.get_target());
+									$state = 169;
+									$t44.continueWith($sm);
+									return;
+								}
+							}
+							case 39: {
+								$state = 38;
+								continue $sm1;
+							}
+							case 43: {
+								$state = -1;
+								$t45.getResult();
+								$state = 42;
+								continue $sm1;
+							}
+							case 44: {
+								$state = -1;
+								if ($t46.getResult()) {
+									this.QS();
+									$state = 42;
+									continue $sm1;
+								}
+								else {
+									$t47 = this.aI_Sidestep(this.get_target());
+									$state = 170;
+									$t47.continueWith($sm);
+									return;
+								}
+							}
+							case 42: {
+								$state = 38;
 								continue $sm1;
 							}
 							case 46: {
 								$state = -1;
-								if (!($t50 < $t49.length)) {
-									$state = 166;
-									continue $sm1;
-								}
-								a1 = $t49[$t50];
-								if (a1.hasAttr(75) && a1.hasLOE(this)) {
-									if (this.distanceFrom(this.get_target()) === 1) {
-										$t51 = this.attack(0, this.get_target());
-										$state = 168;
-										$t51.continueWith($sm);
-										return;
-									}
-									else {
-										$t52 = this.aI_Step(this.get_target());
-										$state = 169;
-										$t52.continueWith($sm);
-										return;
-									}
-								}
-								$state = 165;
-								continue $sm1;
-							}
-							case 48: {
-								$state = -1;
-								$t62.getResult();
-								$state = 47;
-								continue $sm1;
-							}
-							case 49: {
-								$state = -1;
-								$t63.getResult();
-								this.QS();
-								$state = 47;
+								$t48.getResult();
+								$state = 45;
 								continue $sm1;
 							}
 							case 47: {
 								$state = -1;
-								break $sm1;
-							}
-							case 51: {
-								$state = -1;
-								$t64.getResult();
-								$state = 50;
+								if ($t49.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+								}
+								this.QS();
+								$state = 45;
 								continue $sm1;
 							}
-							case 52: {
-								$state = -1;
-								$t65.getResult();
-								if (this.distanceFrom(this.get_target()) === 1) {
-									$t66 = this.attack(0, this.get_target());
-									$state = 170;
-									$t66.continueWith($sm);
-									return;
-								}
-								else {
-									this.QS();
-									$state = 50;
-									continue $sm1;
-								}
+							case 45: {
+								$state = 38;
+								continue $sm1;
 							}
-							case 50: {
+							case 48: {
 								$state = -1;
-								break $sm1;
+								$t50.getResult();
+								this.QS();
+								$state = 38;
+								continue $sm1;
 							}
-							case 53: {
+							case 38: {
+								$state = 38;
+								continue $sm1;
+							}
+							case 49: {
 								$state = -1;
-								if (!($t68 < $t67.length)) {
+								if (!($t52 < $t51.length)) {
 									$state = 172;
 									continue $sm1;
 								}
-								a2 = $t67[$t68];
-								if (a2.hasAttr(75) && a2.hasLOE(this)) {
+								a1 = $t51[$t52];
+								if (a1.hasAttr(75) && a1.hasLOE(this)) {
 									if (this.distanceFrom(this.get_target()) === 1) {
-										$t69 = this.attack(0, this.get_target());
+										$t53 = this.attack(0, this.get_target());
 										$state = 174;
-										$t69.continueWith($sm);
+										$t53.continueWith($sm);
 										return;
 									}
 									else {
-										$t70 = this.aI_Step(this.get_target());
+										$t54 = this.aI_Step(this.get_target());
 										$state = 175;
-										$t70.continueWith($sm);
+										$t54.continueWith($sm);
 										return;
 									}
 								}
 								$state = 171;
 								continue $sm1;
 							}
-							case 55: {
+							case 51: {
 								$state = -1;
-								if (!($t82 < targets.length)) {
-									$state = 177;
-									continue $sm1;
-								}
-								actor = targets[$t82];
-								$t83 = actor.takeDamage$2(9, 1, $Forays_Global.roll(6), this, 'a banshee\'s scream');
-								$state = 178;
-								$t83.continueWith($sm);
-								return;
-							}
-							case 56: {
-								$state = -1;
-								$t84.getResult();
-								$state = 54;
+								$t69.getResult();
+								$state = 50;
 								continue $sm1;
 							}
-							case 57: {
+							case 52: {
 								$state = -1;
-								$t85.getResult();
+								$t70.getResult();
 								this.QS();
-								$state = 54;
+								$state = 50;
 								continue $sm1;
 							}
-							case 54: {
+							case 50: {
 								$state = -1;
 								break $sm1;
 							}
-							case 59: {
+							case 54: {
 								$state = -1;
-								$t86.getResult();
-								$state = 58;
+								$t71.getResult();
+								$state = 53;
 								continue $sm1;
 							}
-							case 60: {
+							case 55: {
 								$state = -1;
-								$t87.getResult();
-								$state = 58;
+								$t72.getResult();
+								if (this.distanceFrom(this.get_target()) === 1) {
+									$t73 = this.attack(0, this.get_target());
+									$state = 176;
+									$t73.continueWith($sm);
+									return;
+								}
+								else {
+									this.QS();
+									$state = 53;
+									continue $sm1;
+								}
+							}
+							case 53: {
+								$state = -1;
+								break $sm1;
+							}
+							case 56: {
+								$state = -1;
+								if (!($t75 < $t74.length)) {
+									$state = 178;
+									continue $sm1;
+								}
+								a2 = $t74[$t75];
+								if (a2.hasAttr(75) && a2.hasLOE(this)) {
+									if (this.distanceFrom(this.get_target()) === 1) {
+										$t76 = this.attack(0, this.get_target());
+										$state = 180;
+										$t76.continueWith($sm);
+										return;
+									}
+									else {
+										$t77 = this.aI_Step(this.get_target());
+										$state = 181;
+										$t77.continueWith($sm);
+										return;
+									}
+								}
+								$state = 177;
 								continue $sm1;
 							}
 							case 58: {
 								$state = -1;
-								switch (action) {
-									case 1: {
-										for (i1 = 0; i1 < 9999; ++i1) {
-											a4 = $Forays_Global.roll$1(1, 17) - 9;
-											//-8 to 8
-											b = $Forays_Global.roll$1(1, 17) - 9;
-											if (Math.abs(a4) + Math.abs(b) >= 6) {
-												a4 += this.get_row();
-												b += this.get_col();
-												if ($Forays_PhysicalObject.get_m().boundsCheck(a4, b)) {
-													if ($Forays_PhysicalObject.get_m().tile.get_item(a4, b).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(a4, b))) {
-														this.move(a4, b);
-														break;
-													}
-												}
-											}
-										}
-										this.QS();
-										break;
-									}
-									case 2: {
-										valid_tiles = Array.multidim(Boolean.getDefaultValue(), $Forays_Actor.$ROWS, $Forays_Actor.$COLS);
-										for (i2 = 0; i2 < $Forays_Actor.$ROWS; ++i2) {
-											for (j = 0; j < $Forays_Actor.$COLS; ++j) {
-												if ($Forays_PhysicalObject.get_m().tile.get_item(i2, j).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(i2, j)) && !this.get_target().canSee$1(i2, j)) {
-													valid_tiles.set(i2, j, true);
-												}
-												else {
-													valid_tiles.set(i2, j, false);
-												}
-											}
-										}
-										tilelist1 = [];
-										found = false;
-										for (distance = 1; distance < $Forays_Actor.$COLS && !found; ++distance) {
-											for (i3 = this.get_row() - distance; i3 <= this.get_row() + distance; ++i3) {
-												for (j1 = this.get_col() - distance; j1 <= this.get_col() + distance; ++j1) {
-													if ($Forays_PhysicalObject.get_m().boundsCheck(i3, j1) && valid_tiles.get(i3, j1) && this.distanceFrom$2(i3, j1) === distance) {
-														found = true;
-														tilelist1.add($Forays_PhysicalObject.get_m().tile.get_item(i3, j1));
-													}
-												}
-											}
-										}
-										if (found) {
-											t6 = tilelist1[$Forays_Global.roll$1(1, tilelist1.length) - 1];
-											this.move(t6.get_row(), t6.get_col());
-										}
-										this.QS();
-										break;
-									}
-									default: {
-										break;
-									}
+								if (!($t101 < targets.length)) {
+									$state = 183;
+									continue $sm1;
 								}
+								actor = targets[$t101];
+								$t102 = actor.takeDamage$2(9, 1, $Forays_Global.roll(6), this, 'a banshee\'s scream');
+								$state = 184;
+								$t102.continueWith($sm);
+								return;
+							}
+							case 59: {
+								$state = -1;
+								$t103.getResult();
+								$state = 57;
+								continue $sm1;
+							}
+							case 60: {
+								$state = -1;
+								$t104.getResult();
+								this.QS();
+								$state = 57;
+								continue $sm1;
+							}
+							case 57: {
 								$state = -1;
 								break $sm1;
 							}
 							case 62: {
 								$state = -1;
-								$t88.getResult();
+								$t105.getResult();
 								$state = 61;
 								continue $sm1;
 							}
 							case 63: {
 								$state = -1;
-								$t89.getResult();
-								this.QS();
-								$state = 61;
-								continue $sm1;
+								$t106.getResult();
+								$t107 = this.attack(0, this.get_target());
+								$state = 185;
+								$t107.continueWith($sm);
+								return;
 							}
 							case 61: {
 								$state = -1;
-								break $sm1;
+								if (action === 1) {
+									i1 = 0;
+									$state = 187;
+									continue $sm1;
+								}
+								else if (action === 2) {
+									valid_tiles = Array.multidim(Boolean.getDefaultValue(), $Forays_Actor.$ROWS, $Forays_Actor.$COLS);
+									for (i2 = 0; i2 < $Forays_Actor.$ROWS; ++i2) {
+										for (j = 0; j < $Forays_Actor.$COLS; ++j) {
+											if ($Forays_PhysicalObject.get_m().tile.get_item(i2, j).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(i2, j)) && !this.get_target().canSee$1(i2, j)) {
+												valid_tiles.set(i2, j, true);
+											}
+											else {
+												valid_tiles.set(i2, j, false);
+											}
+										}
+									}
+									tilelist1 = [];
+									found = false;
+									for (distance = 1; distance < $Forays_Actor.$COLS && !found; ++distance) {
+										for (i3 = this.get_row() - distance; i3 <= this.get_row() + distance; ++i3) {
+											for (j1 = this.get_col() - distance; j1 <= this.get_col() + distance; ++j1) {
+												if ($Forays_PhysicalObject.get_m().boundsCheck(i3, j1) && valid_tiles.get(i3, j1) && this.distanceFrom$2(i3, j1) === distance) {
+													found = true;
+													tilelist1.add($Forays_PhysicalObject.get_m().tile.get_item(i3, j1));
+												}
+											}
+										}
+									}
+									if (found) {
+										t6 = tilelist1[$Forays_Global.roll$1(1, tilelist1.length) - 1];
+										$t109 = this.move(t6.get_row(), t6.get_col());
+										$state = 189;
+										$t109.continueWith($sm);
+										return;
+									}
+									$state = 188;
+									continue $sm1;
+								}
+								else {
+									$state = 186;
+									continue $sm1;
+								}
+								$state = 186;
+								continue $sm1;
 							}
 							case 65: {
 								$state = -1;
-								if ($t90.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(target_r, target_c)) && $Forays_Extensions.any($Forays_Item).call(null, this.get_target().get_inv(), function(i4) {
+								$t110.getResult();
+								$state = 64;
+								continue $sm1;
+							}
+							case 66: {
+								$state = -1;
+								$t111.getResult();
+								this.QS();
+								$state = 64;
+								continue $sm1;
+							}
+							case 64: {
+								$state = -1;
+								break $sm1;
+							}
+							case 68: {
+								$state = -1;
+								if ($t112.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(target_r, target_c)) && $Forays_Extensions.any($Forays_Item).call(null, this.get_target().get_inv(), function(i4) {
 									return !i4.get_do_not_stack();
 								})) {
 									item = $Forays_Extensions.random($Forays_Item).call(null, $Forays_Extensions.where($Forays_Item).call(null, this.get_target().get_inv(), function(i5) {
@@ -9980,43 +10122,43 @@
 									}
 									$Forays_Actor.get_b().add(this.youVisible('steal') + ' ' + this.get_target().yourVisible() + ' ' + item.name() + '! ', [this, this.get_target()]);
 								}
-								$state = 64;
-								continue $sm1;
-							}
-							case 66: {
-								$state = -1;
-								$t91.getResult();
-								this.QS();
-								$state = 64;
-								continue $sm1;
-							}
-							case 68: {
-								$state = -1;
-								$t94 = $t93.getResult();
 								$state = 67;
 								continue $sm1;
 							}
-							case 67: {
+							case 69: {
 								$state = -1;
-								if ($t94) {
+								$t113.getResult();
+								this.QS();
+								$state = 67;
+								continue $sm1;
+							}
+							case 71: {
+								$state = -1;
+								$t116 = $t115.getResult();
+								$state = 70;
+								continue $sm1;
+							}
+							case 70: {
+								$state = -1;
+								if ($t116) {
 									this.QS();
-									$state = 64;
+									$state = 67;
 									continue $sm1;
 								}
 								else if (!next.get_passable()) {
 									$Forays_Actor.get_b().add(this.get_the_name() + ' disappears into ' + next.get_the_name() + '. ', [this]);
-									$t95 = this.tilesWithinDistance(1);
-									for ($t96 = 0; $t96 < $t95.length; $t96++) {
-										t8 = $t95[$t96];
+									$t117 = this.tilesWithinDistance(1);
+									for ($t118 = 0; $t118 < $t117.length; $t118++) {
+										t8 = $t117[$t118];
 										if (t8.distanceFrom(next) === 1 && t8.get_name() === 'floor') {
 											t8.features.add(7);
 										}
 									}
 									e = null;
-									$t97 = $Forays_Actor.get_q().list;
-									for ($t98 = 0; $t98 < $t97.length; $t98++) {
-										e2 = $t97[$t98];
-										if (ss.referenceEquals(e2.get_target(), this) && e2.get_type() === 5) {
+									$t119 = $Forays_Actor.get_q().list;
+									for ($t120 = 0; $t120 < $t119.length; $t120++) {
+										e2 = $t119[$t120];
+										if (ss.referenceEquals(e2.get_target(), this) && e2.get_evtype() === 5) {
 											e = e2;
 											break;
 										}
@@ -10024,98 +10166,48 @@
 									e.set_target(this.get_inv()[0]);
 									$Forays_Actor.tiebreakers[e.get_tiebreaker()] = null;
 									this.get_inv().clear();
-									$t99 = this.takeDamage$1(0, 2, 9999, null);
-									$state = 179;
-									$t99.continueWith($sm);
+									$t121 = this.takeDamage$1(0, 2, 9999, null);
+									$state = 190;
+									$t121.continueWith($sm);
 									return;
 								}
 								else if (ss.isValue(next.actor())) {
 									if (!next.actor().hasAttr(12)) {
-										this.move(next.get_row(), next.get_col());
-										this.QS();
-										$state = 64;
-										continue $sm1;
+										$t122 = this.move(next.get_row(), next.get_col());
+										$state = 191;
+										$t122.continueWith($sm);
+										return;
 									}
 									else {
 										if (next.actor().hasAttr(12)) {
-											$t100 = this.aI_Step(next);
-											$state = 180;
-											$t100.continueWith($sm);
+											$t123 = this.aI_Step(next);
+											$state = 192;
+											$t123.continueWith($sm);
 											return;
 										}
-										$state = 64;
+										$state = 67;
 										continue $sm1;
 									}
 								}
 								else {
 									this.QS();
-									$state = 64;
+									$state = 67;
 									continue $sm1;
 								}
 							}
-							case 64: {
-								$state = -1;
-								break $sm1;
-							}
-							case 70: {
-								$state = -1;
-								$t102.getResult();
-								$state = 69;
-								continue $sm1;
-							}
-							case 71: {
-								$state = -1;
-								$t103.getResult();
-								this.QS();
-								$state = 69;
-								continue $sm1;
-							}
-							case 69: {
+							case 67: {
 								$state = -1;
 								break $sm1;
 							}
 							case 73: {
 								$state = -1;
-								if ($t104.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item$1(target_pos)) && ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()) && !this.get_target().hasAttr(103) && !this.get_target().hasAttr(73) && !this.get_target().hasAttr(67)) {
-									first_bite = !this.get_target().hasAttr(92);
-									this.get_target().gainAttrRefreshDuration$1(92, 5000, 'You no longer feel the effects of the poison. ', []);
-									if (this.get_target().attrs.get_item(92) >= this.get_target().get_curhp()) {
-										if (!this.get_target().hasAttr(94)) {
-											$Forays_Actor.get_b().add('The poison is overwhelming you! ', []);
-											$Forays_Actor.get_b().add('You\'re falling asleep. ', []);
-											$Forays_Actor.get_b().add('You\'ll surely be eaten... ', []);
-											$t105 = $Forays_Actor.get_b().printAll();
-											$state = 181;
-											$t105.continueWith($sm);
-											return;
-										}
-										$state = 72;
-										continue $sm1;
-									}
-									else if (this.get_target().attrs.get_item(92) >= ss.Int32.div(this.get_target().get_curhp(), 2) && !this.get_target().hasAttr(93)) {
-										this.get_target().gainAttrRefreshDuration(93, 5000);
-										$Forays_Actor.get_b().add('You feel the subtle poison starting to take effect. ', []);
-										$Forays_Actor.get_b().add('Your injuries make it hard to stay awake. ', []);
-										$t107 = $Forays_Actor.get_b().printAll();
-										$state = 182;
-										$t107.continueWith($sm);
-										return;
-									}
-									else {
-										if (first_bite) {
-											$Forays_Actor.get_b().add('The compy\'s bite makes you momentarily fatigued. ', []);
-											$Forays_Actor.get_b().add('You shake off the effects. ', []);
-										}
-										$state = 72;
-										continue $sm1;
-									}
-								}
+								$t125.getResult();
 								$state = 72;
 								continue $sm1;
 							}
 							case 74: {
 								$state = -1;
-								$t108.getResult();
+								$t126.getResult();
 								this.QS();
 								$state = 72;
 								continue $sm1;
@@ -10126,13 +10218,46 @@
 							}
 							case 76: {
 								$state = -1;
-								$t113.getResult();
+								if ($t127.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item$1(target_pos)) && ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()) && !this.get_target().hasAttr(103) && !this.get_target().hasAttr(73) && !this.get_target().hasAttr(67)) {
+									first_bite = !this.get_target().hasAttr(92);
+									this.get_target().gainAttrRefreshDuration$1(92, 5000, 'You no longer feel the effects of the poison. ', []);
+									if (this.get_target().attrs.get_item(92) >= this.get_target().get_curhp()) {
+										if (!this.get_target().hasAttr(94)) {
+											$Forays_Actor.get_b().add('The poison is overwhelming you! ', []);
+											$Forays_Actor.get_b().add('You\'re falling asleep. ', []);
+											$Forays_Actor.get_b().add('You\'ll surely be eaten... ', []);
+											$t128 = $Forays_Actor.get_b().printAll();
+											$state = 193;
+											$t128.continueWith($sm);
+											return;
+										}
+										$state = 75;
+										continue $sm1;
+									}
+									else if (this.get_target().attrs.get_item(92) >= ss.Int32.div(this.get_target().get_curhp(), 2) && !this.get_target().hasAttr(93)) {
+										this.get_target().gainAttrRefreshDuration(93, 5000);
+										$Forays_Actor.get_b().add('You feel the subtle poison starting to take effect. ', []);
+										$Forays_Actor.get_b().add('Your injuries make it hard to stay awake. ', []);
+										$t130 = $Forays_Actor.get_b().printAll();
+										$state = 194;
+										$t130.continueWith($sm);
+										return;
+									}
+									else {
+										if (first_bite) {
+											$Forays_Actor.get_b().add('The compy\'s bite makes you momentarily fatigued. ', []);
+											$Forays_Actor.get_b().add('You shake off the effects. ', []);
+										}
+										$state = 75;
+										continue $sm1;
+									}
+								}
 								$state = 75;
 								continue $sm1;
 							}
 							case 77: {
 								$state = -1;
-								$t114.getResult();
+								$t131.getResult();
 								this.QS();
 								$state = 75;
 								continue $sm1;
@@ -10141,58 +10266,15 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 80: {
-								$state = -1;
-								$t115.getResult();
-								$state = 79;
-								continue $sm1;
-							}
 							case 79: {
 								$state = -1;
-								a5 = this.actorInDirection(dir3);
-								if (ss.isValue(a5)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
-									$t116 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-									$state = 184;
-									$t116.continueWith($sm);
-									return;
-								}
-								$state = 183;
-								continue $sm1;
-							}
-							case 82: {
-								$state = -1;
-								$t118.getResult();
-								$state = 81;
-								continue $sm1;
-							}
-							case 81: {
-								$state = -1;
-								a6 = this.actorInDirection(dir3);
-								if (ss.isValue(a6)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
-									$t119 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-									$state = 186;
-									$t119.continueWith($sm);
-									return;
-								}
-								$state = 185;
-								continue $sm1;
-							}
-							case 83: {
-								$state = -1;
-								$t121.getResult();
-								if (ss.isValue(this.get_target()) && $Forays_Global.roll(3) === 3) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' screams with fury! ', [this]);
-									this.attrs.set_item(70, this.directionOf(this.get_target()));
-									$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, 350, 70, this.your() + ' rage diminishes. ', [this]));
-								}
+								$t136.getResult();
 								$state = 78;
 								continue $sm1;
 							}
-							case 84: {
+							case 80: {
 								$state = -1;
-								$t122.getResult();
+								$t137.getResult();
 								this.QS();
 								$state = 78;
 								continue $sm1;
@@ -10201,210 +10283,251 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 86: {
+							case 82: {
 								$state = -1;
-								$t123.getResult();
-								$state = 85;
+								$t138.getResult();
+								a5 = this.actorInDirection(this.rotateDirection(dir3, cw));
+								if (ss.isValue(a5)) {
+									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$t139 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+									$state = 196;
+									$t139.continueWith($sm);
+									return;
+								}
+								$state = 195;
 								continue $sm1;
 							}
-							case 87: {
+							case 84: {
 								$state = -1;
-								$t128.getResult();
-								this.QS();
-								$state = 85;
+								$t142.getResult();
+								$state = 83;
 								continue $sm1;
 							}
-							case 88: {
+							case 83: {
 								$state = -1;
-								$t129.getResult();
-								this.QS();
-								$state = 85;
+								a6 = this.actorInDirection(dir3);
+								if (ss.isValue(a6)) {
+									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
+									$t143 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+									$state = 198;
+									$t143.continueWith($sm);
+									return;
+								}
+								$state = 197;
 								continue $sm1;
 							}
 							case 85: {
 								$state = -1;
-								break $sm1;
-							}
-							case 90: {
-								$state = -1;
-								$t134.getResult();
-								$state = 89;
+								$t145.getResult();
+								if (ss.isValue(this.get_target()) && $Forays_Global.roll(3) === 3) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' screams with fury! ', [this]);
+									this.attrs.set_item(70, this.directionOf(this.get_target()));
+									$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, 350, 70, this.your() + ' rage diminishes. ', [this]));
+								}
+								$state = 81;
 								continue $sm1;
 							}
-							case 91: {
+							case 86: {
 								$state = -1;
-								$t135.getResult();
+								$t146.getResult();
 								this.QS();
-								$state = 89;
+								$state = 81;
+								continue $sm1;
+							}
+							case 81: {
+								$state = -1;
+								break $sm1;
+							}
+							case 88: {
+								$state = -1;
+								$t147.getResult();
+								$state = 87;
 								continue $sm1;
 							}
 							case 89: {
 								$state = -1;
+								$t152.getResult();
+								this.QS();
+								$state = 87;
+								continue $sm1;
+							}
+							case 90: {
+								$state = -1;
+								$t153.getResult();
+								this.QS();
+								$state = 87;
+								continue $sm1;
+							}
+							case 87: {
+								$state = -1;
 								break $sm1;
+							}
+							case 92: {
+								$state = -1;
+								$t158.getResult();
+								$state = 91;
+								continue $sm1;
 							}
 							case 93: {
 								$state = -1;
-								if ($t136.getResult()) {
-									this.QS();
-									$state = 92;
-									continue $sm1;
-								}
-								else if (this.distanceFrom(this.get_target()) === 1) {
-									$t137 = this.attack(0, this.get_target());
-									$state = 187;
-									$t137.continueWith($sm);
-									return;
-								}
-								else {
-									this.QS();
-									$state = 92;
-									continue $sm1;
-								}
-							}
-							case 94: {
-								$state = -1;
-								$t138.getResult();
+								$t159.getResult();
 								this.QS();
-								$state = 92;
+								$state = 91;
 								continue $sm1;
+							}
+							case 91: {
+								$state = -1;
+								break $sm1;
 							}
 							case 95: {
 								$state = -1;
-								if ($t139.getResult()) {
+								if ($t160.getResult()) {
 									this.QS();
-									$state = 92;
+									$state = 94;
 									continue $sm1;
 								}
-								else {
-									$t140 = this.attack(0, this.get_target());
-									$state = 188;
-									$t140.continueWith($sm);
+								else if (this.distanceFrom(this.get_target()) === 1) {
+									$t161 = this.attack(0, this.get_target());
+									$state = 199;
+									$t161.continueWith($sm);
 									return;
 								}
+								else {
+									this.QS();
+									$state = 94;
+									continue $sm1;
+								}
+							}
+							case 96: {
+								$state = -1;
+								$t162.getResult();
+								this.QS();
+								$state = 94;
+								continue $sm1;
 							}
 							case 97: {
 								$state = -1;
-								$t146.getResult();
-								$state = 96;
+								$t163.getResult();
+								this.QS();
+								$state = 94;
 								continue $sm1;
 							}
 							case 98: {
 								$state = -1;
-								$t147.getResult();
-								$state = 96;
-								continue $sm1;
+								if ($t164.getResult()) {
+									this.QS();
+									$state = 94;
+									continue $sm1;
+								}
+								else {
+									$t165 = this.attack(0, this.get_target());
+									$state = 200;
+									$t165.continueWith($sm);
+									return;
+								}
 							}
-							case 96: {
+							case 99: {
 								$state = -1;
-								this.QS();
-								$state = 92;
-								continue $sm1;
-							}
-							case 100: {
-								$state = -1;
-								$t148.getResult();
-								$state = 99;
+								$t169.getResult();
+								$Forays_Actor.get_b().displayNow();
+								$Forays_Screen.animateStorm$1(tile.p, 1, 1, 4, thrall.get_symbol(), thrall.get_color());
+								$t170 = thrall.getBestLineOfEffect(tile);
+								for ($t171 = 0; $t171 < $t170.length; $t171++) {
+									t21 = $t170[$t171];
+									$Forays_Screen.animateStorm$1(t21.p, 1, 1, 4, thrall.get_symbol(), thrall.get_color());
+								}
+								this.q1();
+								$state = 94;
 								continue $sm1;
 							}
 							case 101: {
 								$state = -1;
-								$t149.getResult();
-								$state = 99;
-								continue $sm1;
-							}
-							case 99: {
-								$state = -1;
-								this.QS();
-								$state = 92;
+								$t172.getResult();
+								$state = 100;
 								continue $sm1;
 							}
 							case 102: {
 								$state = -1;
-								if ($t150.getResult()) {
-									this.QS();
-									$state = 92;
-									continue $sm1;
-								}
-								else if (this.distanceFrom(this.get_target()) === 1) {
-									$t151 = this.attack(0, this.get_target());
-									$state = 189;
-									$t151.continueWith($sm);
-									return;
-								}
-								else {
-									this.QS();
-									$state = 92;
-									continue $sm1;
-								}
+								$t173.getResult();
+								$state = 100;
+								continue $sm1;
 							}
-							case 92: {
+							case 100: {
 								$state = -1;
-								break $sm1;
+								this.QS();
+								$state = 94;
+								continue $sm1;
 							}
 							case 104: {
 								$state = -1;
-								if ($t154.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' backs away. ', [this]);
-									this.QS();
-									$state = 103;
-									continue $sm1;
-								}
-								else if (this.distanceFrom(this.get_target()) === 1) {
-									$t155 = this.attack(0, this.get_target());
-									$state = 190;
-									$t155.continueWith($sm);
-									return;
-								}
-								else {
-									this.QS();
-									$state = 103;
-									continue $sm1;
-								}
-							}
-							case 105: {
-								$state = -1;
-								$t156.getResult();
+								$t174.getResult();
 								$state = 103;
 								continue $sm1;
 							}
-							case 106: {
+							case 105: {
 								$state = -1;
-								$t157.getResult();
-								this.QS();
+								$t175.getResult();
 								$state = 103;
 								continue $sm1;
 							}
 							case 103: {
 								$state = -1;
+								this.QS();
+								$state = 94;
+								continue $sm1;
+							}
+							case 106: {
+								$state = -1;
+								if ($t176.getResult()) {
+									this.QS();
+									$state = 94;
+									continue $sm1;
+								}
+								else if (this.distanceFrom(this.get_target()) === 1) {
+									$t177 = this.attack(0, this.get_target());
+									$state = 201;
+									$t177.continueWith($sm);
+									return;
+								}
+								else {
+									this.QS();
+									$state = 94;
+									continue $sm1;
+								}
+							}
+							case 94: {
+								$state = -1;
 								break $sm1;
 							}
 							case 108: {
 								$state = -1;
-								$t158.getResult();
-								if (ss.isValue(this.get_target())) {
-									valid_dirs = [];
-									$t159 = this.get_target().tilesAtDistance(1);
-									for ($t160 = 0; $t160 < $t159.length; $t160++) {
-										t30 = $t159[$t160];
-										if (t30.get_passable() && ss.isNullOrUndefined(t30.actor()) && this.distanceFrom(t30) === 1) {
-											valid_dirs.add(t30);
-										}
-									}
-									if (valid_dirs.length > 0) {
-										$t161 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, valid_dirs));
-										$state = 191;
-										$t161.continueWith($sm);
-										return;
-									}
+								if ($t180.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' backs away. ', [this]);
+									this.QS();
 									$state = 107;
 									continue $sm1;
 								}
-								$state = 107;
-								continue $sm1;
+								else if (this.distanceFrom(this.get_target()) === 1) {
+									$t181 = this.attack(0, this.get_target());
+									$state = 202;
+									$t181.continueWith($sm);
+									return;
+								}
+								else {
+									this.QS();
+									$state = 107;
+									continue $sm1;
+								}
 							}
 							case 109: {
 								$state = -1;
-								$t162.getResult();
+								$t182.getResult();
+								$state = 107;
+								continue $sm1;
+							}
+							case 110: {
+								$state = -1;
+								$t183.getResult();
 								this.QS();
 								$state = 107;
 								continue $sm1;
@@ -10413,44 +10536,56 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 111: {
-								$state = -1;
-								$t163.getResult();
-								$state = 110;
-								continue $sm1;
-							}
 							case 112: {
 								$state = -1;
-								$t164.getResult();
-								$state = 110;
+								$t184.getResult();
+								if (ss.isValue(this.get_target())) {
+									valid_dirs = [];
+									$t185 = this.get_target().tilesAtDistance(1);
+									for ($t186 = 0; $t186 < $t185.length; $t186++) {
+										t30 = $t185[$t186];
+										if (t30.get_passable() && ss.isNullOrUndefined(t30.actor()) && this.distanceFrom(t30) === 1) {
+											valid_dirs.add(t30);
+										}
+									}
+									if (valid_dirs.length > 0) {
+										$t187 = this.aI_Step($Forays_Extensions.random($Forays_Tile).call(null, valid_dirs));
+										$state = 203;
+										$t187.continueWith($sm);
+										return;
+									}
+									$state = 111;
+									continue $sm1;
+								}
+								$state = 111;
 								continue $sm1;
 							}
 							case 113: {
 								$state = -1;
-								$t165.getResult();
+								$t188.getResult();
 								this.QS();
-								$state = 110;
+								$state = 111;
 								continue $sm1;
 							}
-							case 110: {
+							case 111: {
 								$state = -1;
 								break $sm1;
 							}
 							case 115: {
 								$state = -1;
-								$t166.getResult();
-								if ($Forays_Global.coinFlip()) {
-									$t167 = this.aI_Step$1(this.get_target(), true);
-									$state = 192;
-									$t167.continueWith($sm);
-									return;
-								}
+								$t189.getResult();
 								$state = 114;
 								continue $sm1;
 							}
 							case 116: {
 								$state = -1;
-								$t168.getResult();
+								$t190.getResult();
+								$state = 114;
+								continue $sm1;
+							}
+							case 117: {
+								$state = -1;
+								$t191.getResult();
 								this.QS();
 								$state = 114;
 								continue $sm1;
@@ -10461,180 +10596,227 @@
 							}
 							case 119: {
 								$state = -1;
-								$t169.getResult();
+								$t192.getResult();
+								if ($Forays_Global.coinFlip()) {
+									$t193 = this.aI_Step$1(this.get_target(), true);
+									$state = 204;
+									$t193.continueWith($sm);
+									return;
+								}
 								$state = 118;
 								continue $sm1;
 							}
 							case 120: {
 								$state = -1;
-								if ($t170.getResult()) {
-									this.QS();
-									$state = 118;
-									continue $sm1;
-								}
-								else {
-									$t171 = this.attack(0, this.get_target());
-									$state = 193;
-									$t171.continueWith($sm);
-									return;
-								}
+								$t194.getResult();
+								this.QS();
+								$state = 118;
+								continue $sm1;
 							}
 							case 118: {
-								$state = 117;
-								continue $sm1;
-							}
-							case 122: {
 								$state = -1;
-								$t172.getResult();
-								$state = 121;
-								continue $sm1;
+								break $sm1;
 							}
 							case 123: {
 								$state = -1;
-								if ($t173.getResult()) {
+								$t195.getResult();
+								$state = 122;
+								continue $sm1;
+							}
+							case 124: {
+								$state = -1;
+								if ($t196.getResult()) {
 									this.QS();
-									$state = 121;
+									$state = 122;
 									continue $sm1;
 								}
 								else {
-									$t174 = this.aI_Sidestep(this.get_target());
-									$state = 194;
-									$t174.continueWith($sm);
+									$t197 = this.attack(0, this.get_target());
+									$state = 205;
+									$t197.continueWith($sm);
 									return;
 								}
 							}
-							case 121: {
-								$state = 117;
-								continue $sm1;
-							}
-							case 125: {
-								$state = -1;
-								$t175.getResult();
-								$state = 124;
+							case 122: {
+								$state = 121;
 								continue $sm1;
 							}
 							case 126: {
 								$state = -1;
-								if ($t176.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
-								}
-								this.QS();
-								$state = 124;
-								continue $sm1;
-							}
-							case 124: {
-								$state = 117;
+								$t198.getResult();
+								$state = 125;
 								continue $sm1;
 							}
 							case 127: {
 								$state = -1;
-								$t177.getResult();
-								this.QS();
-								$state = 117;
-								continue $sm1;
+								if ($t199.getResult()) {
+									this.QS();
+									$state = 125;
+									continue $sm1;
+								}
+								else {
+									$t200 = this.aI_Sidestep(this.get_target());
+									$state = 206;
+									$t200.continueWith($sm);
+									return;
+								}
 							}
-							case 117: {
-								$state = 117;
+							case 125: {
+								$state = 121;
 								continue $sm1;
 							}
 							case 129: {
 								$state = -1;
-								if (!($t179 < $t178.length)) {
-									$state = 196;
-									continue $sm1;
-								}
-								a7 = $t178[$t179];
-								if (a7.hasAttr(75) && a7.hasLOE(this)) {
-									if (this.distanceFrom(this.get_target()) === 1) {
-										$t180 = this.attack(0, this.get_target());
-										$state = 198;
-										$t180.continueWith($sm);
-										return;
-									}
-									else {
-										$t181 = this.aI_Step(this.get_target());
-										$state = 199;
-										$t181.continueWith($sm);
-										return;
-									}
-								}
-								$state = 195;
-								continue $sm1;
-							}
-							case 128: {
-								$state = -1;
-								break $sm1;
-							}
-							case 131: {
-								$state = -1;
-								$t184.getResult();
-								$state = 130;
-								continue $sm1;
-							}
-							case 132: {
-								$state = -1;
-								if (true !== $t185.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' is off balance! ', [this]);
-									this.attrs.set_item(76, 0);
-								}
-								$state = 130;
-								continue $sm1;
-							}
-							case 134: {
-								$state = -1;
-								$t186.getResult();
-								$state = 133;
-								continue $sm1;
-							}
-							case 133: {
-								$state = -1;
-								this.QS();
-								$state = 130;
+								$t201.getResult();
+								$state = 128;
 								continue $sm1;
 							}
 							case 130: {
 								$state = -1;
-								break $sm1;
+								if ($t202.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+								}
+								this.QS();
+								$state = 128;
+								continue $sm1;
 							}
-							case 135: {
+							case 128: {
+								$state = 121;
+								continue $sm1;
+							}
+							case 131: {
 								$state = -1;
-								if (!($t188 < $t187.length)) {
-									$state = 201;
+								$t203.getResult();
+								this.QS();
+								$state = 121;
+								continue $sm1;
+							}
+							case 121: {
+								$state = 121;
+								continue $sm1;
+							}
+							case 133: {
+								$state = -1;
+								if (!(i8 < 9999)) {
+									$state = 208;
 									continue $sm1;
 								}
-								a8 = $t187[$t188];
-								if (a8.hasAttr(75) && a8.hasLOE(this)) {
+								rr = $Forays_Global.roll$1(1, 20);
+								rc = $Forays_Global.roll$1(1, 64);
+								if (Math.abs(rr - this.get_row()) >= 10 || Math.abs(rc - this.get_col()) >= 10 || Math.abs(rr - this.get_row()) >= 7 && Math.abs(rc - this.get_col()) >= 7) {
+									if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc)) && !this.hasLOS$1(rr, rc)) {
+										$Forays_Actor.get_b().add(this.theVisible() + ' slashes at the air, sending a swirling vortex toward ' + this.get_target().get_the_name() + '. ', [this.get_target()]);
+										this.animateBeam$1(this.get_target(), '*', 4);
+										this.get_target().animateStorm(3, 3, 10, '*', 4);
+										$t204 = this.get_target().move(rr, rc);
+										$state = 209;
+										$t204.continueWith($sm);
+										return;
+									}
+									$state = 207;
+									continue $sm1;
+								}
+								$state = 207;
+								continue $sm1;
+							}
+							case 134: {
+								$state = -1;
+								if (!($t206 < $t205.length)) {
+									$state = 211;
+									continue $sm1;
+								}
+								a7 = $t205[$t206];
+								if (a7.hasAttr(75) && a7.hasLOE(this)) {
 									if (this.distanceFrom(this.get_target()) === 1) {
-										$t189 = this.attack(0, this.get_target());
-										$state = 203;
-										$t189.continueWith($sm);
+										$t207 = this.attack(0, this.get_target());
+										$state = 213;
+										$t207.continueWith($sm);
 										return;
 									}
 									else {
-										$t190 = this.aI_Step(this.get_target());
-										$state = 204;
-										$t190.continueWith($sm);
+										$t208 = this.aI_Step(this.get_target());
+										$state = 214;
+										$t208.continueWith($sm);
 										return;
 									}
 								}
-								$state = 200;
+								$state = 210;
+								continue $sm1;
+							}
+							case 132: {
+								$state = -1;
+								break $sm1;
+							}
+							case 136: {
+								$state = -1;
+								$t212.getResult();
+								$state = 135;
 								continue $sm1;
 							}
 							case 137: {
 								$state = -1;
-								$t198.getResult();
-								$state = 136;
-								continue $sm1;
-							}
-							case 138: {
-								$state = -1;
-								$t199.getResult();
-								$state = 136;
+								if (true !== $t213.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' is off balance! ', [this]);
+									this.attrs.set_item(76, 0);
+								}
+								$state = 135;
 								continue $sm1;
 							}
 							case 139: {
 								$state = -1;
-								if ($t200.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(target_r1, target_c1))) {
+								$t214.getResult();
+								$state = 138;
+								continue $sm1;
+							}
+							case 138: {
+								$state = -1;
+								this.QS();
+								$state = 135;
+								continue $sm1;
+							}
+							case 135: {
+								$state = -1;
+								break $sm1;
+							}
+							case 140: {
+								$state = -1;
+								if (!($t216 < $t215.length)) {
+									$state = 216;
+									continue $sm1;
+								}
+								a8 = $t215[$t216];
+								if (a8.hasAttr(75) && a8.hasLOE(this)) {
+									if (this.distanceFrom(this.get_target()) === 1) {
+										$t217 = this.attack(0, this.get_target());
+										$state = 218;
+										$t217.continueWith($sm);
+										return;
+									}
+									else {
+										$t218 = this.aI_Step(this.get_target());
+										$state = 219;
+										$t218.continueWith($sm);
+										return;
+									}
+								}
+								$state = 215;
+								continue $sm1;
+							}
+							case 142: {
+								$state = -1;
+								$t233.getResult();
+								$state = 141;
+								continue $sm1;
+							}
+							case 143: {
+								$state = -1;
+								$t234.getResult();
+								$state = 141;
+								continue $sm1;
+							}
+							case 144: {
+								$state = -1;
+								if ($t235.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(target_r1, target_c1))) {
 									if (this.get_target().hasAttr(30)) {
 										if (this.get_target().get_name() === 'you') {
 											$Forays_Actor.get_b().add('You don\'t move far. ', []);
@@ -10642,7 +10824,7 @@
 										else {
 											$Forays_Actor.get_b().add(this.get_target().get_the_name() + ' doesn\'t move far. ', [this.get_target()]);
 										}
-										$state = 136;
+										$state = 141;
 										continue $sm1;
 									}
 									else {
@@ -10660,143 +10842,126 @@
 										if (this.get_target().get_col() > this.get_col()) {
 											colchange = -1;
 										}
-										$t201 = this.get_target().aI_MoveOrOpen$1(this.get_target().get_row() + rowchange, this.get_target().get_col() + colchange);
-										$state = 205;
-										$t201.continueWith($sm);
+										$t236 = this.get_target().aI_MoveOrOpen$1(this.get_target().get_row() + rowchange, this.get_target().get_col() + colchange);
+										$state = 220;
+										$t236.continueWith($sm);
 										return;
 									}
 								}
-								$state = 136;
-								continue $sm1;
-							}
-							case 136: {
-								$state = -1;
-								break $sm1;
-							}
-							case 142: {
-								$state = -1;
-								if ($t210.getResult()) {
-									this.QS();
-									$state = 206;
-									continue $sm1;
-								}
-								else {
-									$t211 = this.attack(0, this.get_target());
-									$state = 207;
-									$t211.continueWith($sm);
-									return;
-								}
-							}
-							case 144: {
-								$state = -1;
-								if ($t212.getResult()) {
-									this.QS();
-								}
-								else {
-									blast = true;
-								}
-								$state = 143;
-								continue $sm1;
-							}
-							case 143: {
-								$state = 141;
-								continue $sm1;
-							}
-							case 146: {
-								$state = -1;
-								$t213.getResult();
-								this.QS();
-								$state = 145;
-								continue $sm1;
-							}
-							case 145: {
-								$state = 141;
-								continue $sm1;
-							}
-							case 147: {
-								$state = -1;
-								$t214.getResult();
-								this.QS();
 								$state = 141;
 								continue $sm1;
 							}
 							case 141: {
 								$state = -1;
-								if (blast) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' fires dark energy at ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
-									this.animateBoltProjectile(this.get_target(), 12);
-									$t215 = this.get_target().takeDamage$2(9, 1, $Forays_Global.roll(6), this, '*blasted by a necromancer');
-									$state = 208;
-									$t215.continueWith($sm);
+								break $sm1;
+							}
+							case 147: {
+								$state = -1;
+								if ($t245.getResult()) {
+									this.QS();
+									$state = 221;
+									continue $sm1;
+								}
+								else {
+									$t246 = this.attack(0, this.get_target());
+									$state = 222;
+									$t246.continueWith($sm);
 									return;
 								}
-								$state = 140;
-								continue $sm1;
-							}
-							case 140: {
-								$state = -1;
-								break $sm1;
 							}
 							case 149: {
 								$state = -1;
-								$t216.getResult();
-								$state = 148;
-								continue $sm1;
-							}
-							case 150: {
-								$state = -1;
-								$t217.getResult();
-								this.QS();
+								if ($t247.getResult()) {
+									this.QS();
+								}
+								else {
+									blast = true;
+								}
 								$state = 148;
 								continue $sm1;
 							}
 							case 148: {
+								$state = 146;
+								continue $sm1;
+							}
+							case 151: {
 								$state = -1;
-								break $sm1;
+								$t248.getResult();
+								this.QS();
+								$state = 150;
+								continue $sm1;
+							}
+							case 150: {
+								$state = 146;
+								continue $sm1;
 							}
 							case 152: {
 								$state = -1;
-								$t222.getResult();
-								if (ss.isValue(this.get_target()) && !this.get_target().hasAttr(31) && !this.get_target().hasAttr(32)) {
-									this.get_target().attrs.set_item(32, 1);
-									$Forays_Actor.get_b().add(this.get_target().you('start') + ' catching fire! ', [this.get_target()]);
-								}
-								$state = 151;
+								$t249.getResult();
+								this.QS();
+								$state = 146;
 								continue $sm1;
 							}
-							case 153: {
+							case 146: {
 								$state = -1;
-								$t223.getResult();
-								this.QS();
-								$state = 151;
+								if (blast) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' fires dark energy at ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+									this.animateBoltProjectile(this.get_target(), 12);
+									$t250 = this.get_target().takeDamage$2(9, 1, $Forays_Global.roll(6), this, '*blasted by a necromancer');
+									$state = 223;
+									$t250.continueWith($sm);
+									return;
+								}
+								$state = 145;
 								continue $sm1;
+							}
+							case 145: {
+								$state = -1;
+								break $sm1;
 							}
 							case 154: {
 								$state = -1;
-								$t224.getResult();
-								$state = 151;
+								$t251.getResult();
+								$state = 153;
 								continue $sm1;
 							}
 							case 155: {
 								$state = -1;
-								$t225.getResult();
+								$t252.getResult();
 								this.QS();
-								$state = 151;
+								$state = 153;
 								continue $sm1;
 							}
-							case 151: {
+							case 153: {
 								$state = -1;
 								break $sm1;
 							}
 							case 157: {
 								$state = -1;
-								$t226.getResult();
+								$t257.getResult();
+								if (ss.isValue(this.get_target()) && !this.get_target().hasAttr(31) && !this.get_target().hasAttr(32)) {
+									this.get_target().attrs.set_item(32, 1);
+									$Forays_Actor.get_b().add(this.get_target().you('start') + ' catching fire! ', [this.get_target()]);
+								}
 								$state = 156;
 								continue $sm1;
 							}
 							case 158: {
 								$state = -1;
-								$t227.getResult();
+								$t258.getResult();
+								this.QS();
+								$state = 156;
+								continue $sm1;
+							}
+							case 159: {
+								$state = -1;
+								$t259.getResult();
+								$state = 156;
+								continue $sm1;
+							}
+							case 160: {
+								$state = -1;
+								$t260.getResult();
 								this.QS();
 								$state = 156;
 								continue $sm1;
@@ -10805,70 +10970,93 @@
 								$state = -1;
 								break $sm1;
 							}
-							case 159: {
+							case 162: {
+								$state = -1;
+								$t261.getResult();
+								$state = 161;
+								continue $sm1;
+							}
+							case 163: {
+								$state = -1;
+								$t262.getResult();
+								this.QS();
+								$state = 161;
+								continue $sm1;
+							}
+							case 161: {
+								$state = -1;
+								break $sm1;
+							}
+							case 164: {
 								$state = -1;
 								$t2.getResult();
 								$state = 1;
 								continue $sm1;
 							}
-							case 160: {
+							case 165: {
 								$state = -1;
 								$t9.getResult();
 								$state = 5;
 								continue $sm1;
 							}
-							case 161: {
+							case 166: {
 								$state = -1;
-								$t21.getResult();
-								$state = 18;
-								continue $sm1;
-							}
-							case 162: {
-								$state = -1;
-								$t25.getResult();
+								$t22.getResult();
 								$state = 20;
-								continue $sm1;
-							}
-							case 163: {
-								$state = -1;
-								$t42.getResult();
-								$state = 36;
-								continue $sm1;
-							}
-							case 164: {
-								$state = -1;
-								if ($t45.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
-								}
-								this.QS();
-								$state = 39;
-								continue $sm1;
-							}
-							case 168: {
-								$state = -1;
-								$t51.getResult();
-								$state = 167;
-								continue $sm1;
-							}
-							case 169: {
-								$state = -1;
-								$t52.getResult();
-								this.QS();
-								$state = 167;
 								continue $sm1;
 							}
 							case 167: {
 								$state = -1;
+								$t26.getResult();
+								$state = 22;
+								continue $sm1;
+							}
+							case 168: {
+								$state = -1;
+								$t35.getResult();
+								$state = 30;
+								continue $sm1;
+							}
+							case 169: {
+								$state = -1;
+								$t44.getResult();
+								$state = 39;
+								continue $sm1;
+							}
+							case 170: {
+								$state = -1;
+								if ($t47.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+								}
+								this.QS();
+								$state = 42;
+								continue $sm1;
+							}
+							case 174: {
+								$state = -1;
+								$t53.getResult();
+								$state = 173;
+								continue $sm1;
+							}
+							case 175: {
+								$state = -1;
+								$t54.getResult();
+								this.QS();
+								$state = 173;
+								continue $sm1;
+							}
+							case 173: {
+								$state = -1;
 								$tcs.setResult(null);
 								return;
 							}
-							case 165: {
+							case 171: {
 								$state = -1;
-								$t50++;
-								$state = 46;
+								$t52++;
+								$state = 49;
 								continue $sm1;
 							}
-							case 166: {
+							case 172: {
 								$state = -1;
 								valid_spells = [];
 								valid_spells.add(2);
@@ -10881,395 +11069,490 @@
 								//SpellType[] all_spells = valid_spells.ToArray();
 								valid_spells.remove(2);
 								ranged_spells = Enumerable.from(valid_spells).toArray();
-								$t232 = this.distanceFrom(this.get_target());
-								if ($t232 === 1) {
+								$t267 = this.distanceFrom(this.get_target());
+								if ($t267 === 1) {
 									if (this.get_target().enemiesAdjacent() > 1 || $Forays_Global.coinFlip()) {
-										this.castRandomSpell(this.get_target(), close_spells);
-										$state = 210;
-										continue $sm1;
-									}
-									else {
-										$t53 = this.aI_Step$1(this.get_target(), true);
-										$state = 211;
-										$t53.continueWith($sm);
+										$t55 = this.castRandomSpell(this.get_target(), close_spells);
+										$state = 226;
+										$t55.continueWith($sm);
 										return;
-									}
-								}
-								else if ($t232 === 2) {
-									if ($Forays_Global.coinFlip()) {
-										$t54 = this.aI_Step$1(this.get_target(), true);
-										$state = 213;
-										$t54.continueWith($sm);
-										return;
-									}
-									else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-										this.castRandomSpell(this.get_target(), ranged_spells);
-										$state = 212;
-										continue $sm1;
 									}
 									else {
 										$t56 = this.aI_Step$1(this.get_target(), true);
-										$state = 214;
+										$state = 227;
 										$t56.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t232 === 3 || $t232 === 4 || $t232 === 5 || $t232 === 6 || $t232 === 7 || $t232 === 8 || $t232 === 9 || $t232 === 10 || $t232 === 11 || $t232 === 12) {
-									if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-										this.castRandomSpell(this.get_target(), ranged_spells);
-										$state = 215;
-										continue $sm1;
-									}
-									else {
-										$t58 = this.aI_Sidestep(this.get_target());
-										$state = 216;
+								else if ($t267 === 2) {
+									if ($Forays_Global.coinFlip()) {
+										$t58 = this.aI_Step$1(this.get_target(), true);
+										$state = 229;
 										$t58.continueWith($sm);
 										return;
 									}
-								}
-								else {
-									$t59 = this.aI_Step(this.get_target());
-									$state = 217;
-									$t59.continueWith($sm);
-									return;
-								}
-								$state = 209;
-								continue $sm1;
-							}
-							case 170: {
-								$state = -1;
-								$t66.getResult();
-								$state = 50;
-								continue $sm1;
-							}
-							case 174: {
-								$state = -1;
-								$t69.getResult();
-								$state = 173;
-								continue $sm1;
-							}
-							case 175: {
-								$state = -1;
-								$t70.getResult();
-								this.QS();
-								$state = 173;
-								continue $sm1;
-							}
-							case 173: {
-								$state = -1;
-								$tcs.setResult(null);
-								return;
-							}
-							case 171: {
-								$state = -1;
-								$t68++;
-								$state = 53;
-								continue $sm1;
-							}
-							case 172: {
-								$state = -1;
-								$t233 = this.distanceFrom(this.get_target());
-								if ($t233 === 1) {
-									if (this.hasAttr(71)) {
-										$t71 = this.attack(0, this.get_target());
-										$state = 220;
-										$t71.continueWith($sm);
+									else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+										$t61 = this.castRandomSpell(this.get_target(), ranged_spells);
+										$state = 230;
+										$t61.continueWith($sm);
 										return;
 									}
 									else {
-										if (this.get_curhp() <= 13) {
-											this.castSpell(21);
-										}
-										else if (this.get_curhp() < this.get_maxhp()) {
-											if (this.hasAttr(72)) {
-												this.castSpell(20);
-											}
-											else {
-												this.castRandomSpell(null, [22, 20]);
-											}
-										}
-										else {
-											this.castSpell(20);
-										}
-										$state = 219;
-										continue $sm1;
-									}
-								}
-								else if ($t233 === 2) {
-									if (this.get_curhp() <= 20) {
-										this.castSpell(21);
-										$state = 221;
-										continue $sm1;
-									}
-									else if (this.hasAttr(71)) {
-										$t72 = this.aI_Step(this.get_target());
-										$state = 222;
-										$t72.continueWith($sm);
+										$t62 = this.aI_Step$1(this.get_target(), true);
+										$state = 231;
+										$t62.continueWith($sm);
 										return;
 									}
-									else if ($Forays_Global.roll$1(1, 3) === 3) {
-										this.castSpell(20);
-										$state = 221;
-										continue $sm1;
+								}
+								else if ($t267 === 3 || $t267 === 4 || $t267 === 5 || $t267 === 6 || $t267 === 7 || $t267 === 8 || $t267 === 9 || $t267 === 10 || $t267 === 11 || $t267 === 12) {
+									if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+										$t64 = this.castRandomSpell(this.get_target(), ranged_spells);
+										$state = 233;
+										$t64.continueWith($sm);
+										return;
 									}
 									else {
-										$t74 = this.aI_Step(this.get_target());
-										$state = 223;
-										$t74.continueWith($sm);
-										return;
-									}
-								}
-								else if (this.get_curhp() <= 26) {
-									this.castSpell(21);
-									$state = 224;
-									continue $sm1;
-								}
-								else if (this.get_curhp() < this.get_maxhp()) {
-									if (this.hasAttr(72)) {
-										$t76 = this.aI_Step(this.get_target());
-										$state = 225;
-										$t76.continueWith($sm);
-										return;
-									}
-									else if ($Forays_Global.coinFlip()) {
-										this.castSpell(22);
-										$state = 224;
-										continue $sm1;
-									}
-									else {
-										$t78 = this.aI_Step(this.get_target());
-										$state = 226;
-										$t78.continueWith($sm);
+										$t65 = this.aI_Sidestep(this.get_target());
+										$state = 234;
+										$t65.continueWith($sm);
 										return;
 									}
 								}
 								else {
-									$t80 = this.aI_Step(this.get_target());
-									$state = 227;
-									$t80.continueWith($sm);
+									$t66 = this.aI_Step(this.get_target());
+									$state = 235;
+									$t66.continueWith($sm);
 									return;
 								}
-								$state = 218;
-								continue $sm1;
-							}
-							case 178: {
-								$state = -1;
-								if ($t83.getResult()) {
-									actor.attrs.set_item(34, actor.attrs.get_item(34) + 1);
-									$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(actor, actor.durationOfMagicalEffect($Forays_Global.roll(3) + 2) * 100, 34));
-								}
-								$state = 176;
+								$state = 224;
 								continue $sm1;
 							}
 							case 176: {
 								$state = -1;
-								$t82++;
-								$state = 55;
-								continue $sm1;
-							}
-							case 177: {
-								$state = -1;
-								this.q1();
-								$state = 54;
-								continue $sm1;
-							}
-							case 179: {
-								$state = -1;
-								$t99.getResult();
-								$state = 64;
+								$t73.getResult();
+								$state = 53;
 								continue $sm1;
 							}
 							case 180: {
 								$state = -1;
-								if ($t100.getResult()) {
-									this.QS();
-									$state = 64;
-									continue $sm1;
-								}
-								else if (this.distanceFrom(this.get_target()) === 1) {
-									$t101 = this.attack(1, this.get_target());
-									$state = 228;
-									$t101.continueWith($sm);
-									return;
-								}
-								else {
-									this.QS();
-									$state = 64;
-									continue $sm1;
-								}
+								$t76.getResult();
+								$state = 179;
+								continue $sm1;
 							}
 							case 181: {
 								$state = -1;
-								$t105.getResult();
-								$t106 = this.get_target().attrs;
-								$t106.set_item(94, $t106.get_item(94) + 1);
-								$state = 72;
+								$t77.getResult();
+								this.QS();
+								$state = 179;
 								continue $sm1;
 							}
-							case 182: {
+							case 179: {
 								$state = -1;
-								$t107.getResult();
-								$state = 72;
+								$tcs.setResult(null);
+								return;
+							}
+							case 177: {
+								$state = -1;
+								$t75++;
+								$state = 56;
+								continue $sm1;
+							}
+							case 178: {
+								$state = -1;
+								$t268 = this.distanceFrom(this.get_target());
+								if ($t268 === 1) {
+									if (this.hasAttr(71)) {
+										$t78 = this.attack(0, this.get_target());
+										$state = 238;
+										$t78.continueWith($sm);
+										return;
+									}
+									else if (this.get_curhp() <= 13) {
+										$t79 = this.castSpell(21);
+										$state = 239;
+										$t79.continueWith($sm);
+										return;
+									}
+									else if (this.get_curhp() < this.get_maxhp()) {
+										if (this.hasAttr(72)) {
+											$t80 = this.castSpell(20);
+											$state = 240;
+											$t80.continueWith($sm);
+											return;
+										}
+										else {
+											$t81 = this.castRandomSpell(null, [22, 20]);
+											$state = 241;
+											$t81.continueWith($sm);
+											return;
+										}
+									}
+									else {
+										$t82 = this.castSpell(20);
+										$state = 242;
+										$t82.continueWith($sm);
+										return;
+									}
+								}
+								else if ($t268 === 2) {
+									if (this.get_curhp() <= 20) {
+										$t83 = this.castSpell(21);
+										$state = 244;
+										$t83.continueWith($sm);
+										return;
+									}
+									else if (this.hasAttr(71)) {
+										$t84 = this.aI_Step(this.get_target());
+										$state = 245;
+										$t84.continueWith($sm);
+										return;
+									}
+									else if ($Forays_Global.roll$1(1, 3) === 3) {
+										$t86 = this.castSpell(20);
+										$state = 246;
+										$t86.continueWith($sm);
+										return;
+									}
+									else {
+										$t87 = this.aI_Step(this.get_target());
+										$state = 247;
+										$t87.continueWith($sm);
+										return;
+									}
+								}
+								else if (this.get_curhp() <= 26) {
+									$t90 = this.castSpell(21);
+									$state = 249;
+									$t90.continueWith($sm);
+									return;
+								}
+								else if (this.get_curhp() < this.get_maxhp()) {
+									if (this.hasAttr(72)) {
+										$t91 = this.aI_Step(this.get_target());
+										$state = 250;
+										$t91.continueWith($sm);
+										return;
+									}
+									else if ($Forays_Global.coinFlip()) {
+										$t94 = this.castSpell(22);
+										$state = 251;
+										$t94.continueWith($sm);
+										return;
+									}
+									else {
+										$t95 = this.aI_Step(this.get_target());
+										$state = 252;
+										$t95.continueWith($sm);
+										return;
+									}
+								}
+								else {
+									$t98 = this.aI_Step(this.get_target());
+									$state = 253;
+									$t98.continueWith($sm);
+									return;
+								}
+								$state = 236;
 								continue $sm1;
 							}
 							case 184: {
 								$state = -1;
-								$t116.getResult();
-								$state = 183;
+								if ($t102.getResult()) {
+									actor.attrs.set_item(34, actor.attrs.get_item(34) + 1);
+									$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(actor, actor.durationOfMagicalEffect($Forays_Global.roll(3) + 2) * 100, 34));
+								}
+								$state = 182;
+								continue $sm1;
+							}
+							case 182: {
+								$state = -1;
+								$t101++;
+								$state = 58;
 								continue $sm1;
 							}
 							case 183: {
 								$state = -1;
-								a5 = this.actorInDirection(this.rotateDirection(dir3, !cw));
-								if (ss.isValue(a5)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
-									$t117 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-									$state = 230;
-									$t117.continueWith($sm);
-									return;
-								}
-								$state = 229;
-								continue $sm1;
-							}
-							case 186: {
-								$state = -1;
-								$t119.getResult();
-								$state = 185;
+								this.q1();
+								$state = 57;
 								continue $sm1;
 							}
 							case 185: {
 								$state = -1;
-								a6 = this.actorInDirection(this.rotateDirection(dir3, !cw));
-								if (ss.isValue(a6)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
-									$t120 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
-									$state = 232;
-									$t120.continueWith($sm);
-									return;
-								}
-								$state = 231;
+								$t107.getResult();
+								$state = 61;
 								continue $sm1;
 							}
 							case 187: {
 								$state = -1;
-								$t137.getResult();
-								$state = 92;
-								continue $sm1;
-							}
-							case 188: {
-								$state = -1;
-								$t140.getResult();
-								$state = 92;
+								if (!(i1 < 9999)) {
+									$state = 255;
+									continue $sm1;
+								}
+								a4 = $Forays_Global.roll$1(1, 17) - 9;
+								//-8 to 8
+								b = $Forays_Global.roll$1(1, 17) - 9;
+								if (Math.abs(a4) + Math.abs(b) >= 6) {
+									a4 += this.get_row();
+									b += this.get_col();
+									if ($Forays_PhysicalObject.get_m().boundsCheck(a4, b)) {
+										if ($Forays_PhysicalObject.get_m().tile.get_item(a4, b).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(a4, b))) {
+											$t108 = this.move(a4, b);
+											$state = 256;
+											$t108.continueWith($sm);
+											return;
+										}
+										$state = 254;
+										continue $sm1;
+									}
+									$state = 254;
+									continue $sm1;
+								}
+								$state = 254;
 								continue $sm1;
 							}
 							case 189: {
 								$state = -1;
-								$t151.getResult();
-								$state = 92;
+								$t109.getResult();
+								$state = 188;
+								continue $sm1;
+							}
+							case 188: {
+								$state = -1;
+								this.QS();
+								$state = 186;
+								continue $sm1;
+							}
+							case 186: {
+								$state = 186;
 								continue $sm1;
 							}
 							case 190: {
 								$state = -1;
-								$t155.getResult();
-								$state = 103;
+								$t121.getResult();
+								$state = 67;
 								continue $sm1;
 							}
 							case 191: {
 								$state = -1;
-								$t161.getResult();
-								$state = 107;
+								$t122.getResult();
+								this.QS();
+								$state = 67;
 								continue $sm1;
 							}
 							case 192: {
 								$state = -1;
-								$t167.getResult();
-								$state = 114;
-								continue $sm1;
+								if ($t123.getResult()) {
+									this.QS();
+									$state = 67;
+									continue $sm1;
+								}
+								else if (this.distanceFrom(this.get_target()) === 1) {
+									$t124 = this.attack(1, this.get_target());
+									$state = 257;
+									$t124.continueWith($sm);
+									return;
+								}
+								else {
+									this.QS();
+									$state = 67;
+									continue $sm1;
+								}
 							}
 							case 193: {
 								$state = -1;
-								$t171.getResult();
-								$state = 118;
+								$t128.getResult();
+								$t129 = this.get_target().attrs;
+								$t129.set_item(94, $t129.get_item(94) + 1);
+								$state = 75;
 								continue $sm1;
 							}
 							case 194: {
 								$state = -1;
-								if ($t174.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+								$t130.getResult();
+								$state = 75;
+								continue $sm1;
+							}
+							case 196: {
+								$state = -1;
+								$t139.getResult();
+								$state = 195;
+								continue $sm1;
+							}
+							case 195: {
+								$state = -1;
+								a5 = this.actorInDirection(dir3);
+								if (ss.isValue(a5)) {
+									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$t140 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+									$state = 259;
+									$t140.continueWith($sm);
+									return;
 								}
-								this.QS();
-								$state = 121;
+								$state = 258;
 								continue $sm1;
 							}
 							case 198: {
 								$state = -1;
-								$t180.getResult();
-								$state = 197;
-								continue $sm1;
-							}
-							case 199: {
-								$state = -1;
-								$t181.getResult();
-								this.QS();
+								$t143.getResult();
 								$state = 197;
 								continue $sm1;
 							}
 							case 197: {
 								$state = -1;
-								$tcs.setResult(null);
-								return;
-							}
-							case 195: {
-								$state = -1;
-								$t179++;
-								$state = 129;
-								continue $sm1;
-							}
-							case 196: {
-								$state = -1;
-								if (this.distanceFrom(this.get_target()) === 1) {
-									$t182 = this.attack(0, this.get_target());
-									$state = 233;
-									$t182.continueWith($sm);
+								a6 = this.actorInDirection(this.rotateDirection(dir3, !cw));
+								if (ss.isValue(a6)) {
+									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
+									$t144 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+									$state = 261;
+									$t144.continueWith($sm);
 									return;
 								}
-								else if (this.distanceFrom(this.get_target()) <= 12 && ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-									this.castRandomSpell(this.get_target(), [12, 15]);
-									$state = 128;
-									continue $sm1;
-								}
-								else {
-									$t183 = this.aI_Step(this.get_target());
-									$state = 234;
-									$t183.continueWith($sm);
-									return;
-								}
-							}
-							case 203: {
-								$state = -1;
-								$t189.getResult();
-								$state = 202;
+								$state = 260;
 								continue $sm1;
 							}
-							case 204: {
+							case 199: {
 								$state = -1;
-								$t190.getResult();
-								this.QS();
-								$state = 202;
+								$t161.getResult();
+								$state = 94;
+								continue $sm1;
+							}
+							case 200: {
+								$state = -1;
+								$t165.getResult();
+								$state = 94;
+								continue $sm1;
+							}
+							case 201: {
+								$state = -1;
+								$t177.getResult();
+								$state = 94;
 								continue $sm1;
 							}
 							case 202: {
 								$state = -1;
+								$t181.getResult();
+								$state = 107;
+								continue $sm1;
+							}
+							case 203: {
+								$state = -1;
+								$t187.getResult();
+								$state = 111;
+								continue $sm1;
+							}
+							case 204: {
+								$state = -1;
+								$t193.getResult();
+								$state = 118;
+								continue $sm1;
+							}
+							case 205: {
+								$state = -1;
+								$t197.getResult();
+								$state = 122;
+								continue $sm1;
+							}
+							case 206: {
+								$state = -1;
+								if ($t200.getResult()) {
+									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+								}
+								this.QS();
+								$state = 125;
+								continue $sm1;
+							}
+							case 209: {
+								$state = -1;
+								$t204.getResult();
+								$Forays_PhysicalObject.get_m().draw();
+								this.get_target().animateStorm(3, 3, 10, '*', 4);
+								$Forays_Actor.get_b().add(this.get_target().youAre() + ' transported elsewhere. ', []);
+								this.attrs.set_item(69, this.attrs.get_item(69) + 1);
+								$state = 208;
+								continue $sm1;
+							}
+							case 207: {
+								$state = -1;
+								++i8;
+								$state = 133;
+								continue $sm1;
+							}
+							case 208: {
+								$state = -1;
+								this.QS();
+								$state = 132;
+								continue $sm1;
+							}
+							case 213: {
+								$state = -1;
+								$t207.getResult();
+								$state = 212;
+								continue $sm1;
+							}
+							case 214: {
+								$state = -1;
+								$t208.getResult();
+								this.QS();
+								$state = 212;
+								continue $sm1;
+							}
+							case 212: {
+								$state = -1;
 								$tcs.setResult(null);
 								return;
 							}
-							case 200: {
+							case 210: {
 								$state = -1;
-								$t188++;
-								$state = 135;
+								$t206++;
+								$state = 134;
 								continue $sm1;
 							}
-							case 201: {
+							case 211: {
+								$state = -1;
+								if (this.distanceFrom(this.get_target()) === 1) {
+									$t209 = this.attack(0, this.get_target());
+									$state = 262;
+									$t209.continueWith($sm);
+									return;
+								}
+								else if (this.distanceFrom(this.get_target()) <= 12 && ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+									$t210 = this.castRandomSpell(this.get_target(), [12, 15]);
+									$state = 263;
+									$t210.continueWith($sm);
+									return;
+								}
+								else {
+									$t211 = this.aI_Step(this.get_target());
+									$state = 264;
+									$t211.continueWith($sm);
+									return;
+								}
+							}
+							case 218: {
+								$state = -1;
+								$t217.getResult();
+								$state = 217;
+								continue $sm1;
+							}
+							case 219: {
+								$state = -1;
+								$t218.getResult();
+								this.QS();
+								$state = 217;
+								continue $sm1;
+							}
+							case 217: {
+								$state = -1;
+								$tcs.setResult(null);
+								return;
+							}
+							case 215: {
+								$state = -1;
+								$t216++;
+								$state = 140;
+								continue $sm1;
+							}
+							case 216: {
 								$state = -1;
 								if (this.get_curhp() <= 15 && this.hasLOS(this.get_target())) {
 									wall = null;
@@ -11284,11 +11567,377 @@
 										}
 									}
 									if (ss.isValue(wall)) {
-										this.castSpell$1(13, wall);
-										$state = -1;
-										break $sm1;
+										$t219 = this.castSpell$1(13, wall);
+										$state = 266;
+										$t219.continueWith($sm);
+										return;
+									}
+									$state = 265;
+									continue $sm1;
+								}
+								$state = 265;
+								continue $sm1;
+							}
+							case 220: {
+								$state = -1;
+								if (true !== $t236.getResult()) {
+									if (Math.abs(this.get_target().get_row() - this.get_row()) > Math.abs(this.get_target().get_col() - this.get_col())) {
+										$t237 = this.get_target().aI_Step($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_target().get_col()));
+										$state = 267;
+										$t237.continueWith($sm);
+										return;
+									}
+									else if (Math.abs(this.get_target().get_row() - this.get_row()) < Math.abs(this.get_target().get_col() - this.get_col())) {
+										$t238 = this.get_target().aI_Step($Forays_PhysicalObject.get_m().tile.get_item(this.get_target().get_row(), this.get_col()));
+										$state = 268;
+										$t238.continueWith($sm);
+										return;
+									}
+									else {
+										$t239 = this.get_target().aI_Step(this);
+										$state = 269;
+										$t239.continueWith($sm);
+										return;
 									}
 								}
+								$state = 141;
+								continue $sm1;
+							}
+							case 222: {
+								$state = -1;
+								$t246.getResult();
+								$state = 221;
+								continue $sm1;
+							}
+							case 221: {
+								$state = 146;
+								continue $sm1;
+							}
+							case 223: {
+								$state = -1;
+								$t250.getResult();
+								this.q1();
+								$state = 145;
+								continue $sm1;
+							}
+							case 226: {
+								$state = -1;
+								$t55.getResult();
+								$state = 225;
+								continue $sm1;
+							}
+							case 227: {
+								$state = -1;
+								if ($t56.getResult()) {
+									this.QS();
+									$state = 225;
+									continue $sm1;
+								}
+								else {
+									$t57 = this.castRandomSpell(this.get_target(), close_spells);
+									$state = 270;
+									$t57.continueWith($sm);
+									return;
+								}
+							}
+							case 225: {
+								$state = 224;
+								continue $sm1;
+							}
+							case 229: {
+								$state = -1;
+								if ($t58.getResult()) {
+									this.QS();
+									$state = 228;
+									continue $sm1;
+								}
+								else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+									$t59 = this.castRandomSpell(this.get_target(), ranged_spells);
+									$state = 271;
+									$t59.continueWith($sm);
+									return;
+								}
+								else {
+									$t60 = this.aI_Sidestep(this.get_target());
+									$state = 272;
+									$t60.continueWith($sm);
+									return;
+								}
+							}
+							case 230: {
+								$state = -1;
+								$t61.getResult();
+								$state = 228;
+								continue $sm1;
+							}
+							case 231: {
+								$state = -1;
+								if ($t62.getResult()) {
+									this.QS();
+									$state = 228;
+									continue $sm1;
+								}
+								else {
+									$t63 = this.aI_Sidestep(this.get_target());
+									$state = 273;
+									$t63.continueWith($sm);
+									return;
+								}
+							}
+							case 228: {
+								$state = 224;
+								continue $sm1;
+							}
+							case 233: {
+								$state = -1;
+								$t64.getResult();
+								$state = 232;
+								continue $sm1;
+							}
+							case 234: {
+								$state = -1;
+								$t65.getResult();
+								this.QS();
+								$state = 232;
+								continue $sm1;
+							}
+							case 232: {
+								$state = 224;
+								continue $sm1;
+							}
+							case 235: {
+								$state = -1;
+								$t66.getResult();
+								this.QS();
+								$state = 224;
+								continue $sm1;
+							}
+							case 224: {
+								$state = 224;
+								continue $sm1;
+							}
+							case 238: {
+								$state = -1;
+								$t78.getResult();
+								$state = 237;
+								continue $sm1;
+							}
+							case 239: {
+								$state = -1;
+								$t79.getResult();
+								$state = 237;
+								continue $sm1;
+							}
+							case 240: {
+								$state = -1;
+								$t80.getResult();
+								$state = 237;
+								continue $sm1;
+							}
+							case 241: {
+								$state = -1;
+								$t81.getResult();
+								$state = 237;
+								continue $sm1;
+							}
+							case 242: {
+								$state = -1;
+								$t82.getResult();
+								$state = 237;
+								continue $sm1;
+							}
+							case 237: {
+								$state = 236;
+								continue $sm1;
+							}
+							case 244: {
+								$state = -1;
+								$t83.getResult();
+								$state = 243;
+								continue $sm1;
+							}
+							case 245: {
+								$state = -1;
+								if ($t84.getResult()) {
+									this.QS();
+									$state = 243;
+									continue $sm1;
+								}
+								else {
+									$t85 = this.aI_Sidestep(this.get_target());
+									$state = 274;
+									$t85.continueWith($sm);
+									return;
+								}
+							}
+							case 246: {
+								$state = -1;
+								$t86.getResult();
+								$state = 243;
+								continue $sm1;
+							}
+							case 247: {
+								$state = -1;
+								if ($t87.getResult()) {
+									this.QS();
+									$state = 243;
+									continue $sm1;
+								}
+								else {
+									$t88 = this.aI_Sidestep(this.get_target());
+									$state = 275;
+									$t88.continueWith($sm);
+									return;
+								}
+							}
+							case 243: {
+								$state = 236;
+								continue $sm1;
+							}
+							case 249: {
+								$state = -1;
+								$t90.getResult();
+								$state = 248;
+								continue $sm1;
+							}
+							case 250: {
+								$state = -1;
+								if ($t91.getResult()) {
+									this.QS();
+									$state = 248;
+									continue $sm1;
+								}
+								else {
+									$t92 = this.aI_Sidestep(this.get_target());
+									$state = 276;
+									$t92.continueWith($sm);
+									return;
+								}
+							}
+							case 251: {
+								$state = -1;
+								$t94.getResult();
+								$state = 248;
+								continue $sm1;
+							}
+							case 252: {
+								$state = -1;
+								if ($t95.getResult()) {
+									this.QS();
+									$state = 248;
+									continue $sm1;
+								}
+								else {
+									$t96 = this.aI_Sidestep(this.get_target());
+									$state = 277;
+									$t96.continueWith($sm);
+									return;
+								}
+							}
+							case 253: {
+								$state = -1;
+								if ($t98.getResult()) {
+									this.QS();
+									$state = 248;
+									continue $sm1;
+								}
+								else {
+									$t99 = this.aI_Sidestep(this.get_target());
+									$state = 278;
+									$t99.continueWith($sm);
+									return;
+								}
+							}
+							case 248: {
+								$state = 236;
+								continue $sm1;
+							}
+							case 236: {
+								$state = 236;
+								continue $sm1;
+							}
+							case 256: {
+								$state = -1;
+								$t108.getResult();
+								$state = 255;
+								continue $sm1;
+							}
+							case 254: {
+								$state = -1;
+								++i1;
+								$state = 187;
+								continue $sm1;
+							}
+							case 255: {
+								$state = -1;
+								this.QS();
+								$state = 186;
+								continue $sm1;
+							}
+							case 257: {
+								$state = -1;
+								$t124.getResult();
+								$state = 67;
+								continue $sm1;
+							}
+							case 259: {
+								$state = -1;
+								$t140.getResult();
+								$state = 258;
+								continue $sm1;
+							}
+							case 258: {
+								$state = -1;
+								a5 = this.actorInDirection(this.rotateDirection(dir3, !cw));
+								if (ss.isValue(a5)) {
+									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$t141 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
+									$state = 280;
+									$t141.continueWith($sm);
+									return;
+								}
+								$state = 279;
+								continue $sm1;
+							}
+							case 261: {
+								$state = -1;
+								$t144.getResult();
+								$state = 260;
+								continue $sm1;
+							}
+							case 260: {
+								$state = -1;
+								this.q1();
+								$state = 81;
+								continue $sm1;
+							}
+							case 262: {
+								$state = -1;
+								$t209.getResult();
+								$state = 132;
+								continue $sm1;
+							}
+							case 263: {
+								$state = -1;
+								$t210.getResult();
+								$state = 132;
+								continue $sm1;
+							}
+							case 264: {
+								$state = -1;
+								$t211.getResult();
+								this.QS();
+								$state = 132;
+								continue $sm1;
+							}
+							case 266: {
+								$state = -1;
+								$t219.getResult();
+								$state = -1;
+								break $sm1;
+							}
+							case 265: {
+								$state = -1;
 								valid_spells1 = [];
 								valid_spells1.add(17);
 								valid_spells1.add(1);
@@ -11298,486 +11947,344 @@
 									valid_spells1.remove(1);
 								}
 								ranged_spells1 = Enumerable.from(valid_spells1).toArray();
-								$t234 = this.distanceFrom(this.get_target());
-								if ($t234 === 1) {
+								$t269 = this.distanceFrom(this.get_target());
+								if ($t269 === 1) {
 									if (this.get_target().enemiesAdjacent() > 1 || $Forays_Global.coinFlip()) {
-										this.castRandomSpell(this.get_target(), [10, 10, 17]);
-										$state = 236;
-										continue $sm1;
+										$t220 = this.castRandomSpell(this.get_target(), [10, 10, 17]);
+										$state = 283;
+										$t220.continueWith($sm);
+										return;
 									}
 									else {
-										$t191 = this.aI_Step$1(this.get_target(), true);
-										$state = 237;
-										$t191.continueWith($sm);
+										$t221 = this.aI_Step$1(this.get_target(), true);
+										$state = 284;
+										$t221.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t234 === 2) {
+								else if ($t269 === 2) {
 									if (this.hasLOE(this.get_target()) && !ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-										this.castSpell(9);
-										$state = 235;
-										continue $sm1;
-									}
-									if ($Forays_Global.coinFlip()) {
-										$t192 = this.aI_Step$1(this.get_target(), true);
-										$state = 239;
-										$t192.continueWith($sm);
+										$t223 = this.castSpell(9);
+										$state = 286;
+										$t223.continueWith($sm);
 										return;
 									}
-									else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-										this.castRandomSpell(this.get_target(), [1, 17, 12]);
-										$state = 238;
-										continue $sm1;
-									}
-									else {
-										$t194 = this.aI_Step$1(this.get_target(), true);
-										$state = 240;
-										$t194.continueWith($sm);
-										return;
-									}
+									$state = 285;
+									continue $sm1;
 								}
-								else if ($t234 === 3 || $t234 === 4 || $t234 === 5 || $t234 === 6 || $t234 === 7 || $t234 === 8 || $t234 === 9 || $t234 === 10 || $t234 === 11 || $t234 === 12) {
+								else if ($t269 === 3 || $t269 === 4 || $t269 === 5 || $t269 === 6 || $t269 === 7 || $t269 === 8 || $t269 === 9 || $t269 === 10 || $t269 === 11 || $t269 === 12) {
 									if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-										this.castRandomSpell(this.get_target(), ranged_spells1);
-										$state = 241;
-										continue $sm1;
+										$t230 = this.castRandomSpell(this.get_target(), ranged_spells1);
+										$state = 288;
+										$t230.continueWith($sm);
+										return;
 									}
 									else {
-										$t196 = this.aI_Sidestep(this.get_target());
-										$state = 242;
-										$t196.continueWith($sm);
+										$t231 = this.aI_Sidestep(this.get_target());
+										$state = 289;
+										$t231.continueWith($sm);
 										return;
 									}
 								}
 								else {
-									$t197 = this.aI_Step(this.get_target());
-									$state = 243;
-									$t197.continueWith($sm);
+									$t232 = this.aI_Step(this.get_target());
+									$state = 290;
+									$t232.continueWith($sm);
 									return;
 								}
-								$state = 235;
+								$state = 281;
 								continue $sm1;
 							}
-							case 205: {
+							case 267: {
 								$state = -1;
-								if (true !== $t201.getResult()) {
-									if (Math.abs(this.get_target().get_row() - this.get_row()) > Math.abs(this.get_target().get_col() - this.get_col())) {
-										$t202 = this.get_target().aI_Step($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_target().get_col()));
-										$state = 244;
-										$t202.continueWith($sm);
-										return;
-									}
-									else if (Math.abs(this.get_target().get_row() - this.get_row()) < Math.abs(this.get_target().get_col() - this.get_col())) {
-										$t203 = this.get_target().aI_Step($Forays_PhysicalObject.get_m().tile.get_item(this.get_target().get_row(), this.get_col()));
-										$state = 245;
-										$t203.continueWith($sm);
-										return;
-									}
-									else {
-										$t204 = this.get_target().aI_Step(this);
-										$state = 246;
-										$t204.continueWith($sm);
-										return;
-									}
-								}
-								$state = 136;
-								continue $sm1;
-							}
-							case 207: {
-								$state = -1;
-								$t211.getResult();
-								$state = 206;
-								continue $sm1;
-							}
-							case 206: {
+								$t237.getResult();
 								$state = 141;
 								continue $sm1;
 							}
-							case 208: {
+							case 268: {
 								$state = -1;
-								$t215.getResult();
-								this.q1();
-								$state = 140;
+								$t238.getResult();
+								$state = 141;
 								continue $sm1;
 							}
-							case 211: {
+							case 269: {
 								$state = -1;
-								if ($t53.getResult()) {
-									this.QS();
-								}
-								else {
-									this.castRandomSpell(this.get_target(), close_spells);
-								}
-								$state = 210;
+								$t239.getResult();
+								$state = 141;
 								continue $sm1;
 							}
-							case 210: {
-								$state = 209;
-								continue $sm1;
-							}
-							case 213: {
-								$state = -1;
-								if ($t54.getResult()) {
-									this.QS();
-									$state = 212;
-									continue $sm1;
-								}
-								else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-									this.castRandomSpell(this.get_target(), ranged_spells);
-									$state = 212;
-									continue $sm1;
-								}
-								else {
-									$t55 = this.aI_Sidestep(this.get_target());
-									$state = 247;
-									$t55.continueWith($sm);
-									return;
-								}
-							}
-							case 214: {
-								$state = -1;
-								if ($t56.getResult()) {
-									this.QS();
-									$state = 212;
-									continue $sm1;
-								}
-								else {
-									$t57 = this.aI_Sidestep(this.get_target());
-									$state = 248;
-									$t57.continueWith($sm);
-									return;
-								}
-							}
-							case 212: {
-								$state = 209;
-								continue $sm1;
-							}
-							case 216: {
-								$state = -1;
-								$t58.getResult();
-								this.QS();
-								$state = 215;
-								continue $sm1;
-							}
-							case 215: {
-								$state = 209;
-								continue $sm1;
-							}
-							case 217: {
-								$state = -1;
-								$t59.getResult();
-								this.QS();
-								$state = 209;
-								continue $sm1;
-							}
-							case 209: {
-								$state = 209;
-								continue $sm1;
-							}
-							case 220: {
-								$state = -1;
-								$t71.getResult();
-								$state = 219;
-								continue $sm1;
-							}
-							case 219: {
-								$state = 218;
-								continue $sm1;
-							}
-							case 222: {
-								$state = -1;
-								if ($t72.getResult()) {
-									this.QS();
-									$state = 221;
-									continue $sm1;
-								}
-								else {
-									$t73 = this.aI_Sidestep(this.get_target());
-									$state = 249;
-									$t73.continueWith($sm);
-									return;
-								}
-							}
-							case 223: {
-								$state = -1;
-								if ($t74.getResult()) {
-									this.QS();
-									$state = 221;
-									continue $sm1;
-								}
-								else {
-									$t75 = this.aI_Sidestep(this.get_target());
-									$state = 250;
-									$t75.continueWith($sm);
-									return;
-								}
-							}
-							case 221: {
-								$state = 218;
-								continue $sm1;
-							}
-							case 225: {
-								$state = -1;
-								if ($t76.getResult()) {
-									this.QS();
-									$state = 224;
-									continue $sm1;
-								}
-								else {
-									$t77 = this.aI_Sidestep(this.get_target());
-									$state = 251;
-									$t77.continueWith($sm);
-									return;
-								}
-							}
-							case 226: {
-								$state = -1;
-								if ($t78.getResult()) {
-									this.QS();
-									$state = 224;
-									continue $sm1;
-								}
-								else {
-									$t79 = this.aI_Sidestep(this.get_target());
-									$state = 252;
-									$t79.continueWith($sm);
-									return;
-								}
-							}
-							case 227: {
-								$state = -1;
-								if ($t80.getResult()) {
-									this.QS();
-									$state = 224;
-									continue $sm1;
-								}
-								else {
-									$t81 = this.aI_Sidestep(this.get_target());
-									$state = 253;
-									$t81.continueWith($sm);
-									return;
-								}
-							}
-							case 224: {
-								$state = 218;
-								continue $sm1;
-							}
-							case 218: {
-								$state = 218;
-								continue $sm1;
-							}
-							case 228: {
-								$state = -1;
-								$t101.getResult();
-								$state = 64;
-								continue $sm1;
-							}
-							case 230: {
-								$state = -1;
-								$t117.getResult();
-								$state = 229;
-								continue $sm1;
-							}
-							case 229: {
-								$state = -1;
-								this.q1();
-								$state = 78;
-								continue $sm1;
-							}
-							case 232: {
-								$state = -1;
-								$t120.getResult();
-								$state = 231;
-								continue $sm1;
-							}
-							case 231: {
-								$state = -1;
-								this.q1();
-								$state = 78;
-								continue $sm1;
-							}
-							case 233: {
-								$state = -1;
-								$t182.getResult();
-								$state = 128;
-								continue $sm1;
-							}
-							case 234: {
-								$state = -1;
-								$t183.getResult();
-								this.QS();
-								$state = 128;
-								continue $sm1;
-							}
-							case 237: {
-								$state = -1;
-								if ($t191.getResult()) {
-									this.QS();
-								}
-								else {
-									this.castRandomSpell(this.get_target(), [10, 10, 17]);
-								}
-								$state = 236;
-								continue $sm1;
-							}
-							case 236: {
-								$state = 235;
-								continue $sm1;
-							}
-							case 239: {
-								$state = -1;
-								if ($t192.getResult()) {
-									this.QS();
-									$state = 238;
-									continue $sm1;
-								}
-								else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
-									this.castRandomSpell(this.get_target(), [1, 17, 12]);
-									$state = 238;
-									continue $sm1;
-								}
-								else {
-									$t193 = this.aI_Sidestep(this.get_target());
-									$state = 254;
-									$t193.continueWith($sm);
-									return;
-								}
-							}
-							case 240: {
-								$state = -1;
-								if ($t194.getResult()) {
-									this.QS();
-									$state = 238;
-									continue $sm1;
-								}
-								else {
-									$t195 = this.aI_Sidestep(this.get_target());
-									$state = 255;
-									$t195.continueWith($sm);
-									return;
-								}
-							}
-							case 238: {
-								$state = 235;
-								continue $sm1;
-							}
-							case 242: {
-								$state = -1;
-								$t196.getResult();
-								this.QS();
-								$state = 241;
-								continue $sm1;
-							}
-							case 241: {
-								$state = 235;
-								continue $sm1;
-							}
-							case 243: {
-								$state = -1;
-								$t197.getResult();
-								this.QS();
-								$state = 235;
-								continue $sm1;
-							}
-							case 235: {
-								$state = 235;
-								continue $sm1;
-							}
-							case 244: {
-								$state = -1;
-								$t202.getResult();
-								$state = 136;
-								continue $sm1;
-							}
-							case 245: {
-								$state = -1;
-								$t203.getResult();
-								$state = 136;
-								continue $sm1;
-							}
-							case 246: {
-								$state = -1;
-								$t204.getResult();
-								$state = 136;
-								continue $sm1;
-							}
-							case 247: {
-								$state = -1;
-								$t55.getResult();
-								this.QS();
-								$state = 212;
-								continue $sm1;
-							}
-							case 248: {
+							case 270: {
 								$state = -1;
 								$t57.getResult();
-								this.QS();
-								$state = 212;
+								$state = 225;
 								continue $sm1;
 							}
-							case 249: {
+							case 271: {
 								$state = -1;
-								$t73.getResult();
-								this.QS();
-								$state = 221;
+								$t59.getResult();
+								$state = 228;
 								continue $sm1;
 							}
-							case 250: {
+							case 272: {
 								$state = -1;
-								if ($t75.getResult()) {
+								$t60.getResult();
+								this.QS();
+								$state = 228;
+								continue $sm1;
+							}
+							case 273: {
+								$state = -1;
+								$t63.getResult();
+								this.QS();
+								$state = 228;
+								continue $sm1;
+							}
+							case 274: {
+								$state = -1;
+								$t85.getResult();
+								this.QS();
+								$state = 243;
+								continue $sm1;
+							}
+							case 275: {
+								$state = -1;
+								if ($t88.getResult()) {
 									this.QS();
+									$state = 243;
+									continue $sm1;
 								}
 								else {
-									this.castSpell(20);
+									$t89 = this.castSpell(20);
+									$state = 291;
+									$t89.continueWith($sm);
+									return;
 								}
-								$state = 221;
-								continue $sm1;
 							}
-							case 251: {
+							case 276: {
 								$state = -1;
-								if ($t77.getResult()) {
+								if ($t92.getResult()) {
 									this.QS();
+									$state = 248;
+									continue $sm1;
 								}
 								else {
-									this.castSpell(20);
+									$t93 = this.castSpell(20);
+									$state = 292;
+									$t93.continueWith($sm);
+									return;
 								}
-								$state = 224;
-								continue $sm1;
 							}
-							case 252: {
+							case 277: {
 								$state = -1;
-								if ($t79.getResult()) {
+								if ($t96.getResult()) {
 									this.QS();
+									$state = 248;
+									continue $sm1;
 								}
 								else {
-									this.castSpell(20);
+									$t97 = this.castSpell(20);
+									$state = 293;
+									$t97.continueWith($sm);
+									return;
 								}
-								$state = 224;
-								continue $sm1;
 							}
-							case 253: {
+							case 278: {
 								$state = -1;
-								if ($t81.getResult()) {
+								if ($t99.getResult()) {
 									this.QS();
+									$state = 248;
+									continue $sm1;
 								}
 								else {
-									this.castSpell(20);
+									$t100 = this.castSpell(20);
+									$state = 294;
+									$t100.continueWith($sm);
+									return;
 								}
-								$state = 224;
+							}
+							case 280: {
+								$state = -1;
+								$t141.getResult();
+								$state = 279;
 								continue $sm1;
 							}
-							case 254: {
+							case 279: {
 								$state = -1;
-								$t193.getResult();
+								this.q1();
+								$state = 81;
+								continue $sm1;
+							}
+							case 283: {
+								$state = -1;
+								$t220.getResult();
+								$state = 282;
+								continue $sm1;
+							}
+							case 284: {
+								$state = -1;
+								if ($t221.getResult()) {
+									this.QS();
+									$state = 282;
+									continue $sm1;
+								}
+								else {
+									$t222 = this.castRandomSpell(this.get_target(), [10, 10, 17]);
+									$state = 295;
+									$t222.continueWith($sm);
+									return;
+								}
+							}
+							case 282: {
+								$state = 281;
+								continue $sm1;
+							}
+							case 286: {
+								$state = -1;
+								$t223.getResult();
+								$state = 281;
+								continue $sm1;
+							}
+							case 285: {
+								$state = -1;
+								if ($Forays_Global.coinFlip()) {
+									$t224 = this.aI_Step$1(this.get_target(), true);
+									$state = 297;
+									$t224.continueWith($sm);
+									return;
+								}
+								else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+									$t227 = this.castRandomSpell(this.get_target(), [1, 17, 12]);
+									$state = 298;
+									$t227.continueWith($sm);
+									return;
+								}
+								else {
+									$t228 = this.aI_Step$1(this.get_target(), true);
+									$state = 299;
+									$t228.continueWith($sm);
+									return;
+								}
+							}
+							case 288: {
+								$state = -1;
+								$t230.getResult();
+								$state = 287;
+								continue $sm1;
+							}
+							case 289: {
+								$state = -1;
+								$t231.getResult();
 								this.QS();
-								$state = 238;
+								$state = 287;
 								continue $sm1;
 							}
-							case 255: {
+							case 287: {
+								$state = 281;
+								continue $sm1;
+							}
+							case 290: {
 								$state = -1;
-								$t195.getResult();
+								$t232.getResult();
 								this.QS();
-								$state = 238;
+								$state = 281;
+								continue $sm1;
+							}
+							case 281: {
+								$state = 281;
+								continue $sm1;
+							}
+							case 291: {
+								$state = -1;
+								$t89.getResult();
+								$state = 243;
+								continue $sm1;
+							}
+							case 292: {
+								$state = -1;
+								$t93.getResult();
+								$state = 248;
+								continue $sm1;
+							}
+							case 293: {
+								$state = -1;
+								$t97.getResult();
+								$state = 248;
+								continue $sm1;
+							}
+							case 294: {
+								$state = -1;
+								$t100.getResult();
+								$state = 248;
+								continue $sm1;
+							}
+							case 295: {
+								$state = -1;
+								$t222.getResult();
+								$state = 282;
+								continue $sm1;
+							}
+							case 297: {
+								$state = -1;
+								if ($t224.getResult()) {
+									this.QS();
+									$state = 296;
+									continue $sm1;
+								}
+								else if (ss.referenceEquals(this.firstActorInLine(this.get_target()), this.get_target())) {
+									$t225 = this.castRandomSpell(this.get_target(), [1, 17, 12]);
+									$state = 300;
+									$t225.continueWith($sm);
+									return;
+								}
+								else {
+									$t226 = this.aI_Sidestep(this.get_target());
+									$state = 301;
+									$t226.continueWith($sm);
+									return;
+								}
+							}
+							case 298: {
+								$state = -1;
+								$t227.getResult();
+								$state = 296;
+								continue $sm1;
+							}
+							case 299: {
+								$state = -1;
+								if ($t228.getResult()) {
+									this.QS();
+									$state = 296;
+									continue $sm1;
+								}
+								else {
+									$t229 = this.aI_Sidestep(this.get_target());
+									$state = 302;
+									$t229.continueWith($sm);
+									return;
+								}
+							}
+							case 296: {
+								$state = 281;
+								continue $sm1;
+							}
+							case 300: {
+								$state = -1;
+								$t225.getResult();
+								$state = 296;
+								continue $sm1;
+							}
+							case 301: {
+								$state = -1;
+								$t226.getResult();
+								this.QS();
+								$state = 296;
+								continue $sm1;
+							}
+							case 302: {
+								$state = -1;
+								$t229.getResult();
+								this.QS();
+								$state = 296;
 								continue $sm1;
 							}
 							default: {
@@ -11787,15 +12294,15 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t235) {
-					$tcs.setException(ss.Exception.wrap($t235));
+				catch ($t270) {
+					$tcs.setException(ss.Exception.wrap($t270));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		seekAI: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t16, brightest, current_brightest, $t2, $t3, t, pos_radius, pos_obj, $t4, o, open, $t5, $t6, t1, $t7, $t8, dir, $t9, tilelist, i, j, t3, $t10, $t11, a, $t12, path2, path21, $t13, dir1, found, i1, a1, $t14, $t15;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t19, brightest, current_brightest, $t2, $t3, t, pos_radius, pos_obj, $t4, o, open, $t5, $t6, t1, $t7, $t8, dir, $t9, tilelist, i, j, t3, $t10, $t11, $t12, a, $t13, $t14, $t15, path2, path21, $t16, dir1, found, i1, a1, $t17, $t18;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -11813,8 +12320,8 @@
 								if ($t1.getResult()) {
 									return;
 								}
-								$t16 = this.get_type();
-								if ($t16 === 7) {
+								$t19 = this.get_type();
+								if ($t19 === 7) {
 									brightest = null;
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
 										current_brightest = [];
@@ -11921,7 +12428,7 @@
 										}
 									}
 								}
-								else if ($t16 === 24) {
+								else if ($t19 === 24) {
 									if (this.distanceFrom(this.get_target()) <= 10) {
 										if ($Forays_Global.roll$1(1, 4) === 4) {
 											//teleport into target's LOS somewhere nearby
@@ -11937,47 +12444,56 @@
 											}
 											if (tilelist.length > 0) {
 												t3 = tilelist[$Forays_Global.roll$1(1, tilelist.length) - 1];
-												this.move(t3.get_row(), t3.get_col());
+												$t10 = this.move(t3.get_row(), t3.get_col());
+												$state = 9;
+												$t10.continueWith($sm);
+												return;
 											}
-											this.QS();
+											$state = 8;
+											continue $sm1;
 										}
 										else {
 											//do nothing
 											this.QS();
+											$state = 7;
+											continue $sm1;
 										}
 									}
 									else {
 										//forget about target, do nothing
 										this.set_target(null);
 										this.QS();
+										$state = 7;
+										continue $sm1;
 									}
-									$state = -1;
-									break $sm1;
 								}
-								else if ($t16 === 48) {
-									$t10 = this.actorsWithinDistance(2);
-									for ($t11 = 0; $t11 < $t10.length; $t11++) {
-										a = $t10[$t11];
+								else if ($t19 === 48) {
+									$t11 = this.actorsWithinDistance(2);
+									for ($t12 = 0; $t12 < $t11.length; $t12++) {
+										a = $t11[$t12];
 										if (a.hasAttr(75) && a.hasLOE(this)) {
 											this.QS();
 											return;
 										}
 									}
 									if (!this.hasAttr(41)) {
-										this.castSpell(6);
+										$t13 = this.castSpell(6);
+										$state = 11;
+										$t13.continueWith($sm);
+										return;
 									}
 									else {
 										this.QS();
+										$state = 10;
+										continue $sm1;
 									}
-									$state = -1;
-									break $sm1;
 								}
-								else if ($t16 === 10 || $t16 === 54 || $t16 === 49 || $t16 === 55) {
+								else if ($t19 === 10 || $t19 === 54 || $t19 === 49 || $t19 === 55) {
 									this.QS();
 									$state = -1;
 									break $sm1;
 								}
-								else if ($t16 === 2) {
+								else if ($t19 === 2) {
 									this.findPath($Forays_Actor.get_player());
 									this.QS();
 									$state = -1;
@@ -11988,20 +12504,20 @@
 										if (this.grabPreventsMovement(this.target_location) || $Forays_PhysicalObject.get_m().actor.get_item$1(this.target_location.p).grabPreventsMovement(this.tile()) || this.hasAttr(12) || $Forays_PhysicalObject.get_m().actor.get_item$1(this.target_location.p).hasAttr(12)) {
 											this.QS();
 											//todo: should target_location be cleared here?
+											$state = 12;
+											continue $sm1;
 										}
 										else {
-											this.move(this.target_location.get_row(), this.target_location.get_col());
-											//swap places
-											this.target_location = null;
-											this.QS();
+											$t14 = this.move(this.target_location.get_row(), this.target_location.get_col());
+											$state = 13;
+											$t14.continueWith($sm);
+											return;
 										}
-										$state = 7;
-										continue $sm1;
 									}
 									else {
-										$t12 = this.aI_Step(this.target_location);
-										$state = 8;
-										$t12.continueWith($sm);
+										$t15 = this.aI_Step(this.target_location);
+										$state = 14;
+										$t15.continueWith($sm);
 										return;
 									}
 								}
@@ -12021,9 +12537,9 @@
 										}
 									}
 									//FindPath(target,8);
-									$t13 = this.pathStep();
-									$state = 9;
-									$t13.continueWith($sm);
+									$t16 = this.pathStep();
+									$state = 15;
+									$t16.continueWith($sm);
 									return;
 								}
 								else {
@@ -12042,26 +12558,26 @@
 											}
 											if (!found) {
 												if (this.hasLOS(this.group[0])) {
-													$t14 = this.aI_Step(this.group[0]);
-													$state = 11;
-													$t14.continueWith($sm);
+													$t17 = this.aI_Step(this.group[0]);
+													$state = 17;
+													$t17.continueWith($sm);
 													return;
 												}
 												else {
 													this.findPath$1(this.group[0], 8);
-													$t15 = this.pathStep();
-													$state = 12;
-													$t15.continueWith($sm);
+													$t18 = this.pathStep();
+													$state = 18;
+													$t18.continueWith($sm);
 													return;
 												}
 											}
-											$state = 10;
+											$state = 16;
 											continue $sm1;
 										}
-										$state = 10;
+										$state = 16;
 										continue $sm1;
 									}
-									$state = 10;
+									$state = 16;
 									continue $sm1;
 								}
 								$state = -1;
@@ -12097,9 +12613,44 @@
 								$state = -1;
 								break $sm1;
 							}
+							case 9: {
+								$state = -1;
+								$t10.getResult();
+								$state = 8;
+								continue $sm1;
+							}
 							case 8: {
 								$state = -1;
-								if ($t12.getResult()) {
+								this.QS();
+								$state = 7;
+								continue $sm1;
+							}
+							case 7: {
+								$state = -1;
+								break $sm1;
+							}
+							case 11: {
+								$state = -1;
+								$t13.getResult();
+								$state = 10;
+								continue $sm1;
+							}
+							case 10: {
+								$state = -1;
+								break $sm1;
+							}
+							case 13: {
+								$state = -1;
+								$t14.getResult();
+								//swap places
+								this.target_location = null;
+								this.QS();
+								$state = 12;
+								continue $sm1;
+							}
+							case 14: {
+								$state = -1;
+								if ($t15.getResult()) {
 									this.QS();
 									if (this.distanceFrom(this.target_location) === 0) {
 										this.target_location = null;
@@ -12112,39 +12663,39 @@
 									}
 									this.QS();
 								}
-								$state = 7;
+								$state = 12;
 								continue $sm1;
 							}
-							case 9: {
+							case 15: {
 								$state = -1;
-								if ($t13.getResult()) {
+								if ($t16.getResult()) {
 									return;
 								}
 								this.QS();
-								$state = 7;
+								$state = 12;
 								continue $sm1;
 							}
-							case 11: {
+							case 17: {
 								$state = -1;
-								$t14.getResult();
-								$state = 10;
+								$t17.getResult();
+								$state = 16;
+								continue $sm1;
+							}
+							case 18: {
+								$state = -1;
+								if ($t18.getResult()) {
+									return;
+								}
+								$state = 16;
+								continue $sm1;
+							}
+							case 16: {
+								$state = -1;
+								this.QS();
+								$state = 12;
 								continue $sm1;
 							}
 							case 12: {
-								$state = -1;
-								if ($t15.getResult()) {
-									return;
-								}
-								$state = 10;
-								continue $sm1;
-							}
-							case 10: {
-								$state = -1;
-								this.QS();
-								$state = 7;
-								continue $sm1;
-							}
-							case 7: {
 								$state = -1;
 								break $sm1;
 							}
@@ -12155,15 +12706,15 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t17) {
-					$tcs.setException(ss.Exception.wrap($t17));
+				catch ($t20) {
+					$tcs.setException(ss.Exception.wrap($t20));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		idleAI: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t22, $t2, brightest, current_brightest, $t3, $t4, t, pos_radius, pos_obj, $t5, o, open, $t6, $t7, t1, $t8, $t9, dir, $t10, $t11, $t12, a, in_los, $t13, $t14, t3, passable, $t15, $t16, t4, nearby, $t17, $t18, t5, $t19, dir1, found, i, a1, $t20, $t21;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t23, $t2, brightest, current_brightest, $t3, $t4, t, pos_radius, pos_obj, $t5, o, open, $t6, $t7, t1, $t8, $t9, dir, $t10, $t11, $t12, a, $t13, in_los, $t14, $t15, t3, passable, $t16, $t17, t4, nearby, $t18, $t19, t5, $t20, dir1, found, i, a1, $t21, $t22;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -12192,14 +12743,14 @@
 								//}
 								//return;
 								//}
-								$t22 = this.get_type();
-								if ($t22 === 4 || $t22 === 62) {
+								$t23 = this.get_type();
+								if ($t23 === 4 || $t23 === 62) {
 									$t2 = this.aI_Step(this.tileInDirection($Forays_Global.randomDirection()));
 									$state = 3;
 									$t2.continueWith($sm);
 									return;
 								}
-								else if ($t22 === 7) {
+								else if ($t23 === 7) {
 									brightest = null;
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
 										current_brightest = [];
@@ -12306,7 +12857,7 @@
 										}
 									}
 								}
-								else if ($t22 === 48) {
+								else if ($t23 === 48) {
 									$t11 = this.actorsWithinDistance(2);
 									for ($t12 = 0; $t12 < $t11.length; $t12++) {
 										a = $t11[$t12];
@@ -12316,21 +12867,22 @@
 										}
 									}
 									if (!this.hasAttr(41)) {
-										this.castSpell(6);
+										$t13 = this.castSpell(6);
+										$state = 10;
+										$t13.continueWith($sm);
 										return;
-										//<--!
 									}
-									$state = 2;
+									$state = 9;
 									continue $sm1;
 								}
-								else if ($t22 === 8 || $t22 === 63) {
+								else if ($t23 === 8 || $t23 === 63) {
 									if (this.attrs.get_item(98) > 0) {
 										this.attrs.set_item(98, 0);
 									}
 									$state = 2;
 									continue $sm1;
 								}
-								else if ($t22 === 2) {
+								else if ($t23 === 2) {
 									this.findPath($Forays_Actor.get_player());
 									this.QS();
 									$tcs.setResult(null);
@@ -12381,14 +12933,27 @@
 								$tcs.setResult(null);
 								return;
 							}
+							case 10: {
+								$state = -1;
+								$t13.getResult();
+								$tcs.setResult(null);
+								return;
+								//<--!
+								$state = 9;
+								continue $sm1;
+							}
+							case 9: {
+								$state = 2;
+								continue $sm1;
+							}
 							case 2: {
 								$state = -1;
 								if (this.hasAttr(11)) {
 									if ($Forays_Global.roll(10) <= 6) {
 										in_los = [];
-										$t13 = $Forays_PhysicalObject.get_m().allTiles();
-										for ($t14 = 0; $t14 < $t13.length; $t14++) {
-											t3 = $t13[$t14];
+										$t14 = $Forays_PhysicalObject.get_m().allTiles();
+										for ($t15 = 0; $t15 < $t14.length; $t15++) {
+											t3 = $t14[$t15];
 											if (t3.get_passable() && this.canSee(t3)) {
 												in_los.add(t3);
 											}
@@ -12403,9 +12968,9 @@
 									}
 									else if ($Forays_Global.oneIn(4)) {
 										passable = [];
-										$t15 = $Forays_PhysicalObject.get_m().allTiles();
-										for ($t16 = 0; $t16 < $t15.length; $t16++) {
-											t4 = $t15[$t16];
+										$t16 = $Forays_PhysicalObject.get_m().allTiles();
+										for ($t17 = 0; $t17 < $t16.length; $t17++) {
+											t4 = $t16[$t17];
 											if (t4.get_passable()) {
 												passable.add(t4);
 											}
@@ -12420,9 +12985,9 @@
 									}
 									else {
 										nearby = [];
-										$t17 = $Forays_PhysicalObject.get_m().allTiles();
-										for ($t18 = 0; $t18 < $t17.length; $t18++) {
-											t5 = $t17[$t18];
+										$t18 = $Forays_PhysicalObject.get_m().allTiles();
+										for ($t19 = 0; $t19 < $t18.length; $t19++) {
+											t5 = $t18[$t19];
 											if (t5.get_passable() && this.distanceFrom(t5) <= 12) {
 												nearby.add(t5);
 											}
@@ -12435,9 +13000,9 @@
 											this.attrs.set_item(11, 0);
 										}
 									}
-									$t19 = this.pathStep();
-									$state = 9;
-									$t19.continueWith($sm);
+									$t20 = this.pathStep();
+									$state = 11;
+									$t20.continueWith($sm);
 									return;
 								}
 								else {
@@ -12454,53 +13019,53 @@
 											}
 											if (!found) {
 												if (this.hasLOS(this.group[0])) {
-													$t20 = this.aI_Step(this.group[0]);
-													$state = 11;
-													$t20.continueWith($sm);
+													$t21 = this.aI_Step(this.group[0]);
+													$state = 13;
+													$t21.continueWith($sm);
 													return;
 												}
 												else {
 													this.findPath$1(this.group[0], 8);
-													$t21 = this.pathStep();
-													$state = 12;
-													$t21.continueWith($sm);
+													$t22 = this.pathStep();
+													$state = 14;
+													$t22.continueWith($sm);
 													return;
 												}
 											}
-											$state = 10;
+											$state = 12;
 											continue $sm1;
 										}
-										$state = 10;
+										$state = 12;
 										continue $sm1;
 									}
-									$state = 10;
+									$state = 12;
 									continue $sm1;
 								}
 							}
-							case 9: {
+							case 11: {
 								$state = -1;
-								if ($t19.getResult()) {
+								if ($t20.getResult()) {
 									return;
 								}
 								this.QS();
 								$state = -1;
 								break $sm1;
 							}
-							case 11: {
+							case 13: {
 								$state = -1;
-								$t20.getResult();
-								$state = 10;
+								$t21.getResult();
+								$state = 12;
+								continue $sm1;
+							}
+							case 14: {
+								$state = -1;
+								if ($t22.getResult()) {
+									return;
+								}
+								$state = 12;
 								continue $sm1;
 							}
 							case 12: {
-								$state = -1;
-								if ($t21.getResult()) {
-									return;
-								}
-								$state = 10;
-								continue $sm1;
-							}
-							case 10: {
 								$state = -1;
 								this.QS();
 								$state = -1;
@@ -12513,8 +13078,8 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t23) {
-					$tcs.setException(ss.Exception.wrap($t23));
+				catch ($t24) {
+					$tcs.setException(ss.Exception.wrap($t24));
 				}
 			});
 			$sm();
@@ -12818,7 +13383,7 @@
 			return $tcs.task;
 		},
 		aI_MoveOrOpen$1: function(r, c) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource();
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -12827,32 +13392,64 @@
 							case 0: {
 								$state = -1;
 								if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item(r, c)) && $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() !== 35) {
-									this.move(r, c);
-									return true;
+									$t1 = this.move(r, c);
+									$state = 2;
+									$t1.continueWith($sm);
+									return;
 								}
 								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 3 && this.hasAttr(6)) {
 									$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
-									return true;
+									$tcs.setResult(true);
+									return;
 								}
 								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 28) {
 									if (this.hasAttr(9)) {
 										if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item(r, c))) {
-											this.move(r, c);
+											$t2 = this.move(r, c);
+											$state = 4;
+											$t2.continueWith($sm);
+											return;
 										}
 										else {
-											return false;
+											$tcs.setResult(false);
+											return;
 										}
 									}
 									else {
 										$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
+										$state = 3;
+										continue $sm1;
 									}
-									return true;
 								}
-								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 20 && this.hasAttr(107)) {
-									$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
-									$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
-									return true;
+								else {
+									if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 20 && this.hasAttr(107)) {
+										$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
+										$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
+										return true;
+									}
+									$state = 1;
+									continue $sm1;
 								}
+							}
+							case 2: {
+								$state = -1;
+								$t1.getResult();
+								$tcs.setResult(true);
+								return;
+							}
+							case 4: {
+								$state = -1;
+								$t2.getResult();
+								$state = 3;
+								continue $sm1;
+							}
+							case 3: {
+								$state = -1;
+								$tcs.setResult(true);
+								return;
+							}
+							case 1: {
+								$state = -1;
 								$tcs.setResult(false);
 								return;
 							}
@@ -12862,8 +13459,8 @@
 						}
 					}
 				}
-				catch ($t1) {
-					$tcs.setException(ss.Exception.wrap($t1));
+				catch ($t3) {
+					$tcs.setException(ss.Exception.wrap($t3));
 				}
 			});
 			$sm();
@@ -12964,7 +13561,7 @@
 			return $tcs.task;
 		},
 		pathStep$1: function(never_clear_path) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -12977,16 +13574,15 @@
 										if (ss.isValue(this.group) && ss.referenceEquals(this.group[0], this) && this.group.contains($Forays_PhysicalObject.get_m().actor.get_item$1(this.path[0]))) {
 											if (this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0])) || $Forays_PhysicalObject.get_m().actor.get_item$1(this.path[0]).grabPreventsMovement(this.tile())) {
 												this.path.clear();
+												$state = 2;
+												continue $sm1;
 											}
 											else {
-												this.move(this.path[0].row, this.path[0].col);
-												//leaders can push through their followers
-												if (this.distanceFrom$1(this.path[0]) === 0) {
-													this.path.removeAt(0);
-												}
+												$t1 = this.move(this.path[0].row, this.path[0].col);
+												$state = 3;
+												$t1.continueWith($sm);
+												return;
 											}
-											$state = 2;
-											continue $sm1;
 										}
 										else if (this.path.length === 1) {
 											if (!never_clear_path) {
@@ -12996,16 +13592,16 @@
 											continue $sm1;
 										}
 										else {
-											$t1 = this.aI_Step($Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]));
-											$state = 3;
-											$t1.continueWith($sm);
+											$t2 = this.aI_Step($Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]));
+											$state = 4;
+											$t2.continueWith($sm);
 											return;
 										}
 									}
 									else {
-										$t2 = this.aI_Step($Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]));
-										$state = 4;
-										$t2.continueWith($sm);
+										$t3 = this.aI_Step($Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]));
+										$state = 5;
+										$t3.continueWith($sm);
 										return;
 									}
 								}
@@ -13015,6 +13611,16 @@
 							case 3: {
 								$state = -1;
 								$t1.getResult();
+								//leaders can push through their followers
+								if (this.distanceFrom$1(this.path[0]) === 0) {
+									this.path.removeAt(0);
+								}
+								$state = 2;
+								continue $sm1;
+							}
+							case 4: {
+								$state = -1;
+								$t2.getResult();
 								if (this.distanceFrom$1(this.path[1]) > 1) {
 									if (!never_clear_path) {
 										this.path.clear();
@@ -13027,9 +13633,9 @@
 								$state = 2;
 								continue $sm1;
 							}
-							case 4: {
+							case 5: {
 								$state = -1;
-								$t2.getResult();
+								$t3.getResult();
 								if (this.distanceFrom$1(this.path[0]) === 0) {
 									this.path.removeAt(0);
 								}
@@ -13061,8 +13667,8 @@
 						}
 					}
 				}
-				catch ($t3) {
-					$tcs.setException(ss.Exception.wrap($t3));
+				catch ($t4) {
+					$tcs.setException(ss.Exception.wrap($t4));
 				}
 			});
 			$sm();
@@ -13973,7 +14579,7 @@
 			return $tcs.task;
 		},
 		takeDamage: function(dmg, cause_of_death) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), damage_dealt, old_hp, resisted, div, i, div1, i1, div2, i2, div3, i3, div4, i4, div5, i5, $t1, $t2, verb, $t3, adjective, $t4, noun, i6, $t5, $t6, a, duration, amount, $t7, $t8, $t9, $t20, $t10, troll, i7, $t11, $t12, t, attr, $t13, $t14, t1, $t15, $t16, $t17, item, idx, $t18, $t19, a1, command, done, $t21, good, $t22, $t23, t2, $t24, $t25, a2, $t26, $t27, t3, tilelist, destination, i8, $t28, $t29, p, i9, rr, rc;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), damage_dealt, old_hp, resisted, div, i, div1, i1, div2, i2, div3, i3, div4, i4, div5, i5, $t1, $t2, verb, $t3, adjective, $t4, noun, i6, $t5, $t6, a, duration, amount, $t7, $t8, $t9, $t20, $t10, troll, i7, $t11, $t12, t, attr, $t13, $t14, t1, $t15, $t16, $t17, item, idx, $t18, $t19, a1, command, done, $t21, good, $t22, $t23, t2, $t24, $t25, a2, $t26, $t27, t3, tilelist, destination, i8, $t28, $t29, p, $t30, i9, rr, rc, $t31;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -14608,74 +15214,68 @@
 							case 14: {
 								$state = -1;
 								command = $t21.getResult();
-								switch (command.keyChar) {
-									case 110:
-									case 78: {
-										done = true;
-										break;
-									}
-									case 121:
-									case 89: {
-										done = true;
-										good = Array.multidim(Boolean.getDefaultValue(), $Forays_Actor.$ROWS, $Forays_Actor.$COLS);
-										$t22 = $Forays_PhysicalObject.get_m().allTiles();
-										for ($t23 = 0; $t23 < $t22.length; $t23++) {
-											t2 = $t22[$t23];
-											if (t2.get_passable()) {
-												good.set(t2.get_row(), t2.get_col(), true);
-											}
-											else {
-												good.set(t2.get_row(), t2.get_col(), false);
-											}
-										}
-										$t24 = $Forays_PhysicalObject.get_m().allActors();
-										for ($t25 = 0; $t25 < $t24.length; $t25++) {
-											a2 = $t24[$t25];
-											$t26 = $Forays_PhysicalObject.get_m().allTiles();
-											for ($t27 = 0; $t27 < $t26.length; $t27++) {
-												t3 = $t26[$t27];
-												if (good.get(t3.get_row(), t3.get_col())) {
-													if (a2.distanceFrom(t3) < 6 || a2.hasLOS$1(t3.get_row(), t3.get_col())) {
-														//was CanSee, but this is safer
-														good.set(t3.get_row(), t3.get_col(), false);
-													}
-												}
-											}
-										}
-										tilelist = [];
-										destination = null;
-										for (i8 = 4; i8 < $Forays_Actor.$COLS; ++i8) {
-											$t28 = this.positionsAtDistance(i8);
-											for ($t29 = 0; $t29 < $t28.length; $t29++) {
-												p = $t28[$t29];
-												if (good.get(p.row, p.col)) {
-													tilelist.add($Forays_PhysicalObject.get_m().tile.get_item(p.row, p.col));
-												}
-											}
-											if (tilelist.length > 0) {
-												destination = tilelist[$Forays_Global.roll$1(1, tilelist.length) - 1];
-												break;
-											}
-										}
-										if (ss.isValue(destination)) {
-											this.move(destination.get_row(), destination.get_col());
+								if (command.keyChar === 110 || command.keyChar === 78) {
+									done = true;
+									$state = 12;
+									continue $sm1;
+								}
+								else if (command.keyChar === 121 || command.keyChar === 89) {
+									done = true;
+									good = Array.multidim(Boolean.getDefaultValue(), $Forays_Actor.$ROWS, $Forays_Actor.$COLS);
+									$t22 = $Forays_PhysicalObject.get_m().allTiles();
+									for ($t23 = 0; $t23 < $t22.length; $t23++) {
+										t2 = $t22[$t23];
+										if (t2.get_passable()) {
+											good.set(t2.get_row(), t2.get_col(), true);
 										}
 										else {
-											for (i9 = 0; i9 < 9999; ++i9) {
-												rr = $Forays_Global.roll$1(1, 20);
-												rc = $Forays_Global.roll$1(1, 64);
-												if ($Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc)) && this.distanceFrom$2(rr, rc) >= 6 && !$Forays_PhysicalObject.get_m().tile.get_item(rr, rc).isTrap()) {
-													this.move(rr, rc);
-													break;
+											good.set(t2.get_row(), t2.get_col(), false);
+										}
+									}
+									$t24 = $Forays_PhysicalObject.get_m().allActors();
+									for ($t25 = 0; $t25 < $t24.length; $t25++) {
+										a2 = $t24[$t25];
+										$t26 = $Forays_PhysicalObject.get_m().allTiles();
+										for ($t27 = 0; $t27 < $t26.length; $t27++) {
+											t3 = $t26[$t27];
+											if (good.get(t3.get_row(), t3.get_col())) {
+												if (a2.distanceFrom(t3) < 6 || a2.hasLOS$1(t3.get_row(), t3.get_col())) {
+													//was CanSee, but this is safer
+													good.set(t3.get_row(), t3.get_col(), false);
 												}
 											}
 										}
-										$Forays_Actor.get_b().add('You escape. ', []);
-										break;
 									}
-									default: {
-										break;
+									tilelist = [];
+									destination = null;
+									for (i8 = 4; i8 < $Forays_Actor.$COLS; ++i8) {
+										$t28 = this.positionsAtDistance(i8);
+										for ($t29 = 0; $t29 < $t28.length; $t29++) {
+											p = $t28[$t29];
+											if (good.get(p.row, p.col)) {
+												tilelist.add($Forays_PhysicalObject.get_m().tile.get_item(p.row, p.col));
+											}
+										}
+										if (tilelist.length > 0) {
+											destination = tilelist[$Forays_Global.roll$1(1, tilelist.length) - 1];
+											break;
+										}
 									}
+									if (ss.isValue(destination)) {
+										$t30 = this.move(destination.get_row(), destination.get_col());
+										$state = 16;
+										$t30.continueWith($sm);
+										return;
+									}
+									else {
+										i9 = 0;
+										$state = 17;
+										continue $sm1;
+									}
+								}
+								else {
+									$state = 12;
+									continue $sm1;
 								}
 								$state = 12;
 								continue $sm1;
@@ -14687,14 +15287,55 @@
 								$state = 6;
 								continue $sm1;
 							}
+							case 16: {
+								$state = -1;
+								$t30.getResult();
+								$state = 15;
+								continue $sm1;
+							}
+							case 17: {
+								$state = -1;
+								if (!(i9 < 9999)) {
+									$state = 15;
+									continue $sm1;
+								}
+								rr = $Forays_Global.roll$1(1, 20);
+								rc = $Forays_Global.roll$1(1, 64);
+								if ($Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc)) && this.distanceFrom$2(rr, rc) >= 6 && !$Forays_PhysicalObject.get_m().tile.get_item(rr, rc).isTrap()) {
+									$t31 = this.move(rr, rc);
+									$state = 19;
+									$t31.continueWith($sm);
+									return;
+								}
+								$state = 18;
+								continue $sm1;
+							}
+							case 15: {
+								$state = -1;
+								$Forays_Actor.get_b().add('You escape. ', []);
+								$state = 12;
+								continue $sm1;
+							}
+							case 19: {
+								$state = -1;
+								$t31.getResult();
+								$state = 15;
+								continue $sm1;
+							}
+							case 18: {
+								$state = -1;
+								++i9;
+								$state = 17;
+								continue $sm1;
+							}
 							default: {
 								break $sm1;
 							}
 						}
 					}
 				}
-				catch ($t30) {
-					$tcs.setException(ss.Exception.wrap($t30));
+				catch ($t32) {
+					$tcs.setException(ss.Exception.wrap($t32));
 				}
 			});
 			$sm();
@@ -14733,7 +15374,7 @@
 			return $tcs.task;
 		},
 		getKnockedBack$1: function(line) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), idx, next, source, no_movement, r, c, immobilized, $t1, this_name, $t2, grabber, $t4, $t5, a, grabber_name, $t6, $t3;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), idx, next, source, no_movement, $t1, r, c, immobilized, $t2, this_name, $t3, grabber, $t5, $t6, a, grabber_name, $t7, $t4;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -14759,9 +15400,10 @@
 											$Forays_Actor.get_b().add('The ice breaks! ', [this]);
 										}
 									}
-									this.move(next.get_row(), next.get_col());
-									$state = 1;
-									continue $sm1;
+									$t1 = this.move(next.get_row(), next.get_col());
+									$state = 2;
+									$t1.continueWith($sm);
+									return;
 								}
 								else {
 									r = this.get_row();
@@ -14771,9 +15413,9 @@
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
 											$Forays_Actor.get_b().add(this.youVisibleAre() + ' knocked into ' + next.theVisible() + '. ', [this, next]);
 										}
-										$t1 = this.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + next.get_a_name());
-										$state = 3;
-										$t1.continueWith($sm);
+										$t2 = this.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + next.get_a_name());
+										$state = 4;
+										$t2.continueWith($sm);
 										return;
 									}
 									else if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item$1(next.p))) {
@@ -14782,9 +15424,9 @@
 											//vis
 										}
 										this_name = this.get_a_name();
-										$t2 = this.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + $Forays_PhysicalObject.get_m().actor.get_item$1(next.p).get_a_name());
-										$state = 4;
-										$t2.continueWith($sm);
+										$t3 = this.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + $Forays_PhysicalObject.get_m().actor.get_item$1(next.p).get_a_name());
+										$state = 5;
+										$t3.continueWith($sm);
 										return;
 									}
 									else {
@@ -14793,9 +15435,9 @@
 											$Forays_Actor.get_b().add(this.youVisibleAre() + ' knocked about. ', [this]);
 										}
 										grabber = null;
-										$t4 = this.actorsAtDistance(1);
-										for ($t5 = 0; $t5 < $t4.length; $t5++) {
-											a = $t4[$t5];
+										$t5 = this.actorsAtDistance(1);
+										for ($t6 = 0; $t6 < $t5.length; $t6++) {
+											a = $t5[$t6];
 											if (a.attrs.get_item(97) === a.directionOf(this)) {
 												grabber = a;
 											}
@@ -14804,34 +15446,40 @@
 										if (ss.isValue(grabber)) {
 											grabber_name = grabber.get_a_name();
 										}
-										$t6 = this.takeDamage$2(0, 0, $Forays_Global.roll(6), source, '*smashed against ' + grabber_name);
-										$state = 5;
-										$t6.continueWith($sm);
+										$t7 = this.takeDamage$2(0, 0, $Forays_Global.roll(6), source, '*smashed against ' + grabber_name);
+										$state = 6;
+										$t7.continueWith($sm);
 										return;
 									}
 								}
 							}
-							case 3: {
+							case 2: {
 								$state = -1;
 								$t1.getResult();
-								$state = 2;
+								$state = 1;
 								continue $sm1;
 							}
 							case 4: {
 								$state = -1;
 								$t2.getResult();
-								$t3 = $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + this_name);
-								$state = 6;
-								$t3.continueWith($sm);
-								return;
+								$state = 3;
+								continue $sm1;
 							}
 							case 5: {
 								$state = -1;
-								$t6.getResult();
-								$state = 2;
+								$t3.getResult();
+								$t4 = $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + this_name);
+								$state = 7;
+								$t4.continueWith($sm);
+								return;
+							}
+							case 6: {
+								$state = -1;
+								$t7.getResult();
+								$state = 3;
 								continue $sm1;
 							}
-							case 2: {
+							case 3: {
 								$state = -1;
 								if (immobilized && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									if ($Forays_Actor.get_player().canSee(this.tile())) {
@@ -14846,10 +15494,10 @@
 								$tcs.setResult(true);
 								return;
 							}
-							case 6: {
+							case 7: {
 								$state = -1;
-								$t3.getResult();
-								$state = 2;
+								$t4.getResult();
+								$state = 3;
 								continue $sm1;
 							}
 							default: {
@@ -14858,24 +15506,111 @@
 						}
 					}
 				}
-				catch ($t7) {
-					$tcs.setException(ss.Exception.wrap($t7));
+				catch ($t8) {
+					$tcs.setException(ss.Exception.wrap($t8));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		castSpell: function(spell) {
-			return this.castSpell$3(spell, null, false).getResult();
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
+			var $sm = Function.mkdel(this, function() {
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								$t1 = this.castSpell$3(spell, null, false);
+								$state = 1;
+								$t1.continueWith($sm);
+								return;
+							}
+							case 1: {
+								$state = -1;
+								$tcs.setResult($t1.getResult());
+								return;
+							}
+							default: {
+								break $sm1;
+							}
+						}
+					}
+				}
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
+				}
+			});
+			$sm();
+			return $tcs.task;
 		},
 		castSpell$2: function(spell, force_of_will) {
-			return this.castSpell$3(spell, null, force_of_will).getResult();
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
+			var $sm = Function.mkdel(this, function() {
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								$t1 = this.castSpell$3(spell, null, force_of_will);
+								$state = 1;
+								$t1.continueWith($sm);
+								return;
+							}
+							case 1: {
+								$state = -1;
+								$tcs.setResult($t1.getResult());
+								return;
+							}
+							default: {
+								break $sm1;
+							}
+						}
+					}
+				}
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
+				}
+			});
+			$sm();
+			return $tcs.task;
 		},
 		castSpell$1: function(spell, obj) {
-			return this.castSpell$3(spell, obj, false).getResult();
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
+			var $sm = Function.mkdel(this, function() {
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								$t1 = this.castSpell$3(spell, obj, false);
+								$state = 1;
+								$t1.continueWith($sm);
+								return;
+							}
+							case 1: {
+								$state = -1;
+								$tcs.setResult($t1.getResult());
+								return;
+							}
+							default: {
+								break $sm1;
+							}
+						}
+					}
+				}
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
+				}
+			});
+			$sm();
+			return $tcs.task;
 		},
 		castSpell$3: function(spell, obj, force_of_will) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, a, t, line, bonus, fail, $t4, s, $t5, $t7, $t11, i, a4, b, $t12, $t15, duration, targets, $t38, $t39, a6, a7, $t40, $t41, $t43, i2, $t45, $t51, $t57, $t59, $t66, $t71, targets2, $t73, duration2, a1, $t6, t2, a2, s1, s2, line2, idx, next, $t8, a3, a5, $t13, $t14, t21, bolt_target, damage_targets, $t16, t22, chain, $t17, $t18, last_added, done, new_last_added, $t19, added, sort_list, $t20, $t21, nearby, contains_value, $t22, k, list, $t23, o, idx1, $t24, o1, $t25, $t26, o2, frames, line_length, $t27, current, next1, $t28, o3, $t29, $t30, o21, bres, idx2, $t31, t23, $t33, $t32, frame, i1, a8, $t42, a9, $t44, ch, tiles, memlist, a10, targets1, prev, $t52, $t53, ac1, $t54, $t55, t24, a11, r, c, $t58, dist, cells, chars, p2, a12, $t60, $t61, $t62, neighbor, full_line, i3, a13, idx4, a14, r1, c1, $t72, $t9, $t10, $t34, p, $t35, $t46, ac2, $t56, duration1, open_spaces, $t63, $t64, neighbor1, count, firstactor, nextactor, firsttile, nexttile, $t67, tile2, idx3, s3, s21, $t68, $t36, j, $t47, j1, $t49, chosen, $t65, prev1, $t69, $t70, ac, $t37, tile, $t48, tile1, $t50;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, a, t, line, bonus, fail, $t4, s, $t5, $t7, $t11, i, $t13, $t16, duration, targets, $t39, $t40, a6, a7, $t41, $t42, $t44, $t45, i2, $t47, $t54, $t60, $t62, $t69, $t74, targets2, $t76, duration2, a1, $t6, t2, a2, s1, s2, line2, idx, next, $t8, a3, a4, b, $t12, a5, $t14, $t15, t21, bolt_target, damage_targets, $t17, t22, chain, $t18, $t19, last_added, done, new_last_added, $t20, added, sort_list, $t21, $t22, nearby, contains_value, $t23, k, list, $t24, o, idx1, $t25, o1, $t26, $t27, o2, frames, line_length, $t28, current, next1, $t29, o3, $t30, $t31, o21, bres, idx2, $t32, t23, $t34, $t33, frame, i1, a8, $t43, a9, $t46, ch, tiles, memlist, a10, targets1, prev, $t55, $t56, ac1, $t57, $t58, t24, a11, r, c, $t61, dist, cells, chars, p2, a12, $t63, $t64, $t65, neighbor, full_line, i3, a13, idx4, a14, r1, c1, $t75, $t9, $t10, $t35, p, $t36, $t48, ac2, $t59, duration1, open_spaces, $t66, $t67, neighbor1, count, firstactor, nextactor, firsttile, nexttile, $t70, tile2, idx3, s3, s21, $t71, $t37, j, $t49, j1, $t52, chosen, $t68, prev1, $t72, $t73, ac, $t38, tile, $t50, $t51, tile1, $t53;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -15010,35 +15745,18 @@
 									continue $sm1;
 								}
 								else if (spell === 4) {
-									for (i = 0; i < 9999; ++i) {
-										a4 = $Forays_Global.roll$1(1, 17) - 9;
-										//-8 to 8
-										b = $Forays_Global.roll$1(1, 17) - 9;
-										if (Math.abs(a4) + Math.abs(b) >= 6) {
-											a4 += this.get_row();
-											b += this.get_col();
-											if ($Forays_PhysicalObject.get_m().boundsCheck(a4, b) && $Forays_PhysicalObject.get_m().tile.get_item(a4, b).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(a4, b))) {
-												$Forays_Actor.get_b().add(this.you('cast') + ' blink. ', [this]);
-												$Forays_Actor.get_b().add(this.you('step') + ' through a rip in reality. ', [this]);
-												this.animateStorm(2, 3, 4, '*', 14);
-												this.move(a4, b);
-												$Forays_PhysicalObject.get_m().draw();
-												this.animateStorm(2, 3, 4, '*', 14);
-												break;
-											}
-										}
-									}
-									$state = 2;
+									i = 0;
+									$state = 9;
 									continue $sm1;
 								}
 								else if (spell === 5) {
 									if (ss.isNullOrUndefined(t)) {
-										$t12 = this.getTarget$2(12);
-										$state = 10;
-										$t12.continueWith($sm);
+										$t13 = this.getTarget$2(12);
+										$state = 11;
+										$t13.continueWith($sm);
 										return;
 									}
-									$state = 9;
+									$state = 10;
 									continue $sm1;
 								}
 								else if (spell === 6) {
@@ -15062,12 +15780,12 @@
 								}
 								else if (spell === 7) {
 									if (ss.isNullOrUndefined(t)) {
-										$t15 = this.getTarget$2(12);
-										$state = 12;
-										$t15.continueWith($sm);
+										$t16 = this.getTarget$2(12);
+										$state = 13;
+										$t16.continueWith($sm);
 										return;
 									}
-									$state = 11;
+									$state = 12;
 									continue $sm1;
 								}
 								else if (spell === 8) {
@@ -15075,7 +15793,7 @@
 										$Forays_Actor.get_b().add('You cast shadowsight. ', []);
 										$Forays_Actor.get_b().add('Your eyes pierce the darkness. ', []);
 										duration = 10001;
-										this.gainAttr$2(85, duration, 'You no longer see as well in darkness. ', []);
+										this.gainAttr$2(85, duration, 'You no longer see as well in darkness. ');
 										this.gainAttr(22, duration);
 									}
 									else {
@@ -15087,9 +15805,9 @@
 								}
 								else if (spell === 9) {
 									targets = [];
-									$t38 = this.actorsWithinDistance$1(2, true);
-									for ($t39 = 0; $t39 < $t38.length; $t39++) {
-										a6 = $t38[$t39];
+									$t39 = this.actorsWithinDistance$1(2, true);
+									for ($t40 = 0; $t40 < $t39.length; $t40++) {
+										a6 = $t39[$t40];
 										if (this.hasLOE(a6)) {
 											targets.add(a6);
 										}
@@ -15098,31 +15816,31 @@
 									this.animateExplosion(this, 2, 18, '*');
 									if (targets.length === 0) {
 										$Forays_Actor.get_b().add('The air around ' + this.get_the_name() + ' crackles. ', [this]);
-										$state = 13;
+										$state = 14;
 										continue $sm1;
 									}
 									else {
 										if (!(targets.length > 0)) {
-											$state = 13;
+											$state = 14;
 											continue $sm1;
 										}
 										a7 = $Forays_Extensions.random($Forays_Actor).call(null, targets);
 										targets.remove(a7);
 										$Forays_Actor.get_b().add('Electricity blasts ' + a7.get_the_name() + '. ', [a7]);
-										$t40 = a7.takeDamage$2(3, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
-										$state = 14;
-										$t40.continueWith($sm);
+										$t41 = a7.takeDamage$2(3, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
+										$state = 15;
+										$t41.continueWith($sm);
 										return;
 									}
 								}
 								else if (spell === 10) {
 									if (ss.isNullOrUndefined(t)) {
-										$t41 = this.getDirection();
-										$state = 16;
-										$t41.continueWith($sm);
+										$t42 = this.getDirection();
+										$state = 17;
+										$t42.continueWith($sm);
 										return;
 									}
-									$state = 15;
+									$state = 16;
 									continue $sm1;
 								}
 								else if (spell === 11) {
@@ -15131,27 +15849,30 @@
 										this.target_location = $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col());
 										$Forays_Actor.get_b().add('You create a rune of transport on ' + $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_the_name() + '. ', []);
 										this.target_location.features.add(4);
+										$state = 18;
+										continue $sm1;
 									}
 									else if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(this.target_location.get_row(), this.target_location.get_col())) && this.target_location.get_passable()) {
 										$Forays_Actor.get_b().add('You activate your rune of transport. ', []);
-										this.move(this.target_location.get_row(), this.target_location.get_col());
-										this.target_location.features.remove(4);
-										this.target_location = null;
+										$t44 = this.move(this.target_location.get_row(), this.target_location.get_col());
+										$state = 19;
+										$t44.continueWith($sm);
+										return;
 									}
 									else {
 										$Forays_Actor.get_b().add('Something blocks your transport. ', []);
+										$state = 18;
+										continue $sm1;
 									}
-									$state = 2;
-									continue $sm1;
 								}
 								else if (spell === 12) {
 									if (ss.isNullOrUndefined(t)) {
-										$t43 = this.getTarget$2(12);
-										$state = 18;
-										$t43.continueWith($sm);
+										$t45 = this.getTarget$2(12);
+										$state = 21;
+										$t45.continueWith($sm);
 										return;
 									}
-									$state = 17;
+									$state = 20;
 									continue $sm1;
 								}
 								else if (spell === 13) {
@@ -15162,65 +15883,65 @@
 										return;
 									}
 									else if (ss.isNullOrUndefined(t)) {
-										$t45 = this.getDirection$2(true, false);
-										$state = 21;
-										$t45.continueWith($sm);
+										$t47 = this.getDirection$2(true, false);
+										$state = 24;
+										$t47.continueWith($sm);
 										return;
 									}
 									else {
 										i2 = this.directionOf(t);
-										$state = 20;
+										$state = 23;
 										continue $sm1;
 									}
 								}
 								else if (spell === 14) {
 									if (ss.isNullOrUndefined(t)) {
-										$t51 = this.getTarget$4(12, 2);
-										$state = 23;
-										$t51.continueWith($sm);
+										$t54 = this.getTarget$4(12, 2);
+										$state = 26;
+										$t54.continueWith($sm);
 										return;
 									}
-									$state = 22;
+									$state = 25;
 									continue $sm1;
 								}
 								else if (spell === 15) {
 									if (ss.isNullOrUndefined(t)) {
-										$t57 = this.getTarget$2(12);
-										$state = 25;
-										$t57.continueWith($sm);
+										$t60 = this.getTarget$2(12);
+										$state = 28;
+										$t60.continueWith($sm);
 										return;
 									}
-									$state = 24;
+									$state = 27;
 									continue $sm1;
 								}
 								else if (spell === 16) {
 									if (ss.isNullOrUndefined(t)) {
-										$t59 = this.getTarget$4(12, -1);
-										$state = 27;
-										$t59.continueWith($sm);
+										$t62 = this.getTarget$4(12, -1);
+										$state = 30;
+										$t62.continueWith($sm);
 										return;
 									}
-									$state = 26;
+									$state = 29;
 									continue $sm1;
 								}
 								else if (spell === 17) {
 									if (ss.isNullOrUndefined(t)) {
-										$t66 = this.getTarget();
-										$state = 29;
-										$t66.continueWith($sm);
+										$t69 = this.getTarget();
+										$state = 32;
+										$t69.continueWith($sm);
 										return;
 									}
-									$state = 28;
+									$state = 31;
 									continue $sm1;
 								}
 								else if (spell === 18) {
 									if (ss.isNullOrUndefined(t)) {
-										$t71 = this.getDirection();
-										$state = 31;
-										$t71.continueWith($sm);
+										$t74 = this.getDirection();
+										$state = 34;
+										$t74.continueWith($sm);
 										return;
 									}
-									$state = 30;
+									$state = 33;
 									continue $sm1;
 								}
 								else if (spell === 19) {
@@ -15228,7 +15949,7 @@
 									$Forays_Actor.get_b().add(this.you('cast') + ' blizzard. ', [this]);
 									this.animateStorm(5, 8, 24, '*', 17);
 									$Forays_Actor.get_b().add('A massive ice storm surrounds ' + this.get_the_name() + '. ', [this]);
-									$state = 32;
+									$state = 35;
 									continue $sm1;
 								}
 								else if (spell === 20) {
@@ -15248,9 +15969,9 @@
 								else if (spell === 21) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' minor heal. ', [this]);
 									$Forays_Actor.get_b().add('A bluish glow surrounds ' + this.get_the_name() + '. ', [this]);
-									$t73 = this.takeDamage$1(5, 2, $Forays_Global.roll$1(4, 6), null);
-									$state = 33;
-									$t73.continueWith($sm);
+									$t76 = this.takeDamage$1(5, 2, $Forays_Global.roll$1(4, 6), null);
+									$state = 36;
+									$t76.continueWith($sm);
 									return;
 								}
 								else if (spell === 22) {
@@ -15347,7 +16068,7 @@
 										idx = line2.indexOf($Forays_PhysicalObject.get_m().tile.get_item(a2.get_row(), a2.get_col()));
 										next = line2[idx + 1];
 										$t8 = a2.takeDamage$2(9, 1, $Forays_Global.roll$1(1 + bonus, 6), this, this.get_a_name());
-										$state = 35;
+										$state = 38;
 										$t8.continueWith($sm);
 										return;
 									}
@@ -15369,7 +16090,7 @@
 												t.toggle(this);
 											}
 										}
-										$state = 34;
+										$state = 37;
 										continue $sm1;
 									}
 								}
@@ -15413,16 +16134,43 @@
 								$state = 2;
 								continue $sm1;
 							}
-							case 10: {
+							case 9: {
 								$state = -1;
-								line = $t12.getResult();
+								if (!(i < 9999)) {
+									$state = 40;
+									continue $sm1;
+								}
+								a4 = $Forays_Global.roll$1(1, 17) - 9;
+								//-8 to 8
+								b = $Forays_Global.roll$1(1, 17) - 9;
+								if (Math.abs(a4) + Math.abs(b) >= 6) {
+									a4 += this.get_row();
+									b += this.get_col();
+									if ($Forays_PhysicalObject.get_m().boundsCheck(a4, b) && $Forays_PhysicalObject.get_m().tile.get_item(a4, b).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(a4, b))) {
+										$Forays_Actor.get_b().add(this.you('cast') + ' blink. ', [this]);
+										$Forays_Actor.get_b().add(this.you('step') + ' through a rip in reality. ', [this]);
+										this.animateStorm(2, 3, 4, '*', 14);
+										$t12 = this.move(a4, b);
+										$state = 41;
+										$t12.continueWith($sm);
+										return;
+									}
+									$state = 39;
+									continue $sm1;
+								}
+								$state = 39;
+								continue $sm1;
+							}
+							case 11: {
+								$state = -1;
+								line = $t13.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 9;
+								$state = 10;
 								continue $sm1;
 							}
-							case 9: {
+							case 10: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' scorch. ', [this]);
@@ -15430,14 +16178,14 @@
 									if (ss.isValue(a5)) {
 										this.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 16);
 										$Forays_Actor.get_b().add('The scorching bolt hits ' + a5.get_the_name() + '. ', [a5]);
-										$t13 = a5.takeDamage$2(1, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
-										$state = 37;
-										$t13.continueWith($sm);
+										$t14 = a5.takeDamage$2(1, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
+										$state = 43;
+										$t14.continueWith($sm);
 										return;
 									}
 									else {
-										for ($t14 = 0; $t14 < line.length; $t14++) {
-											t21 = line[$t14];
+										for ($t15 = 0; $t15 < line.length; $t15++) {
+											t21 = line[$t15];
 											if (t21.is(1) || t21.is(2)) {
 												line = $Forays_Extensions.to(line, t21);
 											}
@@ -15452,7 +16200,7 @@
 											$Forays_Extensions.last($Forays_Tile).call(null, line).features.remove(2);
 											$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [$Forays_Extensions.last($Forays_Tile).call(null, line)]);
 										}
-										$state = 36;
+										$state = 42;
 										continue $sm1;
 									}
 								}
@@ -15461,23 +16209,23 @@
 									return;
 								}
 							}
-							case 12: {
+							case 13: {
 								$state = -1;
-								line = $t15.getResult();
+								line = $t16.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 11;
+								$state = 12;
 								continue $sm1;
 							}
-							case 11: {
+							case 12: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' lightning bolt. ', [this]);
 									bolt_target = null;
 									damage_targets = [];
-									for ($t16 = 0; $t16 < line.length; $t16++) {
-										t22 = line[$t16];
+									for ($t17 = 0; $t17 < line.length; $t17++) {
+										t22 = line[$t17];
 										if (ss.isValue(t22.actor()) && !ss.referenceEquals(t22.actor(), this)) {
 											bolt_target = t22.actor();
 											damage_targets.add(t22.actor());
@@ -15490,21 +16238,21 @@
 									}
 									if (ss.isValue(bolt_target)) {
 										chain = new (Type.makeGenericType($Forays_Dict$2, [$Forays_PhysicalObject, Array]))();
-										$t17 = [];
-										$t17.add(bolt_target);
-										chain.set_item(this, $t17);
 										$t18 = [];
 										$t18.add(bolt_target);
-										last_added = $t18;
+										chain.set_item(this, $t18);
+										$t19 = [];
+										$t19.add(bolt_target);
+										last_added = $t19;
 										for (done = false; !done;) {
 											done = true;
 											new_last_added = [];
-											for ($t19 = 0; $t19 < last_added.length; $t19++) {
-												added = last_added[$t19];
+											for ($t20 = 0; $t20 < last_added.length; $t20++) {
+												added = last_added[$t20];
 												sort_list = [];
-												$t20 = added.tilesWithinDistance$1(3, true);
-												for ($t21 = 0; $t21 < $t20.length; $t21++) {
-													nearby = $t20[$t21];
+												$t21 = added.tilesWithinDistance$1(3, true);
+												for ($t22 = 0; $t22 < $t21.length; $t22++) {
+													nearby = $t21[$t22];
 													if (ss.isValue(nearby.actor()) || nearby.conductsElectricity()) {
 														if (added.hasLOE(nearby)) {
 															if (ss.isValue(nearby.actor())) {
@@ -15514,13 +16262,13 @@
 																bolt_target = nearby;
 															}
 															contains_value = false;
-															$t22 = Object.keys(chain.d).getEnumerator();
+															$t23 = Object.keys(chain.d).getEnumerator();
 															try {
-																while ($t22.moveNext()) {
-																	k = $t22.get_current();
+																while ($t23.moveNext()) {
+																	k = $t23.get_current();
 																	list = chain.d[k];
-																	for ($t23 = 0; $t23 < list.length; $t23++) {
-																		o = list[$t23];
+																	for ($t24 = 0; $t24 < list.length; $t24++) {
+																		o = list[$t24];
 																		if (ss.referenceEquals(o, bolt_target)) {
 																			contains_value = true;
 																			break;
@@ -15532,7 +16280,7 @@
 																}
 															}
 															finally {
-																$t22.dispose();
+																$t23.dispose();
 															}
 															if (!Object.keyExists(chain.d, bolt_target) && !contains_value) {
 																if (ss.isValue(Type.safeCast(bolt_target, $Forays_Actor))) {
@@ -15544,8 +16292,8 @@
 																}
 																else {
 																	idx1 = 0;
-																	for ($t24 = 0; $t24 < sort_list.length; $t24++) {
-																		o1 = sort_list[$t24];
+																	for ($t25 = 0; $t25 < sort_list.length; $t25++) {
+																		o1 = sort_list[$t25];
 																		if (bolt_target.distanceFrom(added) < o1.distanceFrom(added)) {
 																			sort_list.insert(idx1, bolt_target);
 																			break;
@@ -15557,9 +16305,9 @@
 																	}
 																}
 																if (ss.isNullOrUndefined(chain.get_item(added))) {
-																	$t25 = [];
-																	$t25.add(bolt_target);
-																	chain.set_item(added, $t25);
+																	$t26 = [];
+																	$t26.add(bolt_target);
+																	chain.set_item(added, $t26);
 																}
 																else {
 																	chain.get_item(added).add(bolt_target);
@@ -15568,8 +16316,8 @@
 														}
 													}
 												}
-												for ($t26 = 0; $t26 < sort_list.length; $t26++) {
-													o2 = sort_list[$t26];
+												for ($t27 = 0; $t27 < sort_list.length; $t27++) {
+													o2 = sort_list[$t27];
 													new_last_added.add(o2);
 												}
 											}
@@ -15581,31 +16329,31 @@
 										frames = new (Type.makeGenericType($Forays_Dict$2, [ss.Int32, Array]))();
 										line_length = new (Type.makeGenericType($Forays_Dict$2, [$Forays_PhysicalObject, ss.Int32]))();
 										line_length.set_item(this, 0);
-										$t27 = [];
-										$t27.add(this);
-										current = $t27;
+										$t28 = [];
+										$t28.add(this);
+										current = $t28;
 										next1 = [];
 										while (current.length > 0) {
-											for ($t28 = 0; $t28 < current.length; $t28++) {
-												o3 = current[$t28];
+											for ($t29 = 0; $t29 < current.length; $t29++) {
+												o3 = current[$t29];
 												if (ss.isValue(chain.get_item(o3))) {
-													$t29 = chain.get_item(o3);
-													for ($t30 = 0; $t30 < $t29.length; $t30++) {
-														o21 = $t29[$t30];
+													$t30 = chain.get_item(o3);
+													for ($t31 = 0; $t31 < $t30.length; $t31++) {
+														o21 = $t30[$t31];
 														bres = o3.getBestLine(o21);
 														bres.removeAt(0);
 														line_length.set_item(o21, bres.length + line_length.get_item(o3));
 														idx2 = 0;
-														for ($t31 = 0; $t31 < bres.length; $t31++) {
-															t23 = bres[$t31];
+														for ($t32 = 0; $t32 < bres.length; $t32++) {
+															t23 = bres[$t32];
 															if (ss.isValue(frames.get_item(idx2 + line_length.get_item(o3)))) {
 																frames.get_item(idx2 + line_length.get_item(o3)).add(new $Forays_pos(t23.get_row(), t23.get_col()));
 															}
 															else {
-																$t33 = idx2 + line_length.get_item(o3);
-																$t32 = [];
-																$t32.add(new $Forays_pos(t23.get_row(), t23.get_col()));
-																frames.set_item($t33, $t32);
+																$t34 = idx2 + line_length.get_item(o3);
+																$t33 = [];
+																$t33.add(new $Forays_pos(t23.get_row(), t23.get_col()));
+																frames.set_item($t34, $t33);
 															}
 															++idx2;
 														}
@@ -15618,13 +16366,13 @@
 										}
 										frame = frames.get_item(0);
 										i1 = 0;
-										$state = 39;
+										$state = 45;
 										continue $sm1;
 									}
 									else {
 										this.animateBeam$2(line, '*', 18);
 										$Forays_Actor.get_b().add('The bolt hits ' + t.get_the_name() + '. ', [t]);
-										$state = 38;
+										$state = 44;
 										continue $sm1;
 									}
 								}
@@ -15633,23 +16381,23 @@
 									return;
 								}
 							}
-							case 14: {
+							case 15: {
 								$state = -1;
-								$t40.getResult();
+								$t41.getResult();
 								$state = 1;
 								continue $sm1;
 							}
-							case 13: {
+							case 14: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 16: {
+							case 17: {
 								$state = -1;
-								t = this.tileInDirection($t41.getResult());
-								$state = 15;
+								t = this.tileInDirection($t42.getResult());
+								$state = 16;
 								continue $sm1;
 							}
-							case 15: {
+							case 16: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									a8 = t.actor();
@@ -15658,14 +16406,14 @@
 									$Forays_Screen.animateMapCell$1(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor4('*', 7), 100);
 									if (ss.isValue(a8)) {
 										$Forays_Actor.get_b().add(this.you$1('smash', true) + ' ' + a8.theVisible() + '. ', [this, a8]);
-										$t42 = a8.takeDamage$2(9, 1, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
-										$state = 41;
-										$t42.continueWith($sm);
+										$t43 = a8.takeDamage$2(9, 1, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
+										$state = 47;
+										$t43.continueWith($sm);
 										return;
 									}
 									else {
 										$Forays_Actor.get_b().add('You smash ' + t.get_the_name() + '. ', []);
-										$state = 40;
+										$state = 46;
 										continue $sm1;
 									}
 								}
@@ -15674,16 +16422,28 @@
 									return;
 								}
 							}
-							case 18: {
+							case 19: {
 								$state = -1;
-								line = $t43.getResult();
+								$t44.getResult();
+								this.target_location.features.remove(4);
+								this.target_location = null;
+								$state = 18;
+								continue $sm1;
+							}
+							case 18: {
+								$state = 2;
+								continue $sm1;
+							}
+							case 21: {
+								$state = -1;
+								line = $t45.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 17;
+								$state = 20;
 								continue $sm1;
 							}
-							case 17: {
+							case 20: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' glacial blast. ', [this]);
@@ -15691,15 +16451,15 @@
 									if (ss.isValue(a9)) {
 										this.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 17);
 										$Forays_Actor.get_b().add('The glacial blast hits ' + a9.get_the_name() + '. ', [a9]);
-										$t44 = a9.takeDamage$2(2, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
-										$state = 43;
-										$t44.continueWith($sm);
+										$t46 = a9.takeDamage$2(2, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
+										$state = 49;
+										$t46.continueWith($sm);
 										return;
 									}
 									else {
 										this.animateProjectile$2(line, '*', 17);
 										$Forays_Actor.get_b().add('The glacial blast hits ' + t.get_the_name() + '. ', [t]);
-										$state = 42;
+										$state = 48;
 										continue $sm1;
 									}
 								}
@@ -15708,14 +16468,14 @@
 									return;
 								}
 							}
-							case 21: {
+							case 24: {
 								$state = -1;
-								i2 = $t45.getResult();
+								i2 = $t47.getResult();
 								t = this.tileInDirection(i2);
-								$state = 20;
+								$state = 23;
 								continue $sm1;
 							}
-							case 20: {
+							case 23: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									if (t.get_type() === 0) {
@@ -15738,7 +16498,7 @@
 										}
 										tiles = [];
 										memlist = [];
-										$state = 44;
+										$state = 50;
 										continue $sm1;
 									}
 									else {
@@ -15754,20 +16514,20 @@
 									return;
 								}
 							}
-							case 19: {
+							case 22: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 23: {
+							case 26: {
 								$state = -1;
-								line = $t51.getResult();
+								line = $t54.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 22;
+								$state = 25;
 								continue $sm1;
 							}
-							case 22: {
+							case 25: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									a10 = this.firstActorInLine$1(line);
@@ -15780,9 +16540,9 @@
 									$Forays_Actor.get_b().add('Fwoosh! ', [this, t]);
 									targets1 = [];
 									prev = $Forays_Extensions.toFirstObstruction(line)[$Forays_Extensions.toFirstObstruction(line).length - 2];
-									$t52 = t.actorsWithinDistance(2);
-									for ($t53 = 0; $t53 < $t52.length; $t53++) {
-										ac1 = $t52[$t53];
+									$t55 = t.actorsWithinDistance(2);
+									for ($t56 = 0; $t56 < $t55.length; $t56++) {
+										ac1 = $t55[$t56];
 										if (t.get_passable()) {
 											if (t.hasBresenhamLine(ac1.get_row(), ac1.get_col())) {
 												targets1.add(ac1);
@@ -15792,9 +16552,9 @@
 											targets1.add(ac1);
 										}
 									}
-									$t54 = t.tilesWithinDistance(2);
-									for ($t55 = 0; $t55 < $t54.length; $t55++) {
-										t24 = $t54[$t55];
+									$t57 = t.tilesWithinDistance(2);
+									for ($t58 = 0; $t58 < $t57.length; $t58++) {
+										t24 = $t57[$t58];
 										if (t.get_passable()) {
 											if (t.hasBresenhamLine(t24.get_row(), t24.get_col())) {
 												if (ss.isValue(t24.actor())) {
@@ -15824,7 +16584,7 @@
 											}
 										}
 									}
-									$state = 46;
+									$state = 52;
 									continue $sm1;
 								}
 								else {
@@ -15832,16 +16592,16 @@
 									return;
 								}
 							}
-							case 25: {
+							case 28: {
 								$state = -1;
-								line = $t57.getResult();
+								line = $t60.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 24;
+								$state = 27;
 								continue $sm1;
 							}
-							case 24: {
+							case 27: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' sonic boom. ', [this]);
@@ -15851,15 +16611,15 @@
 										$Forays_Actor.get_b().add('A wave of sound hits ' + a11.get_the_name() + '. ', [a11]);
 										r = a11.get_row();
 										c = a11.get_col();
-										$t58 = a11.takeDamage$2(9, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
-										$state = 48;
-										$t58.continueWith($sm);
+										$t61 = a11.takeDamage$2(9, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
+										$state = 54;
+										$t61.continueWith($sm);
 										return;
 									}
 									else {
 										this.animateProjectile$2(line, '~', 6);
 										$Forays_Actor.get_b().add('Sonic boom! ', []);
-										$state = 47;
+										$state = 53;
 										continue $sm1;
 									}
 								}
@@ -15868,16 +16628,16 @@
 									return;
 								}
 							}
-							case 27: {
+							case 30: {
 								$state = -1;
-								line = $t59.getResult();
+								line = $t62.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 26;
+								$state = 29;
 								continue $sm1;
 							}
-							case 26: {
+							case 29: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' collapse. ', [this]);
@@ -15911,9 +16671,9 @@
 									a12 = t.actor();
 									if (ss.isValue(a12)) {
 										$Forays_Actor.get_b().add('Part of the ceiling falls onto ' + a12.get_the_name() + '. ', [a12]);
-										$t60 = a12.takeDamage$2(7, 0, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
-										$state = 51;
-										$t60.continueWith($sm);
+										$t63 = a12.takeDamage$2(7, 0, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
+										$state = 57;
+										$t63.continueWith($sm);
 										return;
 									}
 									else {
@@ -15923,15 +16683,15 @@
 										else if (t.get_type() === 0 || t.get_type() === 20) {
 											$Forays_Actor.get_b().add('The wall crashes down! ', []);
 											t.turnToFloor();
-											$t61 = t.tilesAtDistance(1);
-											for ($t62 = 0; $t62 < $t61.length; $t62++) {
-												neighbor = $t61[$t62];
+											$t64 = t.tilesAtDistance(1);
+											for ($t65 = 0; $t65 < $t64.length; $t65++) {
+												neighbor = $t64[$t65];
 												if (neighbor.get_solid_rock()) {
 													neighbor.set_solid_rock(false);
 												}
 											}
 										}
-										$state = 50;
+										$state = 56;
 										continue $sm1;
 									}
 								}
@@ -15940,16 +16700,16 @@
 									return;
 								}
 							}
-							case 29: {
+							case 32: {
 								$state = -1;
-								line = $t66.getResult();
+								line = $t69.getResult();
 								if (ss.isValue(line)) {
 									t = $Forays_Extensions.last($Forays_Tile).call(null, line);
 								}
-								$state = 28;
+								$state = 31;
 								continue $sm1;
 							}
-							case 28: {
+							case 31: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									$Forays_Actor.get_b().add(this.you('cast') + ' force beam. ', [this]);
@@ -15958,7 +16718,7 @@
 									full_line = line.clone();
 									line = $Forays_Extensions.getRange($Forays_Tile).call(null, line, 0, Math.min(13, line.length));
 									i3 = 0;
-									$state = 53;
+									$state = 59;
 									continue $sm1;
 								}
 								else {
@@ -15966,13 +16726,13 @@
 									return;
 								}
 							}
-							case 31: {
+							case 34: {
 								$state = -1;
-								t = this.tileInDirection($t71.getResult());
-								$state = 30;
+								t = this.tileInDirection($t74.getResult());
+								$state = 33;
 								continue $sm1;
 							}
-							case 30: {
+							case 33: {
 								$state = -1;
 								if (ss.isValue(t)) {
 									a13 = t.actor();
@@ -16006,10 +16766,10 @@
 								$state = 2;
 								continue $sm1;
 							}
-							case 32: {
+							case 35: {
 								$state = -1;
 								if (!(targets2.length > 0)) {
-									$state = 54;
+									$state = 60;
 									continue $sm1;
 								}
 								idx4 = $Forays_Global.roll$1(1, targets2.length) - 1;
@@ -16018,14 +16778,14 @@
 								$Forays_Actor.get_b().add('The blizzard hits ' + a14.get_the_name() + '. ', [a14]);
 								r1 = a14.get_row();
 								c1 = a14.get_col();
-								$t72 = a14.takeDamage$2(2, 1, $Forays_Global.roll$1(5 + bonus, 6), this, this.get_a_name());
-								$state = 55;
-								$t72.continueWith($sm);
+								$t75 = a14.takeDamage$2(2, 1, $Forays_Global.roll$1(5 + bonus, 6), this, this.get_a_name());
+								$state = 61;
+								$t75.continueWith($sm);
 								return;
 							}
-							case 33: {
+							case 36: {
 								$state = -1;
-								$t73.getResult();
+								$t76.getResult();
 								$state = 2;
 								continue $sm1;
 							}
@@ -16063,76 +16823,52 @@
 								$tcs.setResult(true);
 								return;
 							}
-							case 35: {
+							case 38: {
 								$state = -1;
 								$t8.getResult();
 								if ($Forays_Global.roll$1(1, 10) <= 7) {
 									if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(t.get_row(), t.get_col()))) {
 										$t9 = a2.getKnockedBack(this);
-										$state = 56;
+										$state = 62;
 										$t9.continueWith($sm);
 										return;
 									}
 									else if (!next.get_passable()) {
 										$Forays_Actor.get_b().add(s1 + '\'s corpse is knocked into ' + next.get_the_name() + '. ', [t, next]);
-										$state = 34;
+										$state = 37;
 										continue $sm1;
 									}
 									else {
 										if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()))) {
 											$Forays_Actor.get_b().add(s1 + '\'s corpse is knocked into ' + $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).get_the_name() + '. ', [t, $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())]);
 											$t10 = $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), this, s2 + '\'s falling corpse');
-											$state = 57;
+											$state = 63;
 											$t10.continueWith($sm);
 											return;
 										}
-										$state = 34;
+										$state = 37;
 										continue $sm1;
 									}
 								}
-								$state = 34;
-								continue $sm1;
-							}
-							case 34: {
-								$state = 2;
+								$state = 37;
 								continue $sm1;
 							}
 							case 37: {
-								$state = -1;
-								$t13.getResult();
-								$state = 36;
-								continue $sm1;
-							}
-							case 36: {
-								$state = 2;
-								continue $sm1;
-							}
-							case 39: {
-								$state = -1;
-								if (!ss.isValue(frame)) {
-									$state = 59;
-									continue $sm1;
-								}
-								for ($t34 = 0; $t34 < frame.length; $t34++) {
-									p = frame[$t34];
-									$Forays_Screen.writeMapChar$2(p.row, p.col, '*', 18);
-								}
-								$t35 = ss.Task.delay(50);
-								$state = 60;
-								$t35.continueWith($sm);
-								return;
-							}
-							case 38: {
 								$state = 2;
 								continue $sm1;
 							}
 							case 41: {
 								$state = -1;
-								if ($t42.getResult()) {
-									a8.gainAttrRefreshDuration$1(27, 201, a8.youAre() + ' no longer stunned. ', [a8]);
-									$Forays_Actor.get_b().add(a8.youAre() + ' stunned. ', [a8]);
-								}
+								$t12.getResult();
+								$Forays_PhysicalObject.get_m().draw();
+								this.animateStorm(2, 3, 4, '*', 14);
 								$state = 40;
+								continue $sm1;
+							}
+							case 39: {
+								$state = -1;
+								++i;
+								$state = 9;
 								continue $sm1;
 							}
 							case 40: {
@@ -16141,7 +16877,7 @@
 							}
 							case 43: {
 								$state = -1;
-								$t44.getResult();
+								$t14.getResult();
 								$state = 42;
 								continue $sm1;
 							}
@@ -16149,73 +16885,115 @@
 								$state = 2;
 								continue $sm1;
 							}
+							case 45: {
+								$state = -1;
+								if (!ss.isValue(frame)) {
+									$state = 65;
+									continue $sm1;
+								}
+								for ($t35 = 0; $t35 < frame.length; $t35++) {
+									p = frame[$t35];
+									$Forays_Screen.writeMapChar$2(p.row, p.col, '*', 18);
+								}
+								$t36 = ss.Task.delay(50);
+								$state = 66;
+								$t36.continueWith($sm);
+								return;
+							}
 							case 44: {
+								$state = 2;
+								continue $sm1;
+							}
+							case 47: {
+								$state = -1;
+								if ($t43.getResult()) {
+									a8.gainAttrRefreshDuration$1(27, 201, a8.youAre() + ' no longer stunned. ', [a8]);
+									$Forays_Actor.get_b().add(a8.youAre() + ' stunned. ', [a8]);
+								}
+								$state = 46;
+								continue $sm1;
+							}
+							case 46: {
+								$state = 2;
+								continue $sm1;
+							}
+							case 49: {
+								$state = -1;
+								$t46.getResult();
+								$state = 48;
+								continue $sm1;
+							}
+							case 48: {
+								$state = 2;
+								continue $sm1;
+							}
+							case 50: {
 								$state = -1;
 								if (!!t.get_passable()) {
-									$state = 61;
+									$state = 67;
 									continue $sm1;
 								}
 								if (t.get_row() === 0 || t.get_row() === 21 || t.get_col() === 0 || t.get_col() === 65) {
-									$state = 61;
+									$state = 67;
 									continue $sm1;
 								}
 								if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 									tiles.add(t);
 									memlist.add($Forays_Screen.mapChar(t.get_row(), t.get_col()));
 									$Forays_Screen.writeMapChar(t.get_row(), t.get_col(), ch);
-									$t46 = ss.Task.delay(35);
-									$state = 63;
-									$t46.continueWith($sm);
+									$t48 = ss.Task.delay(35);
+									$state = 69;
+									$t48.continueWith($sm);
 									return;
 								}
-								$state = 62;
+								$state = 68;
 								continue $sm1;
 							}
-							case 46: {
+							case 52: {
 								$state = -1;
 								if (!(targets1.length > 0)) {
-									$state = 45;
+									$state = 51;
 									continue $sm1;
 								}
 								ac2 = $Forays_Extensions.removeRandom($Forays_Actor).call(null, targets1);
 								$Forays_Actor.get_b().add('The explosion hits ' + ac2.get_the_name() + '. ', [ac2]);
-								$t56 = ac2.takeDamage$2(1, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
-								$state = 64;
-								$t56.continueWith($sm);
+								$t59 = ac2.takeDamage$2(1, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
+								$state = 70;
+								$t59.continueWith($sm);
 								return;
 							}
-							case 45: {
+							case 51: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 48: {
+							case 54: {
 								$state = -1;
-								$t58.getResult();
+								$t61.getResult();
 								if ($Forays_Global.roll$1(1, 10) <= 5 && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !$Forays_PhysicalObject.get_m().actor.get_item(r, c).hasAttr(27)) {
 									$Forays_Actor.get_b().add(a11.youAre() + ' stunned. ', [a11]);
 									a11.attrs.set_item(27, a11.attrs.get_item(27) + 1);
 									duration1 = this.durationOfMagicalEffect($Forays_Global.roll$1(1, 4) + 2) * 100;
 									$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(a11, duration1, 27, a11.youAre() + ' no longer stunned. ', [a11]));
 								}
-								$state = 47;
+								$state = 53;
 								continue $sm1;
 							}
-							case 47: {
+							case 53: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 51: {
+							case 57: {
 								$state = -1;
-								$t60.getResult();
-								$state = 50;
+								$t63.getResult();
+								$state = 56;
 								continue $sm1;
 							}
-							case 50: {
+							case 56: {
 								$state = -1;
 								open_spaces = [];
-								$t63 = t.tilesWithinDistance(1);
-								for ($t64 = 0; $t64 < $t63.length; $t64++) {
-									neighbor1 = $t63[$t64];
+								$t66 = t.tilesWithinDistance(1);
+								for ($t67 = 0; $t67 < $t66.length; $t67++) {
+									neighbor1 = $t66[$t67];
 									if (neighbor1.get_passable()) {
 										if (ss.isNullOrUndefined(a12) || !ss.referenceEquals(neighbor1, t)) {
 											//don't hit the same guy again
@@ -16227,17 +17005,17 @@
 								if (open_spaces.length < 4) {
 									count = open_spaces.length;
 								}
-								$state = 65;
+								$state = 71;
 								continue $sm1;
 							}
-							case 49: {
+							case 55: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 53: {
+							case 59: {
 								$state = -1;
 								if (!(i3 < 3)) {
-									$state = 52;
+									$state = 58;
 									continue $sm1;
 								}
 								//hits thrice
@@ -16245,8 +17023,8 @@
 								nextactor = null;
 								firsttile = null;
 								nexttile = null;
-								for ($t67 = 0; $t67 < line.length; $t67++) {
-									tile2 = line[$t67];
+								for ($t70 = 0; $t70 < line.length; $t70++) {
+									tile2 = line[$t70];
 									if (!tile2.get_passable()) {
 										firsttile = tile2;
 										break;
@@ -16264,77 +17042,77 @@
 								if (ss.isValue(firstactor)) {
 									s3 = firstactor.theVisible();
 									s21 = firstactor.get_a_name();
-									$t68 = firstactor.takeDamage$2(9, 1, $Forays_Global.roll$1(1 + bonus, 6), this, this.get_a_name());
-									$state = 67;
-									$t68.continueWith($sm);
+									$t71 = firstactor.takeDamage$2(9, 1, $Forays_Global.roll$1(1 + bonus, 6), this, this.get_a_name());
+									$state = 73;
+									$t71.continueWith($sm);
 									return;
 								}
-								$state = 66;
+								$state = 72;
 								continue $sm1;
 							}
-							case 52: {
+							case 58: {
 								$state = 2;
 								continue $sm1;
 							}
-							case 55: {
+							case 61: {
 								$state = -1;
-								$t72.getResult();
+								$t75.getResult();
 								if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r1, c1)) && $Forays_Global.roll$1(1, 10) <= 8) {
 									$Forays_Actor.get_b().add(a14.get_the_name() + ' is encased in ice. ', [a14]);
 									a14.attrs.set_item(30, 25);
 								}
-								$state = 32;
-								continue $sm1;
-							}
-							case 54: {
-								$state = 2;
-								continue $sm1;
-							}
-							case 56: {
-								$state = -1;
-								$t9.getResult();
-								$state = 34;
-								continue $sm1;
-							}
-							case 57: {
-								$state = -1;
-								$t10.getResult();
-								$state = 34;
+								$state = 35;
 								continue $sm1;
 							}
 							case 60: {
-								$state = -1;
-								$t35.getResult();
-								frame = frames.get_item(i1);
-								$state = 58;
-								continue $sm1;
-							}
-							case 58: {
-								$state = -1;
-								++i1;
-								$state = 39;
-								continue $sm1;
-							}
-							case 59: {
-								$state = -1;
-								$t36 = 0;
-								$state = 68;
-								continue $sm1;
-							}
-							case 63: {
-								$state = -1;
-								$t46.getResult();
-								//									Thread.Sleep(35);
-								$state = 62;
+								$state = 2;
 								continue $sm1;
 							}
 							case 62: {
 								$state = -1;
-								t = t.tileInDirection(i2);
-								$state = 44;
+								$t9.getResult();
+								$state = 37;
 								continue $sm1;
 							}
-							case 61: {
+							case 63: {
+								$state = -1;
+								$t10.getResult();
+								$state = 37;
+								continue $sm1;
+							}
+							case 66: {
+								$state = -1;
+								$t36.getResult();
+								frame = frames.get_item(i1);
+								$state = 64;
+								continue $sm1;
+							}
+							case 64: {
+								$state = -1;
+								++i1;
+								$state = 45;
+								continue $sm1;
+							}
+							case 65: {
+								$state = -1;
+								$t37 = 0;
+								$state = 74;
+								continue $sm1;
+							}
+							case 69: {
+								$state = -1;
+								$t48.getResult();
+								//									Thread.Sleep(35);
+								$state = 68;
+								continue $sm1;
+							}
+							case 68: {
+								$state = -1;
+								t = t.tileInDirection(i2);
+								$state = 50;
+								continue $sm1;
+							}
+							case 67: {
 								$state = -1;
 								if (t.get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(t.get_row(), t.get_col()))) {
 									if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
@@ -16346,198 +17124,205 @@
 										}
 										$Forays_Screen.writeMapChar(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor2(this.get_color(), this.get_symbol()));
 										j = 0;
-										$t47 = 0;
-										$state = 70;
+										$t49 = 0;
+										$state = 76;
 										continue $sm1;
 									}
-									$state = 69;
+									$state = 75;
 									continue $sm1;
 								}
 								else {
 									if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 										j1 = 0;
-										$t49 = 0;
-										$state = 71;
+										$t52 = 0;
+										$state = 77;
 										continue $sm1;
 									}
-									$state = 19;
+									$state = 22;
 									continue $sm1;
 								}
 							}
-							case 64: {
+							case 70: {
 								$state = -1;
-								$t56.getResult();
-								$state = 46;
+								$t59.getResult();
+								$state = 52;
 								continue $sm1;
 							}
-							case 65: {
+							case 71: {
 								$state = -1;
 								if (!(count > 0)) {
-									$state = 49;
+									$state = 55;
 									continue $sm1;
 								}
 								chosen = $Forays_Extensions.random($Forays_Tile).call(null, open_spaces);
 								open_spaces.remove(chosen);
 								if (ss.isValue(chosen.actor())) {
 									$Forays_Actor.get_b().add('A rock falls onto ' + chosen.actor().get_the_name() + '. ', [chosen.actor()]);
-									$t65 = chosen.actor().takeDamage$2(7, 0, $Forays_Global.roll$1(2, 6), this, this.get_a_name());
-									$state = 73;
-									$t65.continueWith($sm);
+									$t68 = chosen.actor().takeDamage$2(7, 0, $Forays_Global.roll$1(2, 6), this, this.get_a_name());
+									$state = 79;
+									$t68.continueWith($sm);
 									return;
 								}
 								else {
 									prev1 = chosen.get_type();
 									chosen.transformTo(28);
 									chosen.toggles_into = prev1;
-									$state = 72;
+									$state = 78;
 									continue $sm1;
 								}
 							}
-							case 67: {
+							case 73: {
 								$state = -1;
-								$t68.getResult();
+								$t71.getResult();
 								if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(firsttile.get_row(), firsttile.get_col()))) {
-									$t69 = firstactor.getKnockedBack$1(full_line);
-									$state = 74;
-									$t69.continueWith($sm);
+									$t72 = firstactor.getKnockedBack$1(full_line);
+									$state = 80;
+									$t72.continueWith($sm);
 									return;
 								}
 								else if (!nexttile.get_passable()) {
 									$Forays_Actor.get_b().add(s3 + '\'s corpse is knocked into ' + nexttile.get_the_name() + '. ', [firsttile, nexttile]);
-									$state = 66;
+									$state = 72;
 									continue $sm1;
 								}
 								else {
 									if (ss.isValue(nextactor)) {
 										$Forays_Actor.get_b().add(s3 + '\'s corpse is knocked into ' + nextactor.theVisible() + '. ', [firsttile, nextactor]);
-										$t70 = nextactor.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), this, s21 + '\'s falling corpse');
-										$state = 75;
-										$t70.continueWith($sm);
+										$t73 = nextactor.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), this, s21 + '\'s falling corpse');
+										$state = 81;
+										$t73.continueWith($sm);
 										return;
 									}
-									$state = 66;
+									$state = 72;
 									continue $sm1;
 								}
-							}
-							case 66: {
-								$state = -1;
-								++i3;
-								$state = 53;
-								continue $sm1;
-							}
-							case 68: {
-								$state = -1;
-								if (!($t36 < damage_targets.length)) {
-									$state = 38;
-									continue $sm1;
-								}
-								ac = damage_targets[$t36];
-								$Forays_Actor.get_b().add('The bolt hits ' + ac.get_the_name() + '. ', [ac]);
-								$t37 = ac.takeDamage$2(3, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
-								$state = 77;
-								$t37.continueWith($sm);
-								return;
-							}
-							case 70: {
-								$state = -1;
-								if (!($t47 < tiles.length)) {
-									$state = 69;
-									continue $sm1;
-								}
-								tile = tiles[$t47];
-								$Forays_Screen.writeMapChar(tile.get_row(), tile.get_col(), memlist[j++]);
-								$t48 = ss.Task.delay(35);
-								$state = 79;
-								$t48.continueWith($sm);
-								return;
-							}
-							case 69: {
-								$state = -1;
-								this.move(t.get_row(), t.get_col());
-								$Forays_PhysicalObject.get_m().draw();
-								$Forays_Actor.get_b().add(this.you('travel') + ' through the passage. ', [this]);
-								$state = 19;
-								continue $sm1;
-							}
-							case 71: {
-								$state = -1;
-								if (!($t49 < tiles.length)) {
-									$state = 81;
-									continue $sm1;
-								}
-								tile1 = tiles[$t49];
-								$Forays_Screen.writeMapChar(tile1.get_row(), tile1.get_col(), memlist[j1++]);
-								$t50 = ss.Task.delay(35);
-								$state = 82;
-								$t50.continueWith($sm);
-								return;
-							}
-							case 73: {
-								$state = -1;
-								$t65.getResult();
-								$state = 72;
-								continue $sm1;
 							}
 							case 72: {
 								$state = -1;
-								--count;
-								$state = 65;
+								++i3;
+								$state = 59;
 								continue $sm1;
 							}
 							case 74: {
 								$state = -1;
-								$t69.getResult();
-								$state = 66;
-								continue $sm1;
-							}
-							case 75: {
-								$state = -1;
-								$t70.getResult();
-								$state = 66;
-								continue $sm1;
-							}
-							case 77: {
-								$state = -1;
-								$t37.getResult();
-								$state = 76;
-								continue $sm1;
+								if (!($t37 < damage_targets.length)) {
+									$state = 44;
+									continue $sm1;
+								}
+								ac = damage_targets[$t37];
+								$Forays_Actor.get_b().add('The bolt hits ' + ac.get_the_name() + '. ', [ac]);
+								$t38 = ac.takeDamage$2(3, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
+								$state = 83;
+								$t38.continueWith($sm);
+								return;
 							}
 							case 76: {
 								$state = -1;
-								$t36++;
-								$state = 68;
-								continue $sm1;
+								if (!($t49 < tiles.length)) {
+									$state = 75;
+									continue $sm1;
+								}
+								tile = tiles[$t49];
+								$Forays_Screen.writeMapChar(tile.get_row(), tile.get_col(), memlist[j++]);
+								$t50 = ss.Task.delay(35);
+								$state = 85;
+								$t50.continueWith($sm);
+								return;
+							}
+							case 75: {
+								$state = -1;
+								$t51 = this.move(t.get_row(), t.get_col());
+								$state = 86;
+								$t51.continueWith($sm);
+								return;
+							}
+							case 77: {
+								$state = -1;
+								if (!($t52 < tiles.length)) {
+									$state = 88;
+									continue $sm1;
+								}
+								tile1 = tiles[$t52];
+								$Forays_Screen.writeMapChar(tile1.get_row(), tile1.get_col(), memlist[j1++]);
+								$t53 = ss.Task.delay(35);
+								$state = 89;
+								$t53.continueWith($sm);
+								return;
 							}
 							case 79: {
 								$state = -1;
-								$t48.getResult();
-								//Thread.Sleep(35);
+								$t68.getResult();
 								$state = 78;
 								continue $sm1;
 							}
 							case 78: {
 								$state = -1;
-								$t47++;
-								$state = 70;
-								continue $sm1;
-							}
-							case 82: {
-								$state = -1;
-								$t50.getResult();
-								//Thread.Sleep(35);
-								$state = 80;
+								--count;
+								$state = 71;
 								continue $sm1;
 							}
 							case 80: {
 								$state = -1;
-								$t49++;
-								$state = 71;
+								$t72.getResult();
+								$state = 72;
 								continue $sm1;
 							}
 							case 81: {
 								$state = -1;
+								$t73.getResult();
+								$state = 72;
+								continue $sm1;
+							}
+							case 83: {
+								$state = -1;
+								$t38.getResult();
+								$state = 82;
+								continue $sm1;
+							}
+							case 82: {
+								$state = -1;
+								$t37++;
+								$state = 74;
+								continue $sm1;
+							}
+							case 85: {
+								$state = -1;
+								$t50.getResult();
+								//Thread.Sleep(35);
+								$state = 84;
+								continue $sm1;
+							}
+							case 84: {
+								$state = -1;
+								$t49++;
+								$state = 76;
+								continue $sm1;
+							}
+							case 86: {
+								$state = -1;
+								$t51.getResult();
+								$Forays_PhysicalObject.get_m().draw();
+								$Forays_Actor.get_b().add(this.you('travel') + ' through the passage. ', [this]);
+								$state = 22;
+								continue $sm1;
+							}
+							case 89: {
+								$state = -1;
+								$t53.getResult();
+								//Thread.Sleep(35);
+								$state = 87;
+								continue $sm1;
+							}
+							case 87: {
+								$state = -1;
+								$t52++;
+								$state = 77;
+								continue $sm1;
+							}
+							case 88: {
+								$state = -1;
 								$Forays_Actor.get_b().add('The passage is blocked. ', []);
-								$state = 19;
+								$state = 22;
 								continue $sm1;
 							}
 							default: {
@@ -16546,18 +17331,47 @@
 						}
 					}
 				}
-				catch ($t74) {
-					$tcs.setException(ss.Exception.wrap($t74));
+				catch ($t77) {
+					$tcs.setException(ss.Exception.wrap($t77));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		castRandomSpell: function(obj, spells) {
-			if (spells.length === 0) {
-				return false;
-			}
-			return this.castSpell$1(spells[$Forays_Global.roll$1(1, spells.length) - 1], obj);
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
+			var $sm = Function.mkdel(this, function() {
+				try {
+					$sm1:
+					for (;;) {
+						switch ($state) {
+							case 0: {
+								$state = -1;
+								if (spells.length === 0) {
+									return false;
+								}
+								$t1 = this.castSpell$1(spells[$Forays_Global.roll$1(1, spells.length) - 1], obj);
+								$state = 1;
+								$t1.continueWith($sm);
+								return;
+							}
+							case 1: {
+								$state = -1;
+								$tcs.setResult($t1.getResult());
+								return;
+							}
+							default: {
+								break $sm1;
+							}
+						}
+					}
+				}
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
+				}
+			});
+			$sm();
+			return $tcs.task;
 		},
 		failRate: function(spell) {
 			var failrate = ($Forays_Spell.level(spell) - this.totalSkill(2)) * 5;
@@ -16626,7 +17440,7 @@
 			$Forays_Actor.get_q().killEvents$1(null, 3);
 		},
 		useFeat: function(feat) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t7, $t8, a1, basefail, ls, sp, bonus_marked, $t9, spell, cs, topborder, bottomborder, $t10, $t11, $t12, line, t, moved, $t2, $t3, amount, i2, dir, line2, t2, $t13, $t14, a2, p, line1, t1, actors_moved_past, moved1, $t4, $t5, neighbor, update, oldradius, i, $t6, a, i1;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t9, $t10, a1, basefail, ls, sp, bonus_marked, $t11, spell, cs, topborder, bottomborder, $t12, $t14, $t16, line, t, moved, $t2, $t4, amount, i2, $t13, dir, $t15, line2, t2, $t17, $t18, a2, p, $t3, line1, t1, actors_moved_past, moved1, $t5, $t6, neighbor, $t7, update, oldradius, i, $t8, a, i1;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -16649,9 +17463,9 @@
 									continue $sm1;
 								}
 								else if (feat === 11) {
-									$t7 = this.actorsWithinDistance(2);
-									for ($t8 = 0; $t8 < $t7.length; $t8++) {
-										a1 = $t7[$t8];
+									$t9 = this.actorsWithinDistance(2);
+									for ($t10 = 0; $t10 < $t9.length; $t10++) {
+										a1 = $t9[$t10];
 										if (a1.hasAttr(75) && a1.hasLOE(this)) {
 											if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 												if (this.canSee(a1)) {
@@ -16676,8 +17490,8 @@
 										ls = [];
 										sp = [];
 										bonus_marked = false;
-										for ($t9 = 0; $t9 < $Forays_Actor.spells_in_order.length; $t9++) {
-											spell = $Forays_Actor.spells_in_order[$t9];
+										for ($t11 = 0; $t11 < $Forays_Actor.spells_in_order.length; $t11++) {
+											spell = $Forays_Actor.spells_in_order[$t11];
 											if (this.hasSpell(spell)) {
 												cs = new $Forays_colorstring.$ctor2($Forays_Spell.name$1(spell).padRight(15) + $Forays_Spell.level(spell).toString().padLeft(3), 2);
 												cs.strings.add(new $Forays_cstr.$ctor1(basefail.toString().padLeft(9) + '%', this.failColor$1(basefail)));
@@ -16695,9 +17509,9 @@
 										if (sp.length > 0) {
 											topborder = new $Forays_colorstring.$ctor2('------------------Level---Fail rate--------Description------------', 2);
 											bottomborder = new $Forays_colorstring.$ctor4('---Force of will fail rate: ', 2, basefail.toString().padLeft(3) + '%', this.failColor$1(basefail), ''.padRight(37, 45), 2);
-											$t10 = this.select$6('Use force of will to cast which spell? ', topborder, bottomborder, ls, false, false, true, true, 3);
+											$t12 = this.select$6('Use force of will to cast which spell? ', topborder, bottomborder, ls, false, false, true, true, 3);
 											$state = 5;
-											$t10.continueWith($sm);
+											$t12.continueWith($sm);
 											return;
 										}
 										else {
@@ -16713,15 +17527,15 @@
 									}
 								}
 								else if (feat === 17) {
-									$t11 = this.getDirection$1('Disarm which trap? ');
+									$t14 = this.getDirection$1('Disarm which trap? ');
 									$state = 6;
-									$t11.continueWith($sm);
+									$t14.continueWith($sm);
 									return;
 								}
 								else if (feat === 16) {
-									$t12 = this.getTarget$4(12, 3);
+									$t16 = this.getTarget$4(12, 3);
 									$state = 7;
-									$t12.continueWith($sm);
+									$t16.continueWith($sm);
 									return;
 								}
 								else {
@@ -16754,9 +17568,7 @@
 									if (this.distanceFrom(t) === 2 && line[1].get_passable() && ss.isNullOrUndefined(line[1].actor()) && !this.grabPreventsMovement(line[1])) {
 										moved = true;
 										$Forays_Actor.get_b().add('You lunge! ', []);
-										this.move(line[1].get_row(), line[1].get_col());
-										this.attrs.set_item(98, this.attrs.get_item(98) + 4);
-										$t2 = this.attack(0, t.actor());
+										$t2 = this.move(line[1].get_row(), line[1].get_col());
 										$state = 10;
 										$t2.continueWith($sm);
 										return;
@@ -16773,9 +17585,9 @@
 								$state = -1;
 								this.set_target(null);
 								//don't try to automatically pick previous targets while tumbling. this solution isn't ideal.
-								$t3 = this.getTarget$5(false, 2, false);
+								$t4 = this.getTarget$5(false, 2, false);
 								$state = 11;
-								$t3.continueWith($sm);
+								$t4.continueWith($sm);
 								return;
 							}
 							case 4: {
@@ -16825,28 +17637,27 @@
 							}
 							case 5: {
 								$state = -1;
-								i2 = $t10.getResult();
+								i2 = $t12.getResult();
 								if (i2 !== -1) {
-									if (!this.castSpell$2(sp[i2], true)) {
-										this.q0();
-										return true;
-									}
-									else {
-										//drained magic is now handled in CastSpell
-										return true;
-									}
+									$t13 = this.castSpell$2(sp[i2], true);
+									$state = 12;
+									$t13.continueWith($sm);
+									return;
 								}
 								else {
 									this.q0();
-									return true;
+									$tcs.setResult(true);
+									return;
 								}
 							}
 							case 6: {
 								$state = -1;
-								dir = $t11.getResult();
+								dir = $t14.getResult();
 								if (dir !== -1 && this.tileInDirection(dir).isKnownTrap()) {
 									if (ss.isValue(this.actorInDirection(dir))) {
 										$Forays_Actor.get_b().add('There is ' + this.actorInDirection(dir).aVisible() + ' in the way. ', []);
+										$state = 13;
+										continue $sm1;
 									}
 									else {
 										if (this.grabPreventsMovement(this.tileInDirection(dir))) {
@@ -16858,27 +17669,33 @@
 											$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '. ', []);
 											this.tileInDirection(dir).toggle(this);
 											this.q1();
+											$state = 13;
+											continue $sm1;
 										}
 										else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
 											$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '! ', []);
 											this.q1();
+											$state = 13;
+											continue $sm1;
 										}
 										else {
 											$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '! ', []);
-											this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
-											this.q1();
+											$t15 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
+											$state = 14;
+											$t15.continueWith($sm);
+											return;
 										}
 									}
 								}
 								else {
 									this.q0();
+									$state = 13;
+									continue $sm1;
 								}
-								$tcs.setResult(true);
-								return;
 							}
 							case 7: {
 								$state = -1;
-								line2 = $t12.getResult();
+								line2 = $t16.getResult();
 								t2 = null;
 								if (ss.isValue(line2)) {
 									t2 = $Forays_Extensions.last($Forays_Tile).call(null, line2);
@@ -16888,9 +17705,9 @@
 										t2 = $Forays_Extensions.lastBeforeSolidTile(line2);
 									}
 									$Forays_Actor.get_b().add('You throw a small stone. ', []);
-									$t13 = t2.actorsWithinDistance(3);
-									for ($t14 = 0; $t14 < $t13.length; $t14++) {
-										a2 = $t13[$t14];
+									$t17 = t2.actorsWithinDistance(3);
+									for ($t18 = 0; $t18 < $t17.length; $t18++) {
+										a2 = $t17[$t18];
 										if (!ss.referenceEquals(a2, this) && a2.player_visibility_duration >= 0) {
 											if (a2.hasAttr(89)) {
 												$Forays_Actor.get_b().add(a2.get_the_name() + ' isn\'t fooled. ', [a2]);
@@ -16924,9 +17741,11 @@
 							case 10: {
 								$state = -1;
 								$t2.getResult();
-								this.attrs.set_item(98, this.attrs.get_item(98) - 4);
-								$state = 9;
-								continue $sm1;
+								this.attrs.set_item(98, this.attrs.get_item(98) + 4);
+								$t3 = this.attack(0, t.actor());
+								$state = 15;
+								$t3.continueWith($sm);
+								return;
 							}
 							case 9: {
 								$state = -1;
@@ -16953,7 +17772,7 @@
 							}
 							case 11: {
 								$state = -1;
-								line1 = $t3.getResult();
+								line1 = $t4.getResult();
 								this.set_target(null);
 								//then, don't remember an actor picked as the target of tumble
 								t1 = null;
@@ -16963,83 +17782,145 @@
 								if (ss.isValue(t1) && t1.get_passable() && ss.isNullOrUndefined(t1.actor()) && !this.grabPreventsMovement(t1)) {
 									actors_moved_past = [];
 									moved1 = false;
-									$t4 = t1.neighborsBetween(this.get_row(), this.get_col());
-									for ($t5 = 0; $t5 < $t4.length; $t5++) {
-										neighbor = $t4[$t5];
-										if (ss.isValue(neighbor.actor())) {
-											actors_moved_past.add(neighbor.actor());
-										}
-										if (neighbor.get_passable() && !moved1) {
-											$Forays_Actor.get_b().add('You tumble. ', []);
-											this.move(t1.get_row(), t1.get_col());
-											moved1 = true;
-											this.attrs.set_item(83, this.attrs.get_item(83) + 1);
-											if (this.hasAttr(32)) {
-												//copy&paste happened here: todo, make a single fire-handling method
-												this.attrs.set_item(32, 0);
-												$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
-												if (this.hasAttr(33)) {
-													this.attrs.set_item(33, 0);
-													$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
-												}
-											}
-											else if (this.hasAttr(33)) {
-												this.attrs.set_item(33, 0);
-												$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
-											}
-											else if (this.hasAttr(31)) {
-												update = false;
-												oldradius = this.lightRadius();
-												if (this.attrs.get_item(31) > this.get_light_radius()) {
-													update = true;
-												}
-												i = 2;
-												if ($Forays_Global.roll$1(1, 3) === 3) {
-													// 1 in 3 times, you don't make progress against the fire
-													i = 1;
-												}
-												this.attrs.set_item(31, this.attrs.get_item(31) - i);
-												if (this.attrs.get_item(31) < 0) {
-													this.attrs.set_item(31, 0);
-												}
-												if (update) {
-													this.updateRadius(oldradius, this.lightRadius());
-												}
-												if (this.hasAttr(31)) {
-													$Forays_Actor.get_b().add('You put out some of the fire. ', []);
-												}
-												else {
-													$Forays_Actor.get_b().add('You put out the fire. ', []);
-												}
-											}
-										}
-									}
-									if (moved1) {
-										for ($t6 = 0; $t6 < actors_moved_past.length; $t6++) {
-											a = actors_moved_past[$t6];
-											i1 = 10 - $Forays_Global.roll(this.stealth());
-											if (i1 < 0) {
-												i1 = 0;
-											}
-											a.player_visibility_duration = i1;
-										}
-										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 200, 1));
-										return true;
-									}
-									else {
-										$Forays_Actor.get_b().add('The way is blocked! ', []);
-										return false;
-									}
+									$t5 = t1.neighborsBetween(this.get_row(), this.get_col());
+									$t6 = 0;
+									$state = 17;
+									continue $sm1;
 								}
 								else {
 									if (this.grabPreventsMovement(t1)) {
 										$Forays_Actor.get_b().add('You can\'t currently reach that spot. ', []);
 									}
-									return false;
+									$tcs.setResult(false);
+									return;
 								}
+							}
+							case 12: {
+								$state = -1;
+								if (true !== $t13.getResult()) {
+									this.q0();
+									return true;
+								}
+								else {
+									//drained magic is now handled in CastSpell
+									return true;
+								}
+							}
+							case 14: {
+								$state = -1;
+								$t15.getResult();
+								this.q1();
+								$state = 13;
+								continue $sm1;
+							}
+							case 13: {
+								$state = -1;
+								$tcs.setResult(true);
+								return;
+							}
+							case 15: {
+								$state = -1;
+								$t3.getResult();
+								this.attrs.set_item(98, this.attrs.get_item(98) - 4);
+								$state = 9;
+								continue $sm1;
+							}
+							case 17: {
+								$state = -1;
+								if (!($t6 < $t5.length)) {
+									$state = 19;
+									continue $sm1;
+								}
+								neighbor = $t5[$t6];
+								if (ss.isValue(neighbor.actor())) {
+									actors_moved_past.add(neighbor.actor());
+								}
+								if (neighbor.get_passable() && !moved1) {
+									$Forays_Actor.get_b().add('You tumble. ', []);
+									$t7 = this.move(t1.get_row(), t1.get_col());
+									$state = 20;
+									$t7.continueWith($sm);
+									return;
+								}
+								$state = 18;
+								continue $sm1;
+							}
+							case 16: {
+								$state = -1;
 								//break;
 								$state = 1;
 								continue $sm1;
+							}
+							case 20: {
+								$state = -1;
+								$t7.getResult();
+								moved1 = true;
+								this.attrs.set_item(83, this.attrs.get_item(83) + 1);
+								if (this.hasAttr(32)) {
+									//copy&paste happened here: todo, make a single fire-handling method
+									this.attrs.set_item(32, 0);
+									$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+									if (this.hasAttr(33)) {
+										this.attrs.set_item(33, 0);
+										$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+									}
+								}
+								else if (this.hasAttr(33)) {
+									this.attrs.set_item(33, 0);
+									$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+								}
+								else if (this.hasAttr(31)) {
+									update = false;
+									oldradius = this.lightRadius();
+									if (this.attrs.get_item(31) > this.get_light_radius()) {
+										update = true;
+									}
+									i = 2;
+									if ($Forays_Global.roll$1(1, 3) === 3) {
+										// 1 in 3 times, you don't make progress against the fire
+										i = 1;
+									}
+									this.attrs.set_item(31, this.attrs.get_item(31) - i);
+									if (this.attrs.get_item(31) < 0) {
+										this.attrs.set_item(31, 0);
+									}
+									if (update) {
+										this.updateRadius(oldradius, this.lightRadius());
+									}
+									if (this.hasAttr(31)) {
+										$Forays_Actor.get_b().add('You put out some of the fire. ', []);
+									}
+									else {
+										$Forays_Actor.get_b().add('You put out the fire. ', []);
+									}
+								}
+								$state = 18;
+								continue $sm1;
+							}
+							case 18: {
+								$state = -1;
+								$t6++;
+								$state = 17;
+								continue $sm1;
+							}
+							case 19: {
+								$state = -1;
+								if (moved1) {
+									for ($t8 = 0; $t8 < actors_moved_past.length; $t8++) {
+										a = actors_moved_past[$t8];
+										i1 = 10 - $Forays_Global.roll(this.stealth());
+										if (i1 < 0) {
+											i1 = 0;
+										}
+										a.player_visibility_duration = i1;
+									}
+									$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 200, 1));
+									return true;
+								}
+								else {
+									$Forays_Actor.get_b().add('The way is blocked! ', []);
+									return false;
+								}
 							}
 							default: {
 								break $sm1;
@@ -17047,8 +17928,8 @@
 						}
 					}
 				}
-				catch ($t15) {
-					$tcs.setException(ss.Exception.wrap($t15));
+				catch ($t19) {
+					$tcs.setException(ss.Exception.wrap($t19));
 				}
 			});
 			$sm();
@@ -17066,7 +17947,7 @@
 			}
 		},
 		stunnedThisTurn: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), dir;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), dir, $t1;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -17082,9 +17963,13 @@
 									dir = $Forays_Global.randomDirection();
 									if (!this.tileInDirection(dir).get_passable()) {
 										$Forays_Actor.get_b().add(this.you('stagger') + ' into ' + this.tileInDirection(dir).get_the_name() + '. ', [this]);
+										$state = 2;
+										continue $sm1;
 									}
 									else if (ss.isValue(this.actorInDirection(dir))) {
 										$Forays_Actor.get_b().add(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir).theVisible() + '. ', [this, this.actorInDirection(dir)]);
+										$state = 2;
+										continue $sm1;
 									}
 									else if (this.grabPreventsMovement(this.tileInDirection(dir))) {
 										if (this.get_type() === 0) {
@@ -17093,14 +17978,34 @@
 										else {
 											$Forays_Actor.get_b().add(this.get_the_name() + ' staggers and almost falls over. ', [this]);
 										}
+										$state = 2;
+										continue $sm1;
 									}
 									else {
 										$Forays_Actor.get_b().add(this.you('stagger') + '. ', [this]);
-										this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
+										$t1 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
+										$state = 3;
+										$t1.continueWith($sm);
+										return;
 									}
-									this.QS();
-									return true;
 								}
+								$state = 1;
+								continue $sm1;
+							}
+							case 3: {
+								$state = -1;
+								$t1.getResult();
+								$state = 2;
+								continue $sm1;
+							}
+							case 2: {
+								$state = -1;
+								this.QS();
+								$tcs.setResult(true);
+								return;
+							}
+							case 1: {
+								$state = -1;
 								$tcs.setResult(false);
 								return;
 							}
@@ -17110,8 +18015,8 @@
 						}
 					}
 				}
-				catch ($t1) {
-					$tcs.setException(ss.Exception.wrap($t1));
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
 				}
 			});
 			$sm();
@@ -17328,7 +18233,8 @@
 					var open = commandhints[i1].lastIndexOf('[');
 					var front = new $Forays_cstr.$ctor1(commandhints[i1].substring(0, open + 1), wordcolor);
 					var close = commandhints[i1].lastIndexOf(']');
-					var middle = new $Forays_cstr.$ctor1(commandhints[i1].substring(open + 1, close - open - 1), lettercolor);
+					var middle = new $Forays_cstr.$ctor1(commandhints[i1].substring(open + 1, close), lettercolor);
+					// was close - open
 					var end = new $Forays_cstr.$ctor1(commandhints[i1].substring(close), wordcolor);
 					$Forays_Screen.writeString(11 + i1, 0, new $Forays_colorstring.$ctor1([front, middle, end]));
 				}
@@ -17896,7 +18802,7 @@
 									spell = $t5[$t6];
 									if (!this.hasSpell(spell) && spell !== 20 && spell !== 21 && spell !== 22 && spell !== 24 && spell !== 23) {
 										unknown.add(spell);
-										cs = new $Forays_colorstring.$ctor1(null);
+										cs = new $Forays_colorstring();
 										cs.strings.add(new $Forays_cstr.$ctor1($Forays_Spell.name$1(spell).padRight(15) + $Forays_Spell.level(spell).toString().padLeft(3), 2));
 										failrate = ($Forays_Spell.level(spell) - this.totalSkill(2)) * 5;
 										if (failrate < 0) {
@@ -18496,10 +19402,10 @@
 									ch = '5';
 								}
 								ch = $Forays_Actor.convertVIKeys(ch);
-								i = ch.toString().charCodeAt(0);
-								if (i >= 1 && i <= 9) {
-									if (i !== 5) {
-										if (!orth || i % 2 === 0) {
+								i = ch.charCodeAt(0);
+								if (i >= 49 && i <= 57) {
+									if (i !== 53) {
+										if (!orth || (i - 48) % 2 === 0) {
 											//in orthogonal mode, return only even dirs
 											$Forays_Game.console.cursorVisible = false;
 											return i;
@@ -20902,9 +21808,9 @@
 				add = true;
 			}
 			if (add && s.length > 0) {
-				if (s.match(new RegExp('^[a-z]')).length > 0) {
-					s.replace(new RegExp('^[a-z]'), function(sr) {
-						return sr.toUpperCase();
+				if (s.match(new RegExp(', [a-z]')).length > 0) {
+					s.replace(new RegExp(', [a-z]'), function(sr) {
+						return String.fromCharCode(sr.charCodeAt(2)).toUpperCase();
 					});
 					//					c[0] = Char.ToUpper(s[0]);
 					//s = new string(c);
@@ -21462,7 +22368,7 @@
 	};
 	$Forays_colorstring.$ctor2.prototype = $Forays_colorstring.$ctor3.prototype = $Forays_colorstring.$ctor4.prototype = $Forays_colorstring.$ctor5.prototype = $Forays_colorstring.$ctor6.prototype = $Forays_colorstring.$ctor7.prototype = $Forays_colorstring.$ctor1.prototype = $Forays_colorstring.prototype;
 	$Forays_colorstring.op_Addition = function(one, two) {
-		var result = new $Forays_colorstring.$ctor1(null);
+		var result = new $Forays_colorstring();
 		for (var $t1 = 0; $t1 < one.strings.length; $t1++) {
 			var s = one.strings[$t1];
 			result.strings.add(s);
@@ -21644,7 +22550,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -21666,11 +22572,11 @@
 		set_delay: function(value) {
 			this.$1$delayField = value;
 		},
-		get_type: function() {
-			return this.$1$typeField;
+		get_evtype: function() {
+			return this.$1$evtypeField;
 		},
-		set_type: function(value) {
-			this.$1$typeField = value;
+		set_evtype: function(value) {
+			this.$1$evtypeField = value;
 		},
 		get_attr: function() {
 			return this.$1$attrField;
@@ -21712,7 +22618,7 @@
 			return this.get_delay() + this.get_time_created();
 		},
 		kill$1: function(target_, type_) {
-			if (ss.isValue(this.msg_objs) && (this.get_type() === type_ || type_ === 0)) {
+			if (ss.isValue(this.msg_objs) && (this.get_evtype() === type_ || type_ === 0)) {
 				if (this.msg_objs.contains(this.get_target())) {
 					this.msg_objs.remove(this.get_target());
 				}
@@ -21729,7 +22635,7 @@
 				//				dead = true;
 				this.area.remove(t);
 			}
-			if (ss.referenceEquals(this.get_target(), target_) && (this.get_type() === type_ || type_ === 0)) {
+			if (ss.referenceEquals(this.get_target(), target_) && (this.get_evtype() === type_ || type_ === 0)) {
 				this.set_target(null);
 				if (ss.isValue(this.msg_objs)) {
 					this.msg_objs.clear();
@@ -21741,24 +22647,24 @@
 				}
 				this.set_dead(true);
 			}
-			if (type_ === 3 && this.get_type() === 3) {
+			if (type_ === 3 && this.get_evtype() === 3) {
 				this.set_dead(true);
 			}
-			if (ss.isNullOrUndefined(target_) && type_ === 7 && this.get_type() === 7) {
+			if (ss.isNullOrUndefined(target_) && type_ === 7 && this.get_evtype() === 7) {
 				this.set_dead(true);
 			}
-			if (ss.isNullOrUndefined(target_) && type_ === 5 && this.get_type() === 5) {
+			if (ss.isNullOrUndefined(target_) && type_ === 5 && this.get_evtype() === 5) {
 				this.set_dead(true);
 			}
-			if (ss.isNullOrUndefined(target_) && type_ === 4 && this.get_type() === 4) {
+			if (ss.isNullOrUndefined(target_) && type_ === 4 && this.get_evtype() === 4) {
 				this.set_dead(true);
 			}
-			if (ss.isNullOrUndefined(target_) && type_ === 9 && this.get_type() === 9) {
+			if (ss.isNullOrUndefined(target_) && type_ === 9 && this.get_evtype() === 9) {
 				this.set_dead(true);
 			}
 		},
 		kill: function(target_, attr_) {
-			if (ss.referenceEquals(this.get_target(), target_) && this.get_type() === 2 && this.get_attr() === attr_) {
+			if (ss.referenceEquals(this.get_target(), target_) && this.get_evtype() === 2 && this.get_attr() === attr_) {
 				this.set_target(null);
 				if (ss.isValue(this.msg_objs)) {
 					this.msg_objs.clear();
@@ -21781,7 +22687,7 @@
 							case 0: {
 								$state = -1;
 								if (!this.get_dead()) {
-									$t93 = this.get_type();
+									$t93 = this.get_evtype();
 									if ($t93 === 1) {
 										temp = Type.safeCast(this.get_target(), $Forays_Actor);
 										$t1 = temp.input();
@@ -22010,7 +22916,7 @@
 												$t10 = $Forays_Event.get_q().list;
 												for ($t11 = 0; $t11 < $t10.length; $t11++) {
 													e = $t10[$t11];
-													if (ss.referenceEquals(e.get_target(), a) && e.get_type() === 1) {
+													if (ss.isValue(e) && ss.isValue(e.get_target()) && ss.referenceEquals(e.get_target(), a) && e.get_evtype() === 1) {
 														e.set_tiebreaker(this.get_tiebreaker());
 														break;
 													}
@@ -22163,7 +23069,7 @@
 													$t20 = $Forays_Event.get_q().list;
 													for ($t21 = 0; $t21 < $t20.length; $t21++) {
 														e1 = $t20[$t21];
-														if (ss.referenceEquals(e1.get_target(), a1) && e1.get_type() === 1) {
+														if (ss.referenceEquals(e1.get_target(), a1) && e1.get_evtype() === 1) {
 															e1.set_tiebreaker(this.get_tiebreaker());
 															break;
 														}
@@ -22197,7 +23103,7 @@
 												$t24 = $Forays_Event.get_q().list;
 												for ($t25 = 0; $t25 < $t24.length; $t25++) {
 													e2 = $t24[$t25];
-													if (ss.referenceEquals(e2.get_target(), a2) && e2.get_type() === 1) {
+													if (ss.referenceEquals(e2.get_target(), a2) && e2.get_evtype() === 1) {
 														e2.set_tiebreaker(this.get_tiebreaker());
 														break;
 													}
@@ -22319,7 +23225,7 @@
 											$t40 = $Forays_Event.get_q().list;
 											for ($t41 = 0; $t41 < $t40.length; $t41++) {
 												e3 = $t40[$t41];
-												if (!e3.get_dead() && e3.get_type() === 3) {
+												if (!e3.get_dead() && e3.get_evtype() === 3) {
 													hiddencheck = e3;
 													break;
 												}
@@ -22374,7 +23280,7 @@
 											$t45 = $Forays_Event.get_q().list;
 											for ($t46 = 0; $t46 < $t45.length; $t46++) {
 												e4 = $t45[$t46];
-												if (!e4.get_dead() && e4.get_type() === 3) {
+												if (!e4.get_dead() && e4.get_evtype() === 3) {
 													hiddencheck1 = e4;
 													break;
 												}
@@ -22458,7 +23364,7 @@
 											$t55 = $Forays_Event.get_q().list;
 											for ($t56 = 0; $t56 < $t55.length; $t56++) {
 												e5 = $t55[$t56];
-												if (!e5.get_dead() && e5.get_type() === 3) {
+												if (!e5.get_dead() && e5.get_evtype() === 3) {
 													hiddencheck2 = e5;
 													break;
 												}
@@ -22585,7 +23491,7 @@
 												$t61 = $Forays_Event.get_q().list;
 												for ($t62 = 0; $t62 < $t61.length; $t62++) {
 													e6 = $t61[$t62];
-													if (ss.referenceEquals(e6.get_target(), a6) && e6.get_type() === 1) {
+													if (ss.referenceEquals(e6.get_target(), a6) && e6.get_evtype() === 1) {
 														e6.set_dead(true);
 														break;
 													}
@@ -22621,7 +23527,7 @@
 												$t63 = $Forays_Event.get_q().list;
 												for ($t64 = 0; $t64 < $t63.length; $t64++) {
 													e7 = $t63[$t64];
-													if (ss.referenceEquals(e7.get_target(), $Forays_Event.get_m().actor.get_item(this.get_target().get_row(), this.get_target().get_col())) && e7.get_type() === 1) {
+													if (ss.referenceEquals(e7.get_target(), $Forays_Event.get_m().actor.get_item(this.get_target().get_row(), this.get_target().get_col())) && e7.get_evtype() === 1) {
 														e7.set_tiebreaker(this.get_tiebreaker());
 														break;
 													}
@@ -22680,7 +23586,7 @@
 												$t67 = $Forays_Event.get_q().list;
 												for ($t68 = 0; $t68 < $t67.length; $t68++) {
 													e8 = $t67[$t68];
-													if (ss.referenceEquals(e8.get_target(), $Forays_Event.get_m().actor.get_item(this.get_target().get_row(), this.get_target().get_col())) && e8.get_type() === 1) {
+													if (ss.referenceEquals(e8.get_target(), $Forays_Event.get_m().actor.get_item(this.get_target().get_row(), this.get_target().get_col())) && e8.get_evtype() === 1) {
 														e8.set_tiebreaker(this.get_tiebreaker());
 														break;
 													}
@@ -22871,7 +23777,7 @@
 											$t80 = $Forays_Event.get_q().list;
 											for ($t81 = 0; $t81 < $t80.length; $t81++) {
 												current2 = $t80[$t81];
-												if (current2.get_type() === 7) {
+												if (current2.get_evtype() === 7) {
 													trolls.add(Type.safeCast(current2.get_target(), $Forays_Tile));
 												}
 											}
@@ -23383,7 +24289,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23393,7 +24299,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(1);
+		this.set_evtype(1);
 		this.set_value(0);
 		this.set_msg('');
 		this.msg_objs = null;
@@ -23405,7 +24311,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23415,7 +24321,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(1);
 		this.set_msg('');
@@ -23428,7 +24334,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23438,7 +24344,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(value_);
 		this.set_msg('');
@@ -23451,7 +24357,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23461,7 +24367,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(1);
 		this.set_msg(msg_);
@@ -23474,7 +24380,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23484,7 +24390,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(value_);
 		this.set_msg(msg_);
@@ -23497,7 +24403,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23507,7 +24413,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(1);
 		this.set_msg(msg_);
@@ -23523,7 +24429,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23533,7 +24439,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(2);
+		this.set_evtype(2);
 		this.set_attr(attr_);
 		this.set_value(value_);
 		this.set_msg(msg_);
@@ -23549,7 +24455,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23559,7 +24465,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(null);
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg('');
@@ -23572,7 +24478,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23582,7 +24488,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg('');
@@ -23595,7 +24501,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23605,7 +24511,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(target_);
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(value_);
 		this.set_msg('');
@@ -23618,7 +24524,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23628,7 +24534,7 @@
 		this.$1$tiebreakerField = 0;
 		this.set_target(null);
 		this.set_delay(delay_);
-		this.set_type(0);
+		this.set_evtype(0);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg(msg_);
@@ -23641,7 +24547,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23657,7 +24563,7 @@
 		}
 		//area=area_;
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg('');
@@ -23670,7 +24576,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23681,7 +24587,7 @@
 		this.set_target(null);
 		this.area = area_;
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg(msg_);
@@ -23697,7 +24603,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23708,7 +24614,7 @@
 		this.set_target(target_);
 		this.area = area_;
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(109);
 		this.set_value(0);
 		this.set_msg('');
@@ -23721,7 +24627,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23732,7 +24638,7 @@
 		this.set_target(target_);
 		this.area = area_;
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(attr_);
 		this.set_value(value_);
 		this.set_msg(msg_);
@@ -23748,7 +24654,7 @@
 		this.$1$targetField = null;
 		this.area = null;
 		this.$1$delayField = 0;
-		this.$1$typeField = 0;
+		this.$1$evtypeField = 0;
 		this.$1$attrField = 0;
 		this.$1$valueField = 0;
 		this.$1$msgField = null;
@@ -23759,7 +24665,7 @@
 		this.set_target(target_);
 		this.area = area_;
 		this.set_delay(delay_);
-		this.set_type(type_);
+		this.set_evtype(type_);
 		this.set_attr(attr_);
 		this.set_value(value_);
 		this.set_msg(msg_);
@@ -23805,7 +24711,7 @@
 		if (one.get_tiebreaker() > two.get_tiebreaker()) {
 			return false;
 		}
-		if (one.get_type() === 1 && two.get_type() !== 1) {
+		if (one.get_evtype() === 1 && two.get_evtype() !== 1) {
 			return true;
 		}
 		return false;
@@ -23824,7 +24730,7 @@
 		if (one.get_tiebreaker() < two.get_tiebreaker()) {
 			return false;
 		}
-		if (one.get_type() !== 1 && two.get_type() === 1) {
+		if (one.get_evtype() !== 1 && two.get_evtype() === 1) {
 			return true;
 		}
 		return false;
@@ -23843,10 +24749,10 @@
 		if (one.get_tiebreaker() > two.get_tiebreaker()) {
 			return false;
 		}
-		if (one.get_type() === 1) {
+		if (one.get_evtype() === 1) {
 			return true;
 		}
-		if (one.get_type() !== 1 && two.get_type() !== 1) {
+		if (one.get_evtype() !== 1 && two.get_evtype() !== 1) {
 			return true;
 		}
 		return false;
@@ -23864,10 +24770,10 @@
 		if (one.get_tiebreaker() < two.get_tiebreaker()) {
 			return false;
 		}
-		if (one.get_type() !== 1) {
+		if (one.get_evtype() !== 1) {
 			return true;
 		}
-		if (one.get_type() === 1 && two.get_type() === 1) {
+		if (one.get_evtype() === 1 && two.get_evtype() === 1) {
 			return true;
 		}
 		return false;
@@ -24045,26 +24951,29 @@
 			var temp = s;
 			var result = new $Forays_colorstring();
 			while (temp.search(new RegExp('\\[')) > -1) {
-				var open = temp.indexOf(String.fromCharCode(91));
-				var close = temp.indexOf(String.fromCharCode(93));
+				var open = temp.indexOf('[');
+				var close = temp.indexOf(']');
 				if (close === -1) {
 					result.strings.add(new $Forays_cstr.$ctor1(temp, color));
 					temp = '';
 				}
 				else {
-					var hyphen = temp.indexOf(String.fromCharCode(45));
+					var hyphen = temp.indexOf('-');
 					if (hyphen !== -1 && hyphen > open && hyphen < close) {
 						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(0, open + 1), color));
 						//result.strings.Add(new cstr(temp.Substring(open+1,(close-open)-1),Color.Cyan));
-						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(open + 1, hyphen - open - 1), 8));
+						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(open + 1, hyphen), 8));
+						//was hyphen - open
 						result.strings.add(new $Forays_cstr.$ctor1('-', color));
-						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(hyphen + 1, close - hyphen - 1), 8));
+						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(hyphen + 1, close), 8));
+						// was close - hyphen
 						result.strings.add(new $Forays_cstr.$ctor1(']', color));
 						temp = temp.substring(close + 1);
 					}
 					else {
 						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(0, open + 1), color));
-						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(open + 1, close - open - 1), 8));
+						result.strings.add(new $Forays_cstr.$ctor1(temp.substring(open + 1, close), 8));
+						// was close-open
 						result.strings.add(new $Forays_cstr.$ctor1(']', color));
 						temp = temp.substring(close + 1);
 					}
@@ -24541,7 +25450,7 @@
 					switch ($state) {
 						case 0: {
 							$state = -1;
-							$('#main').replaceWith($Forays_Game.console.display.getContainer());
+							$('#main').append($Forays_Game.console.display.getContainer());
 							$('canvas').on('keydown', Function.thisFix(function(elem, ev) {
 								$Forays_Game.console.keyAvailable = true;
 							}));
@@ -24617,7 +25526,7 @@
 		});
 	};
 	$Forays_Game.$mainMenu = function() {
-		var $state = 0, $tcs = new ss.TaskCompletionSource(), command, recentname, recentdepth, recentwin, recentcause, saved_game, i, $t1, game, file, base_name, num, $t2, fileout, $t34, scores, file3, s5, cr1, longest_name, longest_cause, $t35, s6, tokens1, name_and_cause_of_death, idx, name, cause_of_death, total_spaces, half_spaces, half_spaces_offset, spaces1, spaces2, spaces3, name_middle, depth_middle, cause_middle, primary, recent, written_recent, line1, $t36, s7, tokens2, dlev1, winning, name_and_cause_of_death1, idx1, name1, cause_of_death1, cause_capitalized, current_color, $t37, $t3, $t5, i1, quickstarted, good, newhighscores, num_scores, added, file2, s1, cr, symbol, tokens, dlev, symbol1, $t6, $t4, ls, done, file1, attr, magic, i2, skill, i3, feat, spell, fileout1, e, fileout2, $t7, $t8, sel, $t9, $t10, t, good1, $t11, $t12, neighbor, $t13, i4, $t14, $t15, s2, $t16, $t17, i5, $t18, $t20, $t19, filename, fileout3, $t21, screen, i6, j, $t22, $t23, s3, $t24, $t25, t1, good2, $t26, $t27, neighbor1, col, $t28, $t29, cch, line, $t30, $t31, s4, $t32, $t33, cch1;
+		var $state = 0, $tcs = new ss.TaskCompletionSource(), command, recentname, recentdepth, recentwin, recentcause, saved_game, i, $t1, game, file, base_name, num, $t2, fileout, $t35, scores, file3, s5, cr1, longest_name, longest_cause, $t36, s6, tokens1, name_and_cause_of_death, idx, name, cause_of_death, total_spaces, half_spaces, half_spaces_offset, spaces1, spaces2, spaces3, name_middle, depth_middle, cause_middle, primary, recent, written_recent, line1, $t37, s7, tokens2, dlev1, winning, name_and_cause_of_death1, idx1, name1, cause_of_death1, cause_capitalized, current_color, $t38, $t3, $t6, $t4, newhighscores, num_scores, added, file2, s1, cr, symbol, tokens, dlev, symbol1, $t7, i1, quickstarted, good, ls, done, $t5, $t8, file1, attr, magic, i2, skill, i3, feat, spell, fileout1, e, fileout2, $t9, sel, $t10, $t11, t, good1, $t12, $t13, neighbor, $t14, i4, $t15, $t16, s2, $t17, $t18, i5, $t19, $t21, $t20, filename, fileout3, $t22, screen, i6, j, $t23, $t24, s3, $t25, $t26, t1, good2, $t27, $t28, neighbor1, col, $t29, $t30, cch, line, $t31, $t32, s4, $t33, $t34, cch1;
 		var $sm = function() {
 			try {
 				$sm1:
@@ -25015,9 +25924,9 @@
 								}
 							}
 							else if (command.keyChar === 98) {
-								$t34 = $Forays_Help.displayHelp();
+								$t35 = $Forays_Help.displayHelp();
 								$state = 6;
-								$t34.continueWith($sm);
+								$t35.continueWith($sm);
 								return;
 							}
 							else if (command.keyChar === 99) {
@@ -25046,8 +25955,8 @@
 								}
 								longest_name = 0;
 								longest_cause = 0;
-								for ($t35 = 0; $t35 < scores.length; $t35++) {
-									s6 = scores[$t35];
+								for ($t36 = 0; $t36 < scores.length; $t36++) {
+									s6 = scores[$t36];
 									tokens1 = s6.split(String.fromCharCode(32));
 									name_and_cause_of_death = s6.substring(tokens1[0].length + 3);
 									idx = name_and_cause_of_death.lastIndexOf(' -- ');
@@ -25080,8 +25989,8 @@
 								$Forays_Screen.writeString$1(2, cause_middle - 6, new $Forays_cstr.$ctor1('Cause of death', primary));
 								written_recent = false;
 								line1 = 3;
-								for ($t36 = 0; $t36 < scores.length; $t36++) {
-									s7 = scores[$t36];
+								for ($t37 = 0; $t37 < scores.length; $t37++) {
+									s7 = scores[$t37];
 									if (line1 > 24) {
 										continue;
 									}
@@ -25109,9 +26018,9 @@
 									}
 									++line1;
 								}
-								$t37 = $Forays_Game.console.readKey(true);
+								$t38 = $Forays_Game.console.readKey(true);
 								$state = 7;
-								$t37.continueWith($sm);
+								$t38.continueWith($sm);
 								return;
 							}
 							else if (command.keyChar === 100) {
@@ -25146,20 +26055,20 @@
 								$state = 10;
 								continue $sm1;
 							}
-							$t5 = game.q.pop();
+							$t6 = game.q.pop();
 							$state = 11;
-							$t5.continueWith($sm);
+							$t6.continueWith($sm);
 							return;
 						}
 						case 6: {
 							$state = -1;
-							$t34.getResult();
+							$t35.getResult();
 							$state = 3;
 							continue $sm1;
 						}
 						case 7: {
 							$state = -1;
-							$t37.getResult();
+							$t38.getResult();
 							$state = 3;
 							continue $sm1;
 						}
@@ -25180,40 +26089,14 @@
 						case 8: {
 							$state = -1;
 							game.m.generateLevelTypes();
-							game.m.generateLevel();
-							$Forays_Screen.blank();
-							$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Global.COLS, 45));
-							$Forays_Screen.writeMapString$2(1, 0, '[a] Toughness - You have a slight resistance to physical damage.');
-							$Forays_Screen.writeMapString$2(2, 0, '[b] Magical blood - Your natural recovery is faster than normal.');
-							$Forays_Screen.writeMapString$2(3, 0, '[c] Low-light vision - You can see farther in darkness.');
-							$Forays_Screen.writeMapString$2(4, 0, '[d] Keen eyes - You\'re better at spotting traps and aiming arrows.');
-							$Forays_Screen.writeMapString$2(5, 0, '[e] Long stride - You walk a good bit faster than normal.');
-							$Forays_Screen.writeMapString$2(6, 0, ''.padRight($Forays_Global.COLS, 45));
-							$Forays_Screen.writeMapString$2(9, 4, '(Your character will keep the chosen trait');
-							$Forays_Screen.writeMapString$2(10, 4, '     for his or her entire adventuring career.)');
-							if (ss.isValue(window.localStorage['quickstart.txt'])) {
-								$Forays_Screen.writeMapString$2(16, 5, '[ ] Repeat previous choices and start immediately.');
-								$Forays_Screen.writeMapChar(16, 6, new $Forays_colorchar.$ctor3(112, 8));
-							}
-							if (ss.isNullOrUndefined(window.localStorage['name.txt'])) {
-								$Forays_Screen.writeMapString$2(18, 5, '[ ] Automatically name future characters after this one.');
-								$Forays_Screen.writeMapChar(18, 6, new $Forays_colorchar.$ctor3(110, 8));
-							}
-							for (i1 = 0; i1 < 5; ++i1) {
-								$Forays_Screen.writeMapChar(i1 + 1, 1, new $Forays_colorchar.$ctor1(8, i1 + 97));
-							}
-							$Forays_Screen.writeMapString$2(-1, 0, 'Select a trait: ');
-							//haha, it works
-							$Forays_Game.console.cursorVisible = true;
-							quickstarted = false;
-							$Forays_Global.quickstartinfo = [];
-							good = false;
+							$t4 = game.m.generateLevel();
 							$state = 12;
-							continue $sm1;
+							$t4.continueWith($sm);
+							return;
 						}
 						case 11: {
 							$state = -1;
-							$t5.getResult();
+							$t6.getResult();
 							$state = 4;
 							continue $sm1;
 						}
@@ -25282,9 +26165,9 @@
 									if ($Forays_Extensions.where($Forays_Item).call(null, game.player.get_inv(), function(item) {
 										return item.get_type() === 0 || item.get_type() === 6;
 									}).length > 0) {
-										$t6 = $Forays_Help.tutorialTip(10);
+										$t7 = $Forays_Help.tutorialTip(10);
 										$state = 15;
-										$t6.continueWith($sm);
+										$t7.continueWith($sm);
 										return;
 									}
 									$state = 14;
@@ -25298,18 +26181,40 @@
 						}
 						case 12: {
 							$state = -1;
-							if (!!good) {
-								$state = 16;
-								continue $sm1;
+							$t4.getResult();
+							$Forays_Screen.blank();
+							$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Global.COLS, 45));
+							$Forays_Screen.writeMapString$2(1, 0, '[a] Toughness - You have a slight resistance to physical damage.');
+							$Forays_Screen.writeMapString$2(2, 0, '[b] Magical blood - Your natural recovery is faster than normal.');
+							$Forays_Screen.writeMapString$2(3, 0, '[c] Low-light vision - You can see farther in darkness.');
+							$Forays_Screen.writeMapString$2(4, 0, '[d] Keen eyes - You\'re better at spotting traps and aiming arrows.');
+							$Forays_Screen.writeMapString$2(5, 0, '[e] Long stride - You walk a good bit faster than normal.');
+							$Forays_Screen.writeMapString$2(6, 0, ''.padRight($Forays_Global.COLS, 45));
+							$Forays_Screen.writeMapString$2(9, 4, '(Your character will keep the chosen trait');
+							$Forays_Screen.writeMapString$2(10, 4, '     for his or her entire adventuring career.)');
+							if (ss.isValue(window.localStorage['quickstart.txt'])) {
+								$Forays_Screen.writeMapString$2(16, 5, '[ ] Repeat previous choices and start immediately.');
+								$Forays_Screen.writeMapChar(16, 6, new $Forays_colorchar.$ctor3(112, 8));
 							}
-							$t4 = $Forays_Game.console.readKey(true);
-							$state = 17;
-							$t4.continueWith($sm);
-							return;
+							if (ss.isNullOrUndefined(window.localStorage['name.txt'])) {
+								$Forays_Screen.writeMapString$2(18, 5, '[ ] Automatically name future characters after this one.');
+								$Forays_Screen.writeMapChar(18, 6, new $Forays_colorchar.$ctor3(110, 8));
+							}
+							for (i1 = 0; i1 < 5; ++i1) {
+								$Forays_Screen.writeMapChar(i1 + 1, 1, new $Forays_colorchar.$ctor1(8, i1 + 97));
+							}
+							$Forays_Screen.writeMapString$2(-1, 0, 'Select a trait: ');
+							//haha, it works
+							$Forays_Game.console.cursorVisible = true;
+							quickstarted = false;
+							$Forays_Global.quickstartinfo = [];
+							good = false;
+							$state = 16;
+							continue $sm1;
 						}
 						case 15: {
 							$state = -1;
-							$t6.getResult();
+							$t7.getResult();
 							$Forays_Global.saveOptions();
 							$state = 14;
 							continue $sm1;
@@ -25325,16 +26230,38 @@
 							ls.add('Write this information to a file');
 							ls.add('Done');
 							done = false;
-							$state = 18;
+							$state = 17;
 							continue $sm1;
 						}
 						case 13: {
 							$state = 3;
 							continue $sm1;
 						}
+						case 16: {
+							$state = -1;
+							if (!!good) {
+								$state = 18;
+								continue $sm1;
+							}
+							$t5 = $Forays_Game.console.readKey(true);
+							$state = 19;
+							$t5.continueWith($sm);
+							return;
+						}
 						case 17: {
 							$state = -1;
-							command = $t4.getResult();
+							if (!!done) {
+								$state = 13;
+								continue $sm1;
+							}
+							$t8 = game.player.select$5('Would you like to examine your character! ', ''.padRight($Forays_Global.COLS), ''.padRight($Forays_Global.COLS), ls, true, false, false);
+							$state = 20;
+							$t8.continueWith($sm);
+							return;
+						}
+						case 19: {
+							$state = -1;
+							command = $t5.getResult();
 							switch (command.keyChar) {
 								case 97: {
 									good = true;
@@ -25418,10 +26345,10 @@
 									break;
 								}
 							}
-							$state = 12;
+							$state = 16;
 							continue $sm1;
 						}
-						case 16: {
+						case 18: {
 							$state = -1;
 							//game.player.Q0();
 							{
@@ -25452,37 +26379,26 @@
 							$state = 4;
 							continue $sm1;
 						}
-						case 18: {
-							$state = -1;
-							if (!!done) {
-								$state = 13;
-								continue $sm1;
-							}
-							$t7 = game.player.select$5('Would you like to examine your character! ', ''.padRight($Forays_Global.COLS), ''.padRight($Forays_Global.COLS), ls, true, false, false);
-							$state = 19;
-							$t7.continueWith($sm);
-							return;
-						}
-						case 19: {
-							$state = -1;
-							$t7.getResult();
-							$t8 = game.player.getSelection('Would you like to examine your character? ', 7, true, false, false);
-							$state = 20;
-							$t8.continueWith($sm);
-							return;
-						}
 						case 20: {
 							$state = -1;
-							sel = $t8.getResult();
+							$t8.getResult();
+							$t9 = game.player.getSelection('Would you like to examine your character? ', 7, true, false, false);
+							$state = 21;
+							$t9.continueWith($sm);
+							return;
+						}
+						case 21: {
+							$state = -1;
+							sel = $t9.getResult();
 							if (sel === 0) {
-								$t9 = game.m.allTiles();
-								for ($t10 = 0; $t10 < $t9.length; $t10++) {
-									t = $t9[$t10];
+								$t10 = game.m.allTiles();
+								for ($t11 = 0; $t11 < $t10.length; $t11++) {
+									t = $t10[$t11];
 									if (t.get_type() !== 1 && !t.isTrap()) {
 										good1 = false;
-										$t11 = t.tilesAtDistance(1);
-										for ($t12 = 0; $t12 < $t11.length; $t12++) {
-											neighbor = $t11[$t12];
+										$t12 = t.tilesAtDistance(1);
+										for ($t13 = 0; $t13 < $t12.length; $t13++) {
+											neighbor = $t12[$t13];
 											if (neighbor.get_type() !== 0) {
 												good1 = true;
 											}
@@ -25496,117 +26412,117 @@
 								$Forays_Game.console.cursorVisible = true;
 								$Forays_Screen.writeMapChar$1(0, 0, '-');
 								game.m.draw();
-								$t13 = $Forays_Game.console.readKey(true);
-								$state = 21;
-								$t13.continueWith($sm);
+								$t14 = $Forays_Game.console.readKey(true);
+								$state = 22;
+								$t14.continueWith($sm);
 								return;
 							}
 							else if (sel === 1) {
 								$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Global.COLS, 45));
 								i4 = 1;
-								$t14 = game.b.getMessages();
-								for ($t15 = 0; $t15 < $t14.length; $t15++) {
-									s2 = $t14[$t15];
+								$t15 = game.b.getMessages();
+								for ($t16 = 0; $t16 < $t15.length; $t16++) {
+									s2 = $t15[$t16];
 									$Forays_Screen.writeMapString$2(i4, 0, s2.padRight($Forays_Global.COLS));
 									++i4;
 								}
 								$Forays_Screen.writeMapString$2(21, 0, ''.padRight($Forays_Global.COLS, 45));
 								game.b.displayNow$1('Previous messages: ');
 								$Forays_Game.console.cursorVisible = true;
-								$t16 = $Forays_Game.console.readKey(true);
-								$state = 22;
-								$t16.continueWith($sm);
+								$t17 = $Forays_Game.console.readKey(true);
+								$state = 23;
+								$t17.continueWith($sm);
 								return;
 							}
 							else if (sel === 2) {
-								$t17 = game.player.displayEquipment();
-								$state = 23;
-								$t17.continueWith($sm);
+								$t18 = game.player.displayEquipment();
+								$state = 24;
+								$t18.continueWith($sm);
 								return;
 							}
 							else if (sel === 3) {
 								for (i5 = 1; i5 < 8; ++i5) {
 									$Forays_Screen.writeMapString$2(i5, 0, ''.padRight($Forays_Global.COLS));
 								}
-								$t18 = game.player.select$3('In your pack: ', game.player.inventoryList(), true, false, false);
-								$state = 24;
-								$t18.continueWith($sm);
+								$t19 = game.player.select$3('In your pack: ', game.player.inventoryList(), true, false, false);
+								$state = 25;
+								$t19.continueWith($sm);
 								return;
 							}
 							else if (sel === 4) {
 								game.player.displayCharacterInfo();
-								$state = 18;
+								$state = 17;
 								continue $sm1;
 							}
 							else if (sel === 5) {
 								game.b.displayNow$1('Enter file name: ');
 								$Forays_Game.console.cursorVisible = true;
-								$t20 = $Forays_Global.enterString$1(40);
-								$state = 25;
-								$t20.continueWith($sm);
+								$t21 = $Forays_Global.enterString$1(40);
+								$state = 26;
+								$t21.continueWith($sm);
 								return;
 							}
 							else if (sel === 6) {
 								done = true;
-								$state = 18;
+								$state = 17;
 								continue $sm1;
 							}
 							else {
-								$state = 18;
+								$state = 17;
 								continue $sm1;
 							}
-							$state = 18;
-							continue $sm1;
-						}
-						case 21: {
-							$state = -1;
-							$t13.getResult();
-							$state = 18;
+							$state = 17;
 							continue $sm1;
 						}
 						case 22: {
 							$state = -1;
-							$t16.getResult();
-							$state = 18;
+							$t14.getResult();
+							$state = 17;
 							continue $sm1;
 						}
 						case 23: {
 							$state = -1;
 							$t17.getResult();
-							$state = 18;
+							$state = 17;
 							continue $sm1;
 						}
 						case 24: {
 							$state = -1;
 							$t18.getResult();
-							$t19 = $Forays_Game.console.readKey(true);
-							$state = 26;
-							$t19.continueWith($sm);
-							return;
+							$state = 17;
+							continue $sm1;
 						}
 						case 25: {
 							$state = -1;
-							filename = $t20.getResult();
-							if (filename === '') {
-								$state = 18;
-								continue $sm1;
-							}
-							fileout3 = [];
-							//(filename,true);
-							$t21 = game.player.displayCharacterInfo$1(false);
+							$t19.getResult();
+							$t20 = $Forays_Game.console.readKey(true);
 							$state = 27;
-							$t21.continueWith($sm);
+							$t20.continueWith($sm);
 							return;
 						}
 						case 26: {
 							$state = -1;
-							$t19.getResult();
-							$state = 18;
-							continue $sm1;
+							filename = $t21.getResult();
+							if (filename === '') {
+								$state = 17;
+								continue $sm1;
+							}
+							fileout3 = [];
+							//(filename,true);
+							$t22 = game.player.displayCharacterInfo$1(false);
+							$state = 28;
+							$t22.continueWith($sm);
+							return;
 						}
 						case 27: {
 							$state = -1;
-							$t21.getResult();
+							$t20.getResult();
+							$state = 17;
+							continue $sm1;
+						}
+						case 28: {
+							$state = -1;
+							$t22.getResult();
 							screen = $Forays_Screen.getCurrentScreen();
 							fileout3[0] = '';
 							for (i6 = 2; i6 < $Forays_Global.screeN_H; ++i6) {
@@ -25617,21 +26533,21 @@
 							}
 							fileout3[0] += '\n';
 							fileout3[0] += 'Inventory: \n';
-							$t22 = game.player.inventoryList();
-							for ($t23 = 0; $t23 < $t22.length; $t23++) {
-								s3 = $t22[$t23];
+							$t23 = game.player.inventoryList();
+							for ($t24 = 0; $t24 < $t23.length; $t24++) {
+								s3 = $t23[$t24];
 								fileout3[0] += s3 + '\n';
 							}
 							fileout3[0] += '\n';
 							fileout3[0] += '\n';
-							$t24 = game.m.allTiles();
-							for ($t25 = 0; $t25 < $t24.length; $t25++) {
-								t1 = $t24[$t25];
+							$t25 = game.m.allTiles();
+							for ($t26 = 0; $t26 < $t25.length; $t26++) {
+								t1 = $t25[$t26];
 								if (t1.get_type() !== 1 && !t1.isTrap()) {
 									good2 = false;
-									$t26 = t1.tilesAtDistance(1);
-									for ($t27 = 0; $t27 < $t26.length; $t27++) {
-										neighbor1 = $t26[$t27];
+									$t27 = t1.tilesAtDistance(1);
+									for ($t28 = 0; $t28 < $t27.length; $t28++) {
+										neighbor1 = $t27[$t28];
 										if (neighbor1.get_type() !== 0) {
 											good2 = true;
 										}
@@ -25644,9 +26560,9 @@
 							$Forays_Screen.writeMapChar$1(0, 0, '-');
 							game.m.draw();
 							col = 0;
-							$t28 = $Forays_Screen.getCurrentMap();
-							for ($t29 = 0; $t29 < $t28.length; $t29++) {
-								cch = $t28[$t29];
+							$t29 = $Forays_Screen.getCurrentMap();
+							for ($t30 = 0; $t30 < $t29.length; $t30++) {
+								cch = $t29[$t30];
 								fileout3[0] += cch.c;
 								++col;
 								if (col === $Forays_Global.COLS) {
@@ -25657,18 +26573,18 @@
 							fileout3[0] += '\n';
 							$Forays_Screen.writeMapString$2(0, 0, ''.padRight($Forays_Global.COLS, 45));
 							line = 1;
-							$t30 = game.b.getMessages();
-							for ($t31 = 0; $t31 < $t30.length; $t31++) {
-								s4 = $t30[$t31];
+							$t31 = game.b.getMessages();
+							for ($t32 = 0; $t32 < $t31.length; $t32++) {
+								s4 = $t31[$t32];
 								$Forays_Screen.writeMapString$2(line, 0, s4.padRight($Forays_Global.COLS));
 								++line;
 							}
 							$Forays_Screen.writeMapString$2(21, 0, ''.padRight($Forays_Global.COLS, 45));
 							fileout3[0] += 'Last messages: \n';
 							col = 0;
-							$t32 = $Forays_Screen.getCurrentMap();
-							for ($t33 = 0; $t33 < $t32.length; $t33++) {
-								cch1 = $t32[$t33];
+							$t33 = $Forays_Screen.getCurrentMap();
+							for ($t34 = 0; $t34 < $t33.length; $t34++) {
+								cch1 = $t33[$t34];
 								fileout3[0] += cch1.c;
 								++col;
 								if (col === $Forays_Global.COLS) {
@@ -25678,7 +26594,7 @@
 							}
 							fileout3[0] += '\n';
 							//								fileout.Close();
-							$state = 18;
+							$state = 17;
 							continue $sm1;
 						}
 						default: {
@@ -25688,8 +26604,8 @@
 				}
 				$tcs.setResult(null);
 			}
-			catch ($t38) {
-				$tcs.setException(ss.Exception.wrap($t38));
+			catch ($t39) {
+				$tcs.setException(ss.Exception.wrap($t39));
 			}
 		};
 		$sm();
@@ -27003,16 +27919,20 @@
 							box[0] = new $Forays_colorstring.$ctor4('+', box_corner_color, ''.padRight(stringwidth, 45), box_edge_color, '+', box_corner_color);
 							box[text.length + 1] = new $Forays_colorstring.$ctor4('|', box_edge_color, ''.padRight(stringwidth), 2, '|', box_edge_color);
 							box[text.length + 2] = $Forays_colorstring.op_Addition($Forays_colorstring.op_Addition(new $Forays_colorstring.$ctor2('|', box_edge_color), $Forays_Extensions.getColorString$1($Forays_Extensions.padOuter('[Press any key to continue]', stringwidth), text_color)), new $Forays_colorstring.$ctor2('|', box_edge_color));
+							//PadOuter originally here
 							box[text.length + 3] = $Forays_colorstring.op_Addition($Forays_colorstring.op_Addition(new $Forays_colorstring.$ctor2('|', box_edge_color), $Forays_Extensions.getColorString$1($Forays_Extensions.padOuter('[=] Stop showing tips', stringwidth), text_color)), new $Forays_colorstring.$ctor2('|', box_edge_color));
+							//PadOuter originally here
 							box[text.length + 4] = new $Forays_colorstring.$ctor4('+', box_corner_color, ''.padRight(stringwidth, 45), box_edge_color, '+', box_corner_color);
 							pos = 1;
 							for ($t2 = 0; $t2 < text.length; $t2++) {
 								s1 = text[$t2];
 								box[pos] = $Forays_colorstring.op_Addition($Forays_colorstring.op_Addition(new $Forays_colorstring.$ctor2('|', box_edge_color), $Forays_Extensions.getColorString$1($Forays_Extensions.padOuter(s1, stringwidth), text_color)), new $Forays_colorstring.$ctor2('|', box_edge_color));
+								//PadOuter originally here
 								if (pos === 1) {
 									box[pos] = new $Forays_colorstring();
 									box[pos].strings.add(new $Forays_cstr.$ctor1('|', box_edge_color));
 									box[pos].strings.add(new $Forays_cstr.$ctor1($Forays_Extensions.padOuter(s1, stringwidth), first_line_color));
+									//PadOuter originally here
 									box[pos].strings.add(new $Forays_cstr.$ctor1('|', box_edge_color));
 								}
 								++pos;
@@ -27281,7 +28201,7 @@
 			return $tcs.task;
 		},
 		use$1: function(user, line) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), used, $t38, $t1, duration, i, rr, rc, i1, rr1, rc1, i2, $t2, $t8, duration1, hiddencheck, $t9, $t10, e, $t11, $t12, t1, good, $t13, $t14, neighbor, $t15, $t22, $t27, $t32, $t37, t, ch, tiles, memlist, t2, prev, first, dmg, t3, prev1, first1, targets, $t23, $t24, ac, $t25, $t26, ac1, ac2, t4, prev2, first2, $t29, $t28, $t31, $t30, t5, prev3, first3, area, cells, $t33, $t34, tile2, $t35, $t36, tile3, $t3, damtype, ch1, $t16, $t17, $t19, $t20, j, $t4, j1, $t6, t21, $t18, t22, $t21, tile, $t5, tile1, $t7;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), used, $t41, $t1, duration, i, i1, i2, $t4, $t11, duration1, hiddencheck, $t12, $t13, e, $t14, $t15, t1, good, $t16, $t17, neighbor, $t18, $t25, $t30, $t35, $t40, rr, rc, $t2, rr1, rc1, $t3, t, ch, tiles, memlist, t2, prev, first, dmg, t3, prev1, first1, targets, $t26, $t27, ac, $t28, $t29, ac1, ac2, t4, prev2, first2, $t32, $t31, $t34, $t33, t5, prev3, first3, area, cells, $t36, $t37, tile2, $t38, $t39, tile3, $t5, damtype, ch1, $t19, $t20, $t22, $t23, j, $t6, j1, $t9, t21, $t21, t22, $t24, tile, $t7, tile1, $t10, $t8;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -27290,20 +28210,20 @@
 							case 0: {
 								$state = -1;
 								used = true;
-								$t38 = this.get_type();
-								if ($t38 === 0) {
+								$t41 = this.get_type();
+								if ($t41 === 0) {
 									$t1 = user.takeDamage$1(5, 2, 50, null);
 									$state = 2;
 									$t1.continueWith($sm);
 									return;
 								}
-								else if ($t38 === 2) {
+								else if ($t41 === 2) {
 									if (!user.hasAttr(67)) {
 										if (user.hasAttr(29)) {
 											user.attrs.set_item(29, 0);
 											$Forays_Item.get_b().add(user.youFeel() + ' relieved. ', [user]);
 										}
-										user.gainAttr$2(67, 5100, user.youAre() + ' no longer immune to toxins. ', [user]);
+										user.gainAttr$3(67, 5100, user.youAre() + ' no longer immune to toxins. ', [user]);
 									}
 									else {
 										$Forays_Item.get_b().add('Nothing happens. ', [user]);
@@ -27311,7 +28231,7 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 1) {
+								else if ($t41 === 1) {
 									user.attrs.set_item(24, user.attrs.get_item(24) + 1);
 									if (user.get_name() === 'you') {
 										$Forays_Item.get_b().add('Your blood tingles. ', [user]);
@@ -27325,7 +28245,7 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 3) {
+								else if ($t41 === 3) {
 									user.resetSpells();
 									if (user.get_name() === 'you') {
 										$Forays_Item.get_b().add('Your mind clears. ', []);
@@ -27336,7 +28256,7 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 4) {
+								else if ($t41 === 4) {
 									if (user.tile().isLit()) {
 										$Forays_Item.get_b().add('You would feel at home in the shadows. ', []);
 									}
@@ -27347,45 +28267,17 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 5) {
-									for (i = 0; i < 9999; ++i) {
-										rr = $Forays_Global.roll$1(1, 17) - 9;
-										rc = $Forays_Global.roll$1(1, 17) - 9;
-										if (Math.abs(rr) + Math.abs(rc) >= 6) {
-											rr += user.get_row();
-											rc += user.get_col();
-											if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
-												$Forays_Item.get_b().add(user.you('step') + ' through a rip in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr, rc)]);
-												user.animateStorm(2, 3, 4, '*', 14);
-												user.move(rr, rc);
-												$Forays_PhysicalObject.get_m().draw();
-												user.animateStorm(2, 3, 4, '*', 14);
-												break;
-											}
-										}
-									}
-									$state = 1;
+								else if ($t41 === 5) {
+									i = 0;
+									$state = 3;
 									continue $sm1;
 								}
-								else if ($t38 === 6) {
-									for (i1 = 0; i1 < 9999; ++i1) {
-										rr1 = $Forays_Global.roll$1(1, 20);
-										rc1 = $Forays_Global.roll$1(1, 64);
-										if (Math.abs(rr1 - user.get_row()) >= 10 || Math.abs(rc1 - user.get_col()) >= 10 || Math.abs(rr1 - user.get_row()) >= 7 && Math.abs(rc1 - user.get_col()) >= 7) {
-											if ($Forays_PhysicalObject.get_m().boundsCheck(rr1, rc1) && $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr1, rc1))) {
-												$Forays_Item.get_b().add(user.you('jump') + ' through a rift in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1)]);
-												user.animateStorm(3, 3, 10, '*', 4);
-												user.move(rr1, rc1);
-												$Forays_PhysicalObject.get_m().draw();
-												user.animateStorm(3, 3, 10, '*', 4);
-												break;
-											}
-										}
-									}
-									$state = 1;
+								else if ($t41 === 6) {
+									i1 = 0;
+									$state = 4;
 									continue $sm1;
 								}
-								else if ($t38 === 7) {
+								else if ($t41 === 7) {
 									i2 = user.directionOfOnlyUnblocked$1(0, true);
 									if (i2 === 0) {
 										$Forays_Item.get_b().add('This item requires an adjacent wall. ', []);
@@ -27394,20 +28286,20 @@
 										continue $sm1;
 									}
 									else {
-										$t2 = user.getDirection$2(true, false);
-										$state = 4;
-										$t2.continueWith($sm);
+										$t4 = user.getDirection$2(true, false);
+										$state = 6;
+										$t4.continueWith($sm);
 										return;
 									}
 								}
-								else if ($t38 === 8) {
+								else if ($t41 === 8) {
 									$Forays_Item.get_b().add('Time stops for a moment. ', []);
-									$t8 = $Forays_Item.get_q();
-									$t8.set_turn($t8.get_turn() - 200);
+									$t11 = $Forays_Item.get_q();
+									$t11.set_turn($t11.get_turn() - 200);
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 9) {
+								else if ($t41 === 9) {
 									//user.attrs[AttrType.DETECTING_MONSTERS]++;
 									$Forays_Item.get_b().add('The scroll reveals ' + user.your() + ' foes. ', [user]);
 									duration1 = $Forays_Global.roll(20) + 30;
@@ -27416,25 +28308,25 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 10) {
+								else if ($t41 === 10) {
 									$Forays_Item.get_b().add('The scroll reveals the layout of this level. ', []);
 									hiddencheck = null;
-									$t9 = $Forays_Item.get_q().list;
-									for ($t10 = 0; $t10 < $t9.length; $t10++) {
-										e = $t9[$t10];
-										if (!e.get_dead() && e.get_type() === 3) {
+									$t12 = $Forays_Item.get_q().list;
+									for ($t13 = 0; $t13 < $t12.length; $t13++) {
+										e = $t12[$t13];
+										if (!e.get_dead() && e.get_evtype() === 3) {
 											hiddencheck = e;
 											break;
 										}
 									}
-									$t11 = $Forays_PhysicalObject.get_m().allTiles();
-									for ($t12 = 0; $t12 < $t11.length; $t12++) {
-										t1 = $t11[$t12];
+									$t14 = $Forays_PhysicalObject.get_m().allTiles();
+									for ($t15 = 0; $t15 < $t14.length; $t15++) {
+										t1 = $t14[$t15];
 										if (t1.get_type() !== 1) {
 											good = false;
-											$t13 = t1.tilesAtDistance(1);
-											for ($t14 = 0; $t14 < $t13.length; $t14++) {
-												neighbor = $t13[$t14];
+											$t16 = t1.tilesAtDistance(1);
+											for ($t17 = 0; $t17 < $t16.length; $t17++) {
+												neighbor = $t16[$t17];
 												if (neighbor.get_type() !== 0) {
 													good = true;
 												}
@@ -27462,7 +28354,7 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 11) {
+								else if ($t41 === 11) {
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
 										$Forays_PhysicalObject.get_m().set_wiz_lite(true);
 										$Forays_PhysicalObject.get_m().set_wiz_dark(false);
@@ -27474,7 +28366,7 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 12) {
+								else if ($t41 === 12) {
 									if (!$Forays_PhysicalObject.get_m().get_wiz_dark()) {
 										$Forays_PhysicalObject.get_m().set_wiz_dark(true);
 										$Forays_PhysicalObject.get_m().set_wiz_lite(false);
@@ -27486,50 +28378,50 @@
 									$state = 1;
 									continue $sm1;
 								}
-								else if ($t38 === 13) {
+								else if ($t41 === 13) {
 									if (ss.isNullOrUndefined(line)) {
-										$t15 = user.getTarget$4(12, 1);
-										$state = 6;
-										$t15.continueWith($sm);
-										return;
-									}
-									$state = 5;
-									continue $sm1;
-								}
-								else if ($t38 === 14) {
-									if (ss.isNullOrUndefined(line)) {
-										$t22 = user.getTarget$4(12, 3);
+										$t18 = user.getTarget$4(12, 1);
 										$state = 8;
-										$t22.continueWith($sm);
+										$t18.continueWith($sm);
 										return;
 									}
 									$state = 7;
 									continue $sm1;
 								}
-								else if ($t38 === 15) {
+								else if ($t41 === 14) {
 									if (ss.isNullOrUndefined(line)) {
-										$t27 = user.getTarget$4(12, -1);
+										$t25 = user.getTarget$4(12, 3);
 										$state = 10;
-										$t27.continueWith($sm);
+										$t25.continueWith($sm);
 										return;
 									}
 									$state = 9;
 									continue $sm1;
 								}
-								else if ($t38 === 16) {
+								else if ($t41 === 15) {
 									if (ss.isNullOrUndefined(line)) {
-										$t32 = user.getTarget$4(12, -3);
+										$t30 = user.getTarget$4(12, -1);
 										$state = 12;
-										$t32.continueWith($sm);
+										$t30.continueWith($sm);
 										return;
 									}
 									$state = 11;
 									continue $sm1;
 								}
-								else if ($t38 === 17) {
-									$t37 = user.takeDamage$1(5, 2, 1, null);
+								else if ($t41 === 16) {
+									if (ss.isNullOrUndefined(line)) {
+										$t35 = user.getTarget$4(12, -3);
+										$state = 14;
+										$t35.continueWith($sm);
+										return;
+									}
 									$state = 13;
-									$t37.continueWith($sm);
+									continue $sm1;
+								}
+								else if ($t41 === 17) {
+									$t40 = user.takeDamage$1(5, 2, 1, null);
+									$state = 15;
+									$t40.continueWith($sm);
 									return;
 								}
 								else {
@@ -27547,9 +28439,57 @@
 								$state = 1;
 								continue $sm1;
 							}
+							case 3: {
+								$state = -1;
+								if (!(i < 9999)) {
+									$state = 17;
+									continue $sm1;
+								}
+								rr = $Forays_Global.roll$1(1, 17) - 9;
+								rc = $Forays_Global.roll$1(1, 17) - 9;
+								if (Math.abs(rr) + Math.abs(rc) >= 6) {
+									rr += user.get_row();
+									rc += user.get_col();
+									if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
+										$Forays_Item.get_b().add(user.you('step') + ' through a rip in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr, rc)]);
+										user.animateStorm(2, 3, 4, '*', 14);
+										$t2 = user.move(rr, rc);
+										$state = 18;
+										$t2.continueWith($sm);
+										return;
+									}
+									$state = 16;
+									continue $sm1;
+								}
+								$state = 16;
+								continue $sm1;
+							}
 							case 4: {
 								$state = -1;
-								i2 = $t2.getResult();
+								if (!(i1 < 9999)) {
+									$state = 20;
+									continue $sm1;
+								}
+								rr1 = $Forays_Global.roll$1(1, 20);
+								rc1 = $Forays_Global.roll$1(1, 64);
+								if (Math.abs(rr1 - user.get_row()) >= 10 || Math.abs(rc1 - user.get_col()) >= 10 || Math.abs(rr1 - user.get_row()) >= 7 && Math.abs(rc1 - user.get_col()) >= 7) {
+									if ($Forays_PhysicalObject.get_m().boundsCheck(rr1, rc1) && $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr1, rc1))) {
+										$Forays_Item.get_b().add(user.you('jump') + ' through a rift in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1)]);
+										user.animateStorm(3, 3, 10, '*', 4);
+										$t3 = user.move(rr1, rc1);
+										$state = 21;
+										$t3.continueWith($sm);
+										return;
+									}
+									$state = 19;
+									continue $sm1;
+								}
+								$state = 19;
+								continue $sm1;
+							}
+							case 6: {
+								$state = -1;
+								i2 = $t4.getResult();
 								t = user.tileInDirection(i2);
 								if (ss.isValue(t)) {
 									if (t.get_type() === 0) {
@@ -27569,7 +28509,7 @@
 										}
 										tiles = [];
 										memlist = [];
-										$state = 14;
+										$state = 22;
 										continue $sm1;
 									}
 									else {
@@ -27581,21 +28521,21 @@
 								}
 								else {
 									used = false;
-									$state = 3;
+									$state = 5;
 									continue $sm1;
 								}
 							}
-							case 3: {
+							case 5: {
 								$state = 1;
 								continue $sm1;
 							}
-							case 6: {
+							case 8: {
 								$state = -1;
-								line = $t15.getResult();
-								$state = 5;
+								line = $t18.getResult();
+								$state = 7;
 								continue $sm1;
 							}
-							case 5: {
+							case 7: {
 								$state = -1;
 								if (ss.isValue(line)) {
 									t2 = $Forays_Extensions.last($Forays_Tile).call(null, line);
@@ -27615,22 +28555,22 @@
 									dmg.add(1);
 									dmg.add(2);
 									dmg.add(3);
-									$state = 16;
+									$state = 24;
 									continue $sm1;
 								}
 								else {
 									used = false;
-									$state = 15;
+									$state = 23;
 									continue $sm1;
 								}
 							}
-							case 8: {
+							case 10: {
 								$state = -1;
-								line = $t22.getResult();
-								$state = 7;
+								line = $t25.getResult();
+								$state = 9;
 								continue $sm1;
 							}
-							case 7: {
+							case 9: {
 								$state = -1;
 								if (ss.isValue(line)) {
 									t3 = $Forays_Extensions.last($Forays_Tile).call(null, line);
@@ -27648,18 +28588,18 @@
 									user.animateExplosion$1(t3, 3, '*', 8);
 									targets = [];
 									if (t3.get_passable()) {
-										$t23 = t3.actorsWithinDistance(3);
-										for ($t24 = 0; $t24 < $t23.length; $t24++) {
-											ac = $t23[$t24];
+										$t26 = t3.actorsWithinDistance(3);
+										for ($t27 = 0; $t27 < $t26.length; $t27++) {
+											ac = $t26[$t27];
 											if (t3.hasLOE(ac)) {
 												targets.add(ac);
 											}
 										}
 									}
 									else {
-										$t25 = t3.actorsWithinDistance(3);
-										for ($t26 = 0; $t26 < $t25.length; $t26++) {
-											ac1 = $t25[$t26];
+										$t28 = t3.actorsWithinDistance(3);
+										for ($t29 = 0; $t29 < $t28.length; $t29++) {
+											ac1 = $t28[$t29];
 											if (ss.isValue(prev1) && prev1.hasLOE(ac1)) {
 												targets.add(ac1);
 											}
@@ -27677,13 +28617,13 @@
 								$state = 1;
 								continue $sm1;
 							}
-							case 10: {
+							case 12: {
 								$state = -1;
-								line = $t27.getResult();
-								$state = 9;
+								line = $t30.getResult();
+								$state = 11;
 								continue $sm1;
 							}
-							case 9: {
+							case 11: {
 								$state = -1;
 								if (ss.isValue(line)) {
 									t4 = $Forays_Extensions.last($Forays_Tile).call(null, line);
@@ -27700,17 +28640,17 @@
 									user.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 16);
 									if (t4.get_passable()) {
 										t4.features.add(3);
-										$t29 = $Forays_Item.get_q();
-										$t28 = [];
-										$t28.add(t4);
-										$t29.add(new $Forays_Event.$ctorf(t4, $t28, 100, 19, 109, 3, ''));
+										$t32 = $Forays_Item.get_q();
+										$t31 = [];
+										$t31.add(t4);
+										$t32.add(new $Forays_Event.$ctorf(t4, $t31, 100, 19, 109, 3, ''));
 									}
 									else {
 										prev2.features.add(3);
-										$t31 = $Forays_Item.get_q();
-										$t30 = [];
-										$t30.add(prev2);
-										$t31.add(new $Forays_Event.$ctorf(prev2, $t30, 100, 19, 109, 3, ''));
+										$t34 = $Forays_Item.get_q();
+										$t33 = [];
+										$t33.add(prev2);
+										$t34.add(new $Forays_Event.$ctorf(prev2, $t33, 100, 19, 109, 3, ''));
 									}
 								}
 								else {
@@ -27719,13 +28659,13 @@
 								$state = 1;
 								continue $sm1;
 							}
-							case 12: {
+							case 14: {
 								$state = -1;
-								line = $t32.getResult();
-								$state = 11;
+								line = $t35.getResult();
+								$state = 13;
 								continue $sm1;
 							}
-							case 11: {
+							case 13: {
 								$state = -1;
 								if (ss.isValue(line)) {
 									t5 = $Forays_Extensions.last($Forays_Tile).call(null, line);
@@ -27743,9 +28683,9 @@
 									area = [];
 									cells = [];
 									if (t5.get_passable()) {
-										$t33 = t5.tilesWithinDistance(3);
-										for ($t34 = 0; $t34 < $t33.length; $t34++) {
-											tile2 = $t33[$t34];
+										$t36 = t5.tilesWithinDistance(3);
+										for ($t37 = 0; $t37 < $t36.length; $t37++) {
+											tile2 = $t36[$t37];
 											if (tile2.get_passable() && t5.hasLOE(tile2)) {
 												tile2.addOpaqueFeature(5);
 												area.add(tile2);
@@ -27754,9 +28694,9 @@
 										}
 									}
 									else {
-										$t35 = t5.tilesWithinDistance(3);
-										for ($t36 = 0; $t36 < $t35.length; $t36++) {
-											tile3 = $t35[$t36];
+										$t38 = t5.tilesWithinDistance(3);
+										for ($t39 = 0; $t39 < $t38.length; $t39++) {
+											tile3 = $t38[$t39];
 											if (ss.isValue(prev3) && tile3.get_passable() && prev3.hasLOE(tile3)) {
 												tile3.addOpaqueFeature(5);
 												area.add(tile3);
@@ -27773,9 +28713,9 @@
 								$state = 1;
 								continue $sm1;
 							}
-							case 13: {
+							case 15: {
 								$state = -1;
-								$t37.getResult();
+								$t40.getResult();
 								if (user.hasAttr(17)) {
 									user.recover_time = $Forays_Item.get_q().get_turn() + 200;
 								}
@@ -27804,28 +28744,64 @@
 								$tcs.setResult(used);
 								return;
 							}
-							case 14: {
+							case 18: {
+								$state = -1;
+								$t2.getResult();
+								$Forays_PhysicalObject.get_m().draw();
+								user.animateStorm(2, 3, 4, '*', 14);
+								$state = 17;
+								continue $sm1;
+							}
+							case 16: {
+								$state = -1;
+								++i;
+								$state = 3;
+								continue $sm1;
+							}
+							case 17: {
+								$state = 1;
+								continue $sm1;
+							}
+							case 21: {
+								$state = -1;
+								$t3.getResult();
+								$Forays_PhysicalObject.get_m().draw();
+								user.animateStorm(3, 3, 10, '*', 4);
+								$state = 20;
+								continue $sm1;
+							}
+							case 19: {
+								$state = -1;
+								++i1;
+								$state = 4;
+								continue $sm1;
+							}
+							case 20: {
+								$state = 1;
+								continue $sm1;
+							}
+							case 22: {
 								$state = -1;
 								if (!!t.get_passable()) {
-									$state = 17;
+									$state = 25;
 									continue $sm1;
 								}
 								if (t.get_row() === 0 || t.get_row() === 21 || t.get_col() === 0 || t.get_col() === 65) {
-									$state = 17;
+									$state = 25;
 									continue $sm1;
 								}
 								tiles.add(t);
 								memlist.add($Forays_Screen.mapChar(t.get_row(), t.get_col()));
 								$Forays_Screen.writeMapChar(t.get_row(), t.get_col(), ch);
-								$t3 = ss.Task.delay(35);
-								$state = 18;
-								$t3.continueWith($sm);
+								$t5 = ss.Task.delay(35);
+								$state = 26;
+								$t5.continueWith($sm);
 								return;
 							}
-							case 16: {
+							case 24: {
 								$state = -1;
 								if (!(dmg.length > 0)) {
-									$state = 15;
+									$state = 23;
 									continue $sm1;
 								}
 								damtype = $Forays_Extensions.random($Forays_DamageType).call(null, dmg);
@@ -27847,30 +28823,30 @@
 								$Forays_Item.get_b().displayNow();
 								$Forays_Screen.animateExplosion$2(t2, 1, ch1, 100);
 								if (t2.get_passable()) {
-									$t16 = t2.tilesWithinDistance(1);
-									$t17 = 0;
-									$state = 20;
+									$t19 = t2.tilesWithinDistance(1);
+									$t20 = 0;
+									$state = 28;
 									continue $sm1;
 								}
 								else {
-									$t19 = t2.tilesWithinDistance(1);
-									$t20 = 0;
-									$state = 21;
+									$t22 = t2.tilesWithinDistance(1);
+									$t23 = 0;
+									$state = 29;
 									continue $sm1;
 								}
 							}
-							case 15: {
+							case 23: {
 								$state = 1;
 								continue $sm1;
 							}
-							case 18: {
+							case 26: {
 								$state = -1;
-								$t3.getResult();
+								$t5.getResult();
 								t = t.tileInDirection(i2);
-								$state = 14;
+								$state = 22;
 								continue $sm1;
 							}
-							case 17: {
+							case 25: {
 								$state = -1;
 								if (t.get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(t.get_row(), t.get_col()))) {
 									if (ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()).get_inv())) {
@@ -27881,92 +28857,92 @@
 									}
 									$Forays_Screen.writeMapChar(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor2(user.get_color(), user.get_symbol()));
 									j = 0;
-									$t4 = 0;
-									$state = 22;
+									$t6 = 0;
+									$state = 30;
 									continue $sm1;
 								}
 								else {
 									j1 = 0;
-									$t6 = 0;
-									$state = 23;
-									continue $sm1;
-								}
-							}
-							case 20: {
-								$state = -1;
-								if (!($t17 < $t16.length)) {
-									$state = 19;
-									continue $sm1;
-								}
-								t21 = $t16[$t17];
-								if (ss.isValue(t21.actor())) {
-									$t18 = t21.actor().takeDamage$2(damtype, 1, $Forays_Global.roll$1(2, 6), user, 'a prismatic orb');
-									$state = 26;
-									$t18.continueWith($sm);
-									return;
-								}
-								$state = 25;
-								continue $sm1;
-							}
-							case 21: {
-								$state = -1;
-								if (!($t20 < $t19.length)) {
-									$state = 19;
-									continue $sm1;
-								}
-								t22 = $t19[$t20];
-								if (ss.isValue(prev) && prev.hasBresenhamLine(t22.get_row(), t22.get_col())) {
-									if (ss.isValue(t22.actor())) {
-										$t21 = t22.actor().takeDamage$2(damtype, 1, $Forays_Global.roll$1(2, 6), user, 'a prismatic orb');
-										$state = 29;
-										$t21.continueWith($sm);
-										return;
-									}
-									$state = 28;
-									continue $sm1;
-								}
-								$state = 27;
-								continue $sm1;
-							}
-							case 19: {
-								$state = -1;
-								dmg.remove(damtype);
-								$state = 16;
-								continue $sm1;
-							}
-							case 22: {
-								$state = -1;
-								if (!($t4 < tiles.length)) {
+									$t9 = 0;
 									$state = 31;
 									continue $sm1;
 								}
-								tile = tiles[$t4];
-								$Forays_Screen.writeMapChar(tile.get_row(), tile.get_col(), memlist[j++]);
-								$t5 = ss.Task.delay(35);
-								$state = 32;
-								$t5.continueWith($sm);
-								return;
 							}
-							case 23: {
+							case 28: {
 								$state = -1;
-								if (!($t6 < tiles.length)) {
-									$state = 34;
+								if (!($t20 < $t19.length)) {
+									$state = 27;
 									continue $sm1;
 								}
-								tile1 = tiles[$t6];
-								$Forays_Screen.writeMapChar(tile1.get_row(), tile1.get_col(), memlist[j1++]);
-								$t7 = ss.Task.delay(35);
+								t21 = $t19[$t20];
+								if (ss.isValue(t21.actor())) {
+									$t21 = t21.actor().takeDamage$2(damtype, 1, $Forays_Global.roll$1(2, 6), user, 'a prismatic orb');
+									$state = 34;
+									$t21.continueWith($sm);
+									return;
+								}
+								$state = 33;
+								continue $sm1;
+							}
+							case 29: {
+								$state = -1;
+								if (!($t23 < $t22.length)) {
+									$state = 27;
+									continue $sm1;
+								}
+								t22 = $t22[$t23];
+								if (ss.isValue(prev) && prev.hasBresenhamLine(t22.get_row(), t22.get_col())) {
+									if (ss.isValue(t22.actor())) {
+										$t24 = t22.actor().takeDamage$2(damtype, 1, $Forays_Global.roll$1(2, 6), user, 'a prismatic orb');
+										$state = 37;
+										$t24.continueWith($sm);
+										return;
+									}
+									$state = 36;
+									continue $sm1;
+								}
 								$state = 35;
+								continue $sm1;
+							}
+							case 27: {
+								$state = -1;
+								dmg.remove(damtype);
+								$state = 24;
+								continue $sm1;
+							}
+							case 30: {
+								$state = -1;
+								if (!($t6 < tiles.length)) {
+									$state = 39;
+									continue $sm1;
+								}
+								tile = tiles[$t6];
+								$Forays_Screen.writeMapChar(tile.get_row(), tile.get_col(), memlist[j++]);
+								$t7 = ss.Task.delay(35);
+								$state = 40;
 								$t7.continueWith($sm);
 								return;
 							}
-							case 26: {
+							case 31: {
 								$state = -1;
-								$t18.getResult();
-								$state = 25;
+								if (!($t9 < tiles.length)) {
+									$state = 42;
+									continue $sm1;
+								}
+								tile1 = tiles[$t9];
+								$Forays_Screen.writeMapChar(tile1.get_row(), tile1.get_col(), memlist[j1++]);
+								$t10 = ss.Task.delay(35);
+								$state = 43;
+								$t10.continueWith($sm);
+								return;
+							}
+							case 34: {
+								$state = -1;
+								$t21.getResult();
+								$state = 33;
 								continue $sm1;
 							}
-							case 25: {
+							case 33: {
 								$state = -1;
 								if (damtype === 1 && t21.is(1)) {
 									t21.features.remove(1);
@@ -27976,22 +28952,22 @@
 									t21.features.remove(2);
 									$Forays_Item.get_b().add('The troll seer corpse burns to ashes! ', [t21]);
 								}
-								$state = 24;
+								$state = 32;
 								continue $sm1;
 							}
-							case 24: {
+							case 32: {
 								$state = -1;
-								$t17++;
-								$state = 20;
-								continue $sm1;
-							}
-							case 29: {
-								$state = -1;
-								$t21.getResult();
+								$t20++;
 								$state = 28;
 								continue $sm1;
 							}
-							case 28: {
+							case 37: {
+								$state = -1;
+								$t24.getResult();
+								$state = 36;
+								continue $sm1;
+							}
+							case 36: {
 								$state = -1;
 								if (damtype === 1 && t22.is(1)) {
 									t22.features.remove(1);
@@ -28001,50 +28977,57 @@
 									t22.features.remove(2);
 									$Forays_Item.get_b().add('The troll seer corpse burns to ashes! ', [t22]);
 								}
-								$state = 27;
-								continue $sm1;
-							}
-							case 27: {
-								$state = -1;
-								$t20++;
-								$state = 21;
-								continue $sm1;
-							}
-							case 32: {
-								$state = -1;
-								$t5.getResult();
-								$state = 30;
-								continue $sm1;
-							}
-							case 30: {
-								$state = -1;
-								$t4++;
-								$state = 22;
-								continue $sm1;
-							}
-							case 31: {
-								$state = -1;
-								$Forays_Item.get_b().add(user.you('travel') + ' through the passage. ', [user, t]);
-								user.move(t.get_row(), t.get_col());
-								$state = 3;
+								$state = 35;
 								continue $sm1;
 							}
 							case 35: {
 								$state = -1;
-								$t7.getResult();
-								$state = 33;
+								$t23++;
+								$state = 29;
 								continue $sm1;
 							}
-							case 33: {
+							case 40: {
+								$state = -1;
+								$t7.getResult();
+								$state = 38;
+								continue $sm1;
+							}
+							case 38: {
 								$state = -1;
 								$t6++;
-								$state = 23;
+								$state = 30;
 								continue $sm1;
 							}
-							case 34: {
+							case 39: {
+								$state = -1;
+								$Forays_Item.get_b().add(user.you('travel') + ' through the passage. ', [user, t]);
+								$t8 = user.move(t.get_row(), t.get_col());
+								$state = 44;
+								$t8.continueWith($sm);
+								return;
+							}
+							case 43: {
+								$state = -1;
+								$t10.getResult();
+								$state = 41;
+								continue $sm1;
+							}
+							case 41: {
+								$state = -1;
+								$t9++;
+								$state = 31;
+								continue $sm1;
+							}
+							case 42: {
 								$state = -1;
 								$Forays_Item.get_b().add('The passage is blocked. ', [user]);
-								$state = 3;
+								$state = 5;
+								continue $sm1;
+							}
+							case 44: {
+								$state = -1;
+								$t8.getResult();
+								$state = 5;
 								continue $sm1;
 							}
 							default: {
@@ -28053,8 +29036,8 @@
 						}
 					}
 				}
-				catch ($t39) {
-					$tcs.setException(ss.Exception.wrap($t39));
+				catch ($t42) {
+					$tcs.setException(ss.Exception.wrap($t42));
 				}
 			});
 			$sm();
@@ -28864,7 +29847,7 @@
 			}
 		},
 		generateLevel: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), i, j, $t1, dungeon, charmap, interesting_tiles, i1, j1, attempts, $t2, ints, done, rr, rc, p, temp, good, $t3, $t4, p1, ch, dist2, $t5, $t6, p2, p21, floors, $t7, $t8, p3, $t9, $t10, p4, ch1, center, good1, $t11, $t12, p5, ch2, floors1, $t13, $t14, p6, no_good, $t15, $t16, p7, ch3, walls, $t17, $t18, p8, successive_walls, rotated, i2, temp2, i3, num_chests, i4, tries, done1, rr1, rc1, p9, floors2, temp1, $t19, $t20, p10, done2, rr2, rc2, p11, floors3, temp3, $t21, $t22, p12, done3, rr3, rc3, p13, floors4, temp4, $t23, $t24, p14, lt, rr4, rc4, rr5, rc5, p15, other_pos, $t25, $t26, nearby, other, num, i5, rr6, rc6, num_traps, i6, tries1, done4, rr7, rc7, percentage_of_traps_to_become_vents, hidden, i7, j2, type, frequency, variance, variance_amount, number_of_values, minimum_value, diff, delay, $t27, $t28, t, num_items, i8, poltergeist_spawned, mimic_spawned, marble_horror_spawned, i9, type1, statue, entrancer, tiles, dist, $t29, $t30, t2, thralltype, done5, t3, thrall, $t31, a, good_location, i10, j3, $t32, $t33, a1, i11, j4, at_least_one_good, i12, j5, $t34, $t35, a2, i13, j6, goodtiles, i14, j7, t4, light, done6, rr8, rc8, good2, $t36, $t37, t5, light1, fire, done7, tries2, rr9, rc9, good3, $t38, $t39, t6, dirs, long_corridor, connections, i15, t7, good_dir, distance, possible_traps, trap_roll, stone_slabs, $t40, i16, t8, distance1, tt, neighbor, tt1, $t42, $t41, $t43, $t44, t9, $t45, $t46, t10, $t47, $t48, t11, $t49, $t50, neighbor1, e, e1, e2;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), i, j, $t1, dungeon, charmap, interesting_tiles, i1, j1, attempts, $t2, ints, done, rr, rc, p, temp, good, $t3, $t4, p1, ch, dist2, $t5, $t6, p2, p21, floors, $t7, $t8, p3, $t9, $t10, p4, ch1, center, good1, $t11, $t12, p5, ch2, floors1, $t13, $t14, p6, no_good, $t15, $t16, p7, ch3, walls, $t17, $t18, p8, successive_walls, rotated, i2, temp2, i3, num_chests, i4, tries, done1, rr1, rc1, p9, floors2, temp1, $t19, $t20, p10, done2, rr2, rc2, p11, floors3, temp3, $t21, $t22, p12, done3, rr3, rc3, p13, floors4, temp4, $t23, $t24, p14, lt, rr4, rc4, rr5, rc5, p15, other_pos, $t25, $t26, nearby, other, num, i5, rr6, rc6, num_traps, i6, tries1, done4, rr7, rc7, percentage_of_traps_to_become_vents, hidden, i7, j2, type, frequency, variance, variance_amount, number_of_values, minimum_value, diff, delay, $t27, $t28, t, num_items, i8, poltergeist_spawned, mimic_spawned, marble_horror_spawned, i9, type1, statue, entrancer, tiles, dist, $t29, $t30, t2, thralltype, done5, t3, thrall, $t31, a, good_location, i10, j3, $t32, $t33, a1, i11, j4, at_least_one_good, i12, j5, $t34, $t35, a2, i13, j6, goodtiles, i14, j7, t4, light, $t36, done6, rr8, rc8, good2, $t37, $t38, t5, light1, fire, $t39, done7, tries2, rr9, rc9, good3, $t40, $t41, t6, dirs, long_corridor, connections, i15, t7, good_dir, distance, possible_traps, trap_roll, stone_slabs, $t42, i16, t8, distance1, tt, neighbor, tt1, $t44, $t43, $t45, $t46, t9, $t47, $t48, t10, $t49, $t50, t11, $t51, $t52, neighbor1, e, e1, e2;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -29648,34 +30631,55 @@
 									t4 = $Forays_Extensions.random($Forays_Tile).call(null, goodtiles);
 									light = $Forays_Map.get_player().get_light_radius();
 									$Forays_Map.get_player().set_light_radius(0);
-									$Forays_Map.get_player().move(t4.get_row(), t4.get_col());
-									$Forays_Map.get_player().updateRadius$1(0, light, true);
+									$t36 = $Forays_Map.get_player().move(t4.get_row(), t4.get_col());
+									$state = 2;
+									$t36.continueWith($sm);
+									return;
 								}
 								else {
-									for (done6 = false; !done6;) {
-										rr8 = $Forays_Global.roll(20);
-										rc8 = $Forays_Global.roll(64);
-										good2 = true;
-										$t36 = this.tile.get_item(rr8, rc8).tilesWithinDistance(1);
-										for ($t37 = 0; $t37 < $t36.length; $t37++) {
-											t5 = $t36[$t37];
-											if (t5.isTrap()) {
-												good2 = false;
-											}
-										}
-										if (good2 && this.tile.get_item(rr8, rc8).get_passable() && ss.isNullOrUndefined(this.actor.get_item(rr8, rc8))) {
-											light1 = $Forays_Map.get_player().get_light_radius();
-											fire = $Forays_Map.get_player().attrs.get_item(31);
-											$Forays_Map.get_player().set_light_radius(0);
-											$Forays_Map.get_player().attrs.set_item(31, 0);
-											$Forays_Map.get_player().move(rr8, rc8);
-											$Forays_Map.get_player().updateRadius$1(0, Math.max(light1, fire), true);
-											$Forays_Map.get_player().set_light_radius(light1);
-											$Forays_Map.get_player().attrs.set_item(31, fire);
-											done6 = true;
-										}
+									done6 = false;
+									$state = 3;
+									continue $sm1;
+								}
+							}
+							case 2: {
+								$state = -1;
+								$t36.getResult();
+								$Forays_Map.get_player().updateRadius$1(0, light, true);
+								$state = 1;
+								continue $sm1;
+							}
+							case 3: {
+								$state = -1;
+								if (!!done6) {
+									$state = 1;
+									continue $sm1;
+								}
+								rr8 = $Forays_Global.roll(20);
+								rc8 = $Forays_Global.roll(64);
+								good2 = true;
+								$t37 = this.tile.get_item(rr8, rc8).tilesWithinDistance(1);
+								for ($t38 = 0; $t38 < $t37.length; $t38++) {
+									t5 = $t37[$t38];
+									if (t5.isTrap()) {
+										good2 = false;
 									}
 								}
+								if (good2 && this.tile.get_item(rr8, rc8).get_passable() && ss.isNullOrUndefined(this.actor.get_item(rr8, rc8))) {
+									light1 = $Forays_Map.get_player().get_light_radius();
+									fire = $Forays_Map.get_player().attrs.get_item(31);
+									$Forays_Map.get_player().set_light_radius(0);
+									$Forays_Map.get_player().attrs.set_item(31, 0);
+									$t39 = $Forays_Map.get_player().move(rr8, rc8);
+									$state = 4;
+									$t39.continueWith($sm);
+									return;
+								}
+								$state = 3;
+								continue $sm1;
+							}
+							case 1: {
+								$state = -1;
 								if ($Forays_Global.coinFlip()) {
 									//is 50% the best rate for hidden areas? it seems to be working well so far.
 									done7 = false;
@@ -29683,9 +30687,9 @@
 										rr9 = $Forays_Global.roll(18) + 1;
 										rc9 = $Forays_Global.roll(62) + 1;
 										good3 = true;
-										$t38 = this.tile.get_item(rr9, rc9).tilesWithinDistance(2);
-										for ($t39 = 0; $t39 < $t38.length; $t39++) {
-											t6 = $t38[$t39];
+										$t40 = this.tile.get_item(rr9, rc9).tilesWithinDistance(2);
+										for ($t41 = 0; $t41 < $t40.length; $t41++) {
+											t6 = $t40[$t41];
 											if (t6.get_type() !== 0) {
 												good3 = false;
 												break;
@@ -29737,8 +30741,8 @@
 												if ($Forays_Global.oneIn(4)) {
 													stone_slabs = true;
 												}
-												for ($t40 = 0; $t40 < dirs.length; $t40++) {
-													i16 = dirs[$t40];
+												for ($t42 = 0; $t42 < dirs.length; $t42++) {
+													i16 = dirs[$t42];
 													t8 = this.tile.get_item(rr9, rc9).tileInDirection(i16);
 													distance1 = -2;
 													//distance of the corridor between traps and secret door
@@ -29818,10 +30822,10 @@
 													t8 = t8.tileInDirection(t8.rotateDirection$1(i16, true, 4));
 													if (stone_slabs) {
 														t8.transformTo(34);
-														$t42 = $Forays_Map.get_q();
-														$t41 = [];
-														$t41.add(t8.tileInDirection($Forays_Extensions.rotateDirection$1(i16, true, 4)));
-														$t42.add(new $Forays_Event.$ctor7(t8, $t41, 100, 17));
+														$t44 = $Forays_Map.get_q();
+														$t43 = [];
+														$t43.add(t8.tileInDirection($Forays_Extensions.rotateDirection$1(i16, true, 4)));
+														$t44.add(new $Forays_Event.$ctor7(t8, $t43, 100, 17));
 													}
 													else {
 														t8.transformTo(20);
@@ -29844,9 +30848,9 @@
 													}
 												}
 												if (long_corridor && connections === 1) {
-													$t43 = this.tile.get_item(rr9, rc9).tilesWithinDistance(1);
-													for ($t44 = 0; $t44 < $t43.length; $t44++) {
-														t9 = $t43[$t44];
+													$t45 = this.tile.get_item(rr9, rc9).tilesWithinDistance(1);
+													for ($t46 = 0; $t46 < $t45.length; $t46++) {
+														t9 = $t45[$t46];
 														t9.transformTo($Forays_Extensions.random($Forays_TileType).call(null, possible_traps));
 														t9.set_name('floor');
 														t9.set_the_name('the floor');
@@ -29858,9 +30862,9 @@
 													this.tile.get_item(rr9, rc9).tileInDirection(this.tile.get_item(rr9, rc9).rotateDirection$1(dirs[0], true, 4)).transformTo(5);
 												}
 												else {
-													$t45 = this.tile.get_item(rr9, rc9).tilesAtDistance(1);
-													for ($t46 = 0; $t46 < $t45.length; $t46++) {
-														t10 = $t45[$t46];
+													$t47 = this.tile.get_item(rr9, rc9).tilesAtDistance(1);
+													for ($t48 = 0; $t48 < $t47.length; $t48++) {
+														t10 = $t47[$t48];
 														t10.transformTo($Forays_Tile.randomTrap());
 														t10.set_name('floor');
 														t10.set_the_name('the floor');
@@ -29876,13 +30880,13 @@
 										}
 									}
 								}
-								$t47 = this.allTiles();
-								for ($t48 = 0; $t48 < $t47.length; $t48++) {
-									t11 = $t47[$t48];
+								$t49 = this.allTiles();
+								for ($t50 = 0; $t50 < $t49.length; $t50++) {
+									t11 = $t49[$t50];
 									if (t11.get_type() !== 0) {
-										$t49 = t11.tilesAtDistance(1);
-										for ($t50 = 0; $t50 < $t49.length; $t50++) {
-											neighbor1 = $t49[$t50];
+										$t51 = t11.tilesAtDistance(1);
+										for ($t52 = 0; $t52 < $t51.length; $t52++) {
+											neighbor1 = $t51[$t52];
 											neighbor1.set_solid_rock(false);
 										}
 									}
@@ -29911,6 +30915,16 @@
 								$state = -1;
 								break $sm1;
 							}
+							case 4: {
+								$state = -1;
+								$t39.getResult();
+								$Forays_Map.get_player().updateRadius$1(0, Math.max(light1, fire), true);
+								$Forays_Map.get_player().set_light_radius(light1);
+								$Forays_Map.get_player().attrs.set_item(31, fire);
+								done6 = true;
+								$state = 3;
+								continue $sm1;
+							}
 							default: {
 								break $sm1;
 							}
@@ -29918,15 +30932,15 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t51) {
-					$tcs.setException(ss.Exception.wrap($t51));
+				catch ($t53) {
+					$tcs.setException(ss.Exception.wrap($t53));
 				}
 			});
 			$sm();
 			return $tcs.task;
 		},
 		generateBossLevel: function(boss_already_on_level) {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), boss_hp, $t1, $t2, e, $t3, $t4, a, i, j, newlist, $t5, $t6, current, $t7, dungeon, charmap, num_traps, i1, tries, done, rr, rc, hidden, i2, j1, type, frequency, variance, variance_amount, number_of_values, minimum_value, diff, delay, $t8, $t9, t, goodtiles, t2, light, fire, done1, rr1, rc1, good, $t10, $t11, t3, light1, $t12, $t13, t4, $t14, $t15, neighbor, e1, tile, a1, e2;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), boss_hp, $t1, $t2, e, $t3, $t4, a, i, j, newlist, $t5, $t6, current, $t7, dungeon, charmap, num_traps, i1, tries, done, rr, rc, hidden, i2, j1, type, frequency, variance, variance_amount, number_of_values, minimum_value, diff, delay, $t8, $t9, t, goodtiles, t2, light, fire, $t10, done1, rr1, rc1, good, $t11, $t12, t3, light1, $t13, $t14, $t15, t4, $t16, $t17, neighbor, e1, tile, a1, e2;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -29939,7 +30953,7 @@
 								$t1 = $Forays_Map.get_q().list;
 								for ($t2 = 0; $t2 < $t1.length; $t2++) {
 									e = $t1[$t2];
-									if (e.get_type() === 21) {
+									if (e.get_evtype() === 21) {
 										boss_hp = e.get_value();
 										break;
 									}
@@ -29977,8 +30991,8 @@
 								$t5 = $Forays_Map.get_q().list;
 								for ($t6 = 0; $t6 < $t5.length; $t6++) {
 									current = $t5[$t6];
-									if (ss.referenceEquals(current.get_target(), $Forays_Event.get_player()) || current.get_type() === 23 || current.get_type() === 22) {
-										if (current.get_type() === 22) {
+									if (ss.referenceEquals(current.get_target(), $Forays_Event.get_player()) || current.get_evtype() === 23 || current.get_evtype() === 22) {
+										if (current.get_evtype() === 22) {
 											current.set_target(null);
 										}
 										newlist.insert(newlist.length, current);
@@ -30080,39 +31094,62 @@
 									fire = $Forays_Map.get_player().attrs.get_item(31);
 									$Forays_Map.get_player().set_light_radius(0);
 									$Forays_Map.get_player().attrs.set_item(31, 0);
-									$Forays_Map.get_player().move(t2.get_row(), t2.get_col());
-									$Forays_Map.get_player().updateRadius$1(0, Math.max(light, fire), true);
-									$Forays_Map.get_player().set_light_radius(light);
-									$Forays_Map.get_player().attrs.set_item(31, fire);
+									$t10 = $Forays_Map.get_player().move(t2.get_row(), t2.get_col());
+									$state = 2;
+									$t10.continueWith($sm);
+									return;
 								}
 								else {
-									for (done1 = false; !done1;) {
-										rr1 = $Forays_Global.roll(20);
-										rc1 = $Forays_Global.roll(64);
-										good = true;
-										$t10 = this.tile.get_item(rr1, rc1).tilesWithinDistance(1);
-										for ($t11 = 0; $t11 < $t10.length; $t11++) {
-											t3 = $t10[$t11];
-											if (t3.isTrap()) {
-												good = false;
-											}
-										}
-										if (good && this.tile.get_item(rr1, rc1).get_passable() && ss.isNullOrUndefined(this.actor.get_item(rr1, rc1))) {
-											light1 = $Forays_Map.get_player().get_light_radius();
-											$Forays_Map.get_player().set_light_radius(0);
-											$Forays_Map.get_player().move(rr1, rc1);
-											$Forays_Map.get_player().updateRadius$1(0, light1, true);
-											done1 = true;
-										}
+									done1 = false;
+									$state = 3;
+									continue $sm1;
+								}
+							}
+							case 2: {
+								$state = -1;
+								$t10.getResult();
+								$Forays_Map.get_player().updateRadius$1(0, Math.max(light, fire), true);
+								$Forays_Map.get_player().set_light_radius(light);
+								$Forays_Map.get_player().attrs.set_item(31, fire);
+								$state = 1;
+								continue $sm1;
+							}
+							case 3: {
+								$state = -1;
+								if (!!done1) {
+									$state = 1;
+									continue $sm1;
+								}
+								rr1 = $Forays_Global.roll(20);
+								rc1 = $Forays_Global.roll(64);
+								good = true;
+								$t11 = this.tile.get_item(rr1, rc1).tilesWithinDistance(1);
+								for ($t12 = 0; $t12 < $t11.length; $t12++) {
+									t3 = $t11[$t12];
+									if (t3.isTrap()) {
+										good = false;
 									}
 								}
-								$t12 = this.allTiles();
-								for ($t13 = 0; $t13 < $t12.length; $t13++) {
-									t4 = $t12[$t13];
+								if (good && this.tile.get_item(rr1, rc1).get_passable() && ss.isNullOrUndefined(this.actor.get_item(rr1, rc1))) {
+									light1 = $Forays_Map.get_player().get_light_radius();
+									$Forays_Map.get_player().set_light_radius(0);
+									$t13 = $Forays_Map.get_player().move(rr1, rc1);
+									$state = 4;
+									$t13.continueWith($sm);
+									return;
+								}
+								$state = 3;
+								continue $sm1;
+							}
+							case 1: {
+								$state = -1;
+								$t14 = this.allTiles();
+								for ($t15 = 0; $t15 < $t14.length; $t15++) {
+									t4 = $t14[$t15];
 									if (t4.get_type() !== 0) {
-										$t14 = t4.tilesAtDistance(1);
-										for ($t15 = 0; $t15 < $t14.length; $t15++) {
-											neighbor = $t14[$t15];
+										$t16 = t4.tilesAtDistance(1);
+										for ($t17 = 0; $t17 < $t16.length; $t17++) {
+											neighbor = $t16[$t17];
 											neighbor.set_solid_rock(false);
 										}
 									}
@@ -30139,6 +31176,14 @@
 								$state = -1;
 								break $sm1;
 							}
+							case 4: {
+								$state = -1;
+								$t13.getResult();
+								$Forays_Map.get_player().updateRadius$1(0, light1, true);
+								done1 = true;
+								$state = 3;
+								continue $sm1;
+							}
 							default: {
 								break $sm1;
 							}
@@ -30146,8 +31191,8 @@
 					}
 					$tcs.setResult(null);
 				}
-				catch ($t16) {
-					$tcs.setException(ss.Exception.wrap($t16));
+				catch ($t18) {
+					$tcs.setException(ss.Exception.wrap($t18));
 				}
 			});
 			$sm();
@@ -32383,7 +33428,7 @@
 			}
 		},
 		pop: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), e, $t1;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), e;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -32395,27 +33440,20 @@
 								e = this.list[0];
 								//list.First.Value.Execute();
 								//list.RemoveFirst();
-								$t1 = e.execute();
-								$state = 1;
-								$t1.continueWith($sm);
-								return;
-							}
-							case 1: {
-								$state = -1;
-								$t1.getResult();
+								e.execute();
+								//await Task.Delay(1000);
 								this.list.remove(e);
-								$state = -1;
-								break $sm1;
+								$tcs.setResult(true);
+								return;
 							}
 							default: {
 								break $sm1;
 							}
 						}
 					}
-					$tcs.setResult(null);
 				}
-				catch ($t2) {
-					$tcs.setException(ss.Exception.wrap($t2));
+				catch ($t1) {
+					$tcs.setException(ss.Exception.wrap($t1));
 				}
 			});
 			$sm();
@@ -32446,7 +33484,7 @@
 		contains: function(type) {
 			var i = 0;
 			for (var current = this.list[0]; ss.isValue(current); i++, current = this.list[i]) {
-				if (current.get_type() === type) {
+				if (current.get_evtype() === type) {
 					return true;
 				}
 			}
@@ -32636,33 +33674,58 @@
 			this.$assignFG(value);
 		},
 		$processKey: function(elem, ev) {
-			var m = 0;
-			if (ev.altKey) {
-				m = m | $Forays_ConsoleModifiers.alt;
-			}
-			if (ev.ctrlKey) {
-				m = m | $Forays_ConsoleModifiers.control;
-			}
-			if (ev.shiftKey) {
-				m = m | $Forays_ConsoleModifiers.shift;
-			}
-			if (m !== 0) {
-				this.$kc = new $Forays_ConsoleKeyInfo.$ctor2(ev.which, m);
-			}
-			else {
-				this.$kc = new $Forays_ConsoleKeyInfo.$ctor1(ev.which);
-			}
-			//if (!Intercept && KeyAvailable)
-			//{
-			//// SetCursorPosition(CursorLeft - 1, CursorTop);
-			//Write(kc.KeyChar);
-			//}
-			$('#key').replaceWith('<div id="key"><p>Key Down, Key is ' + this.$kc.key + ', Char is ' + String.fromCharCode(this.$kc.keyChar) + '</p></div>');
-			//cki = Task<ConsoleKeyInfo>.FromResult(kc);
-			this.keyAvailable = false;
-			$('body').off('keyup', 'canvas', Function.thisFix(Function.mkdel(this, this.$processKey)));
-			//defr = new TaskCompletionSource<ConsoleKeyInfo>();
-			this.$defr.trySetResult(this.$kc);
+			var $state = 0, m, $t1;
+			var $sm = Function.mkdel(this, function() {
+				$sm1:
+				for (;;) {
+					switch ($state) {
+						case 0: {
+							$state = -1;
+							m = 0;
+							if (ev.altKey) {
+								m = m | $Forays_ConsoleModifiers.alt;
+							}
+							if (ev.ctrlKey) {
+								m = m | $Forays_ConsoleModifiers.control;
+							}
+							if (ev.shiftKey) {
+								m = m | $Forays_ConsoleModifiers.shift;
+							}
+							if (m !== 0) {
+								this.$kc = new $Forays_ConsoleKeyInfo.$ctor2(ev.which, m);
+							}
+							else {
+								this.$kc = new $Forays_ConsoleKeyInfo.$ctor1(ev.which);
+							}
+							//if (!Intercept && KeyAvailable)
+							//{
+							//// SetCursorPosition(CursorLeft - 1, CursorTop);
+							//Write(kc.KeyChar);
+							//}
+							$('#key').replaceWith('<div id="key"><p>Key Down, Key is ' + this.$kc.key + ', Char is ' + String.fromCharCode(this.$kc.keyChar) + '</p></div>');
+							//cki = Task<ConsoleKeyInfo>.FromResult(kc);
+							this.keyAvailable = false;
+							//jQuery.Select("#main").Off("keyup", "canvas", processKey);
+							//defr = new TaskCompletionSource<ConsoleKeyInfo>();
+							this.$defr.trySetResult(this.$kc);
+							$t1 = ss.Task.delay(10);
+							$state = 1;
+							$t1.continueWith($sm);
+							return;
+						}
+						case 1: {
+							$state = -1;
+							$t1.getResult();
+							$state = -1;
+							break $sm1;
+						}
+						default: {
+							break $sm1;
+						}
+					}
+				}
+			});
+			$sm();
 		},
 		readKey: function(intercept) {
 			var $state = 0, $tcs = new ss.TaskCompletionSource();
@@ -32677,7 +33740,7 @@
 								this.$intercept = intercept;
 								this.$defr = new ss.TaskCompletionSource();
 								//defr.Done(() => );
-								$('body').on('keyup', Function.thisFix(Function.mkdel(this, this.$processKey)));
+								$('body').one('keyup', Function.thisFix(Function.mkdel(this, this.$processKey)));
 								//(, 2, "on", "keydown", "canvas", "processKey");
 								//while (cki == null)
 								//await Task.Delay(35);
@@ -32687,7 +33750,8 @@
 							}
 							case 1: {
 								$state = -1;
-								$tcs.setResult(this.$defr.task.getResult());
+								this.$kc = this.$defr.task.getResult();
+								$tcs.setResult(this.$kc);
 								return;
 							}
 							default: {
@@ -35869,7 +36933,7 @@
 	$Forays_Actor.$define(5, 'wolf', 'c', 13, 25, 50, 1, 0, [22, 7]);
 	$Forays_Actor.$define(6, 'skeleton', 's', 1, 30, 100, 1, 0, [1, 58, 59, 61, 62, 63, 23]);
 	$Forays_Actor.$define(7, 'blood moth', 'i', 3, 25, 100, 1, 0, [10]);
-	//Define(ActorType.SHAMBLING_SCARECROW,"shambling scarecrow","x",Color.DarkYellow,30,90,0,1,0,AttrType.CONSTRUCT,AttrType.RESIST_BASH,AttrType.RESIST_PIERCE,AttrType.IMMUNE_ARROWS,AttrType.DARKVISION);
+	//Define(ActorType.SHAMBLING_SCARECROW,"shambling scarecrow","x",Color.DarkYellow,30,90,0,1,0,AttrType.CONSTRUCT,AttrType.RESIST_BASH,AttrType.RESIST_PIERCE,AttrType.IMMUNE_ARROWS,AttrType.DARKVISION});
 	$Forays_Actor.$define(8, 'swordsman', 'p', 1, 35, 100, 2, 0, [6, 5]);
 	$Forays_Actor.$define(9, 'darkness dweller', 'h', 11, 45, 100, 2, 0, [6, 5, 23]);
 	$Forays_Actor.$define(10, 'carnivorous bramble', 'B', 13, 35, 100, 2, 0, [3, 12, 8]);

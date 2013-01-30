@@ -183,7 +183,7 @@ namespace Forays
             display = new Display(new DisplayOptions(80, 25));
         }
         private TaskCompletionSource<ConsoleKeyInfo> defr;// Task<ConsoleKeyInfo> cki = null;
-        private void processKey(Element elem, jQueryEvent ev)
+        private async void processKey(Element elem, jQueryEvent ev)
         {
             int m = 0;
             if (ev.AltKey) m = m | ConsoleModifiers.Alt;
@@ -201,10 +201,10 @@ namespace Forays
             jQuery.Select("#key").ReplaceWith("<div id=\"key\"><p>Key Down, Key is " + kc.Key + ", Char is " + kc.KeyChar.ToString() + "</p></div>");
             //cki = Task<ConsoleKeyInfo>.FromResult(kc);
             KeyAvailable = false;
-            jQuery.Select("body").Off("keyup", "canvas", processKey);
+            //jQuery.Select("#main").Off("keyup", "canvas", processKey);
             //defr = new TaskCompletionSource<ConsoleKeyInfo>();
             defr.TrySetResult(kc);
-            
+            await Task.Delay(10);
         }
         /*        public async Task<ConsoleKeyInfo> ReadKey()
                 {
@@ -219,11 +219,12 @@ namespace Forays
             Intercept = intercept;
             defr = new TaskCompletionSource<ConsoleKeyInfo>();
             //defr.Done(() => );
-            jQuery.Select("body").On("keyup", processKey);
+            jQuery.Select("body").One("keyup", processKey);
             //(, 2, "on", "keydown", "canvas", "processKey");
            /*while (cki == null)
                await Task.Delay(35);*/
-            return await defr.Task;
+            kc = await defr.Task;
+            return kc;
         }
         public void SetCursorPosition(int x, int y)
         {

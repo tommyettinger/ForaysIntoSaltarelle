@@ -246,7 +246,7 @@ namespace Forays{
 						user.attrs[AttrType.POISONED] = 0;
 						B.Add(user.YouFeel() + " relieved. ",user);
 					}
-					user.GainAttr(AttrType.IMMUNE_TOXINS,5100,user.YouAre() + " no longer immune to toxins. ",user);
+					user.GainAttr(AttrType.IMMUNE_TOXINS,5100,user.YouAre() + " no longer immune to toxins. ",new PhysicalObject[]{user});
 				}
 				else{
 					B.Add("Nothing happens. ",user);
@@ -316,7 +316,7 @@ namespace Forays{
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
 							B.Add(user.You("step") + " through a rip in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
 							user.AnimateStorm(2,3,4,"*",Color.DarkMagenta);
-							user.Move(rr,rc);
+                            await user.Move(rr, rc);
 							M.Draw();
 							user.AnimateStorm(2,3,4,"*",Color.DarkMagenta);
 							break;
@@ -332,7 +332,7 @@ namespace Forays{
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
 							B.Add(user.You("jump") + " through a rift in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
 							user.AnimateStorm(3,3,10,"*",Color.Green);
-                            user.Move(rr, rc);
+                            await user.Move(rr, rc);
 							M.Draw();
 							user.AnimateStorm(3,3,10,"*",Color.Green);
 							break;
@@ -391,7 +391,7 @@ namespace Forays{
                                     await Task.Delay(35);
 								}
 								B.Add(user.You("travel") + " through the passage. ",user,t);
-                                user.Move(t.row, t.col);
+                                await user.Move(t.row, t.col);
 							}
 							else{
 								int j = 0;
@@ -432,7 +432,7 @@ namespace Forays{
 				B.Add("The scroll reveals the layout of this level. ");
 				Event hiddencheck = null;
 				foreach(Event e in Q.list){
-					if(!e.dead && e.type == EventType.CHECK_FOR_HIDDEN){
+					if(!e.dead && e.evtype == EventType.CHECK_FOR_HIDDEN){
 						hiddencheck = e;
 						break;
 					}
