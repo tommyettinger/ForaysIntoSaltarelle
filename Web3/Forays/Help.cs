@@ -177,6 +177,8 @@ namespace Forays{
 				}
 			}
 			Screen.Blank();
+            
+                                
 		}
 
         public static int[] GetHelpTopics()

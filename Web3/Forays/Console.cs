@@ -23,7 +23,7 @@ namespace Forays
         public const int Alt = 18;
         public const int Backspace = 8;
         public const int CAPS_LOCK = 20;
-        public const int COMMA = 188;
+        public const int Comma = 188;
         public const int COMMAND = 91;
         public const int COMMAND_LEFT = 91;
         public const int COMMAND_RIGHT = 93;
@@ -45,10 +45,10 @@ namespace Forays
         public const int NUMPAD_SUBTRACT = 109;
         public const int PageDown = 34;
         public const int PageUp = 33;
-        public const int PERIOD = 190;
+        public const int Period = 190;
         public const int RightArrow = 39;
         public const int SHIFT = 16;
-        public const int SPACE = 32;
+        public const int Space = 32;
         public const int Tab = 9;
         public const int UpArrow = 38;
         public const int WINDOWS = 91;

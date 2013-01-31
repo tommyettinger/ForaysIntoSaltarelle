@@ -81,6 +81,7 @@ namespace Forays{
 		}
 		public void Cursor(){
 			Game.Console.SetCursorPosition(col+Global.MAP_OFFSET_COLS,row+Global.MAP_OFFSET_ROWS);
+            M.Draw();
 		}
 		public void UpdateRadius(int from,int to){ UpdateRadius(from,to,false); }
 		public void UpdateRadius(int from,int to,bool change){

@@ -4802,7 +4802,7 @@
 									shift = true;
 								}
 								if (ch === '7' || ch === '8' || ch === '9' || ch === '4' || ch === '6' || ch === '1' || ch === '2' || ch === '3') {
-									$('#debug').replaceWith('<div id="debug"><p>DEBUG Key Down, Key is ' + command.key + ', Char is ' + String.fromCharCode(command.keyChar) + ', ch is ' + ch + '</p></div>');
+									//jQuery.Select("#debug").ReplaceWith("<div id=\"debug\"><p>DEBUG Key Down, Key is " + command.Key + ", Char is " + command.KeyChar.ToString() + ", ch is " + ch + "</p></div>");
 									dir = ch.charCodeAt(0) - 48;
 									//ascii 0-9 are 48-57
 									if (shift || alt || ctrl) {
@@ -6431,7 +6431,6 @@
 								if (ch !== 'x') {
 									this.attrs.set_item(81, 0);
 								}
-								$Forays_PhysicalObject.get_m().draw();
 								$tcs.setResult(false);
 								return;
 							}
@@ -20983,6 +20982,30 @@
 			case 13: {
 				return '\r';
 			}
+			case 190: {
+				if ((k.modifiers & $Forays_ConsoleModifiers.shift) === $Forays_ConsoleModifiers.shift) {
+					return '>';
+				}
+				else {
+					return '.';
+				}
+			}
+			case 188: {
+				if ((k.modifiers & $Forays_ConsoleModifiers.shift) === $Forays_ConsoleModifiers.shift) {
+					return '<';
+				}
+				else {
+					return ',';
+				}
+			}
+			case 47: {
+				if ((k.modifiers & $Forays_ConsoleModifiers.shift) === $Forays_ConsoleModifiers.shift) {
+					return '?';
+				}
+				else {
+					return '/';
+				}
+			}
 			default: {
 				if ((k.modifiers & $Forays_ConsoleModifiers.shift) === $Forays_ConsoleModifiers.shift) {
 					return String.fromCharCode(k.keyChar).toUpperCase();
@@ -31862,6 +31885,7 @@
 		},
 		cursor: function() {
 			$Forays_Game.console.setCursorPosition(this.get_col() + $Forays_Global.maP_OFFSET_COLS, this.get_row() + $Forays_Global.maP_OFFSET_ROWS);
+			$Forays_PhysicalObject.get_m().draw();
 		},
 		updateRadius: function(from, to) {
 			this.updateRadius$1(from, to, false);
@@ -37063,7 +37087,7 @@
 	$Forays_ConsoleKey.alt = 18;
 	$Forays_ConsoleKey.backspace = 8;
 	$Forays_ConsoleKey.capS_LOCK = 20;
-	$Forays_ConsoleKey.COMMA = 188;
+	$Forays_ConsoleKey.comma = 188;
 	$Forays_ConsoleKey.COMMAND = 91;
 	$Forays_ConsoleKey.commanD_LEFT = 91;
 	$Forays_ConsoleKey.commanD_RIGHT = 93;
@@ -37085,10 +37109,10 @@
 	$Forays_ConsoleKey.numpaD_SUBTRACT = 109;
 	$Forays_ConsoleKey.pageDown = 34;
 	$Forays_ConsoleKey.pageUp = 33;
-	$Forays_ConsoleKey.PERIOD = 190;
+	$Forays_ConsoleKey.period = 190;
 	$Forays_ConsoleKey.rightArrow = 39;
 	$Forays_ConsoleKey.SHIFT = 16;
-	$Forays_ConsoleKey.SPACE = 32;
+	$Forays_ConsoleKey.space = 32;
 	$Forays_ConsoleKey.tab = 9;
 	$Forays_ConsoleKey.upArrow = 38;
 	$Forays_ConsoleKey.WINDOWS = 91;
