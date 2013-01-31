@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace Forays{
 	public class Item : PhysicalObject{
-		public ConsumableType type{get;set;}
+		public ConsumableType itype{get;set;}
 		public int quantity{get;set;}
 		public bool ignored{get;set;} //whether autoexplore and autopickup should ignore this item
 		public bool do_not_stack{get;set;} //whether the item should be combined with other stacks. used for mimic items too.
@@ -48,7 +48,7 @@ namespace Forays{
 		}
 		public Item(){}
 		public Item(ConsumableType type_,string name_,string symbol_,Color color_){
-			type = type_;
+			itype = type_;
 			quantity = 1;
 			ignored = false;
 			do_not_stack = false;
@@ -78,7 +78,7 @@ namespace Forays{
 			light_radius = 0;
 		}
 		public Item(Item i,int r,int c){
-			type = i.type;
+			itype = i.itype;
 			quantity = 1;
 			ignored = false;
 			do_not_stack = false;
@@ -102,7 +102,7 @@ namespace Forays{
 					M.tile[r,c].inv = i;
 				}
 				else{
-					if(M.tile[r,c].inv.type == type){
+					if(M.tile[r,c].inv.itype == type){
 						M.tile[r,c].inv.quantity++;
 						return M.tile[r,c].inv;
 					}
@@ -117,7 +117,7 @@ namespace Forays{
 			Item i = null;
 			if(a.InventoryCount() < Global.MAX_INVENTORY_SIZE){
 				foreach(Item held in a.inv){
-					if(held.type == type){
+					if(held.itype == type){
 						held.quantity++;
 						return held;
 					}
@@ -219,7 +219,7 @@ namespace Forays{
 		}
 		public static ConsumableType RandomItem(){
 			List<ConsumableType> list = new List<ConsumableType>();
-            foreach (ConsumableType item in typeof(ConsumableType).GetValues())
+            foreach (ConsumableType item in GetConsumableTypes())
             {
 				if(Item.Rarity(item) == 1){
 					list.Add(item);
@@ -232,13 +232,18 @@ namespace Forays{
 			}
 			return list.Random();
 		}
+
+        public static int[] GetConsumableTypes()
+        {
+            return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+        }
         public async Task<bool> Use(Actor user) { return await Use(user, null); }
 		public async Task<bool> Use(Actor user,List<Tile> line){
 			bool used = true;
-			switch(type){
+			switch(itype){
 			case ConsumableType.HEALING:
 				await user.TakeDamage(DamageType.HEAL,DamageClass.NO_TYPE,50,null); //was Roll(8,6)
-				B.Add("A blue glow surrounds " + user.the_name + ". ",user);
+				B.Add("A blue glow surrounds " + user.the_name + ". ",new PhysicalObject[]{user});
 				break;
 			case ConsumableType.TOXIN_IMMUNITY:
 				if(!user.HasAttr(AttrType.IMMUNE_TOXINS)){
@@ -314,7 +319,7 @@ namespace Forays{
 						rr += user.row;
 						rc += user.col;
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
-							B.Add(user.You("step") + " through a rip in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
+							B.Add(user.You("step") + " through a rip in reality. ",new PhysicalObject[]{M.tile[user.row,user.col],M.tile[rr,rc]});
 							user.AnimateStorm(2,3,4,"*",Color.DarkMagenta);
                             await user.Move(rr, rc);
 							M.Draw();
@@ -330,7 +335,7 @@ namespace Forays{
 					int rc = Global.Roll(1,Global.COLS-2);
 					if(Math.Abs(rr-user.row) >= 10 || Math.Abs(rc-user.col) >= 10 || (Math.Abs(rr-user.row) >= 7 && Math.Abs(rc-user.col) >= 7)){
 						if(M.BoundsCheck(rr,rc) && M.tile[rr,rc].passable && M.actor[rr,rc] == null){
-							B.Add(user.You("jump") + " through a rift in reality. ",M.tile[user.row,user.col],M.tile[rr,rc]);
+                            B.Add(user.You("jump") + " through a rift in reality. ", new PhysicalObject[] { M.tile[user.row, user.col], M.tile[rr, rc] });
 							user.AnimateStorm(3,3,10,"*",Color.Green);
                             await user.Move(rr, rc);
 							M.Draw();
@@ -352,7 +357,7 @@ namespace Forays{
 					i = await user.GetDirection(true,false);
 					Tile t = user.TileInDirection(i);
 					if(t != null){
-						if(t.type == TileType.WALL){
+						if(t.ttype == TileType.WALL){
 							Game.Console.CursorVisible = false;
 							colorchar ch = new colorchar(Color.Cyan,"!");
 							switch(user.DirectionOf(t)){
@@ -438,10 +443,10 @@ namespace Forays{
 					}
 				}
 				foreach(Tile t in M.AllTiles()){
-					if(t.type != TileType.FLOOR){
+					if(t.ttype != TileType.FLOOR){
 						bool good = false;
 						foreach(Tile neighbor in t.TilesAtDistance(1)){
-							if(neighbor.type != TileType.WALL){
+							if(neighbor.ttype != TileType.WALL){
 								good = true;
 							}
 						}
@@ -453,11 +458,11 @@ namespace Forays{
 								}
 							}
 							if(t.IsTrapOrVent()){
-								t.name = Tile.Prototype(t.type).name;
-								t.a_name = Tile.Prototype(t.type).a_name;
-								t.the_name = Tile.Prototype(t.type).the_name;
-								t.symbol = Tile.Prototype(t.type).symbol;
-								t.color = Tile.Prototype(t.type).color;
+								t.name = Tile.Prototype(t.ttype).name;
+								t.a_name = Tile.Prototype(t.ttype).a_name;
+								t.the_name = Tile.Prototype(t.ttype).the_name;
+								t.symbol = Tile.Prototype(t.ttype).symbol;
+								t.color = Tile.Prototype(t.ttype).color;
 							}
 							if(t.Is(TileType.HIDDEN_DOOR)){
 								t.Toggle(null);

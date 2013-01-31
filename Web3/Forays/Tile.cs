@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace Forays{
 	public class Tile : PhysicalObject{
-		public TileType type{get;set;}
+		public TileType ttype{get;set;}
 		public bool passable{get;set;}
 		public bool opaque{get{ return internal_opaque || features.Contains(FeatureType.FOG); } set{ internal_opaque = value; }}
 		private bool internal_opaque; //no need to ever access this directly
@@ -24,7 +24,7 @@ namespace Forays{
 				internal_light_value = value;
 				if(value > 0 && features.Contains(FeatureType.FUNGUS)){
 					Q.Add(new Event(this,200,EventType.BLAST_FUNGUS));
-					B.Add("The blast fungus starts to smolder in the light. ",this);
+					B.Add("The blast fungus starts to smolder in the light. ",new PhysicalObject[]{this});
 					features.Remove(FeatureType.FUNGUS);
 					features.Add(FeatureType.FUNGUS_ACTIVE);
 				}
@@ -108,7 +108,7 @@ namespace Forays{
 		}
 		public Tile(){}
 		public Tile(Tile t,int r,int c){
-			type = t.type;
+			ttype = t.ttype;
 			name = t.name;
 			a_name = t.a_name;
 			the_name = t.the_name;
@@ -126,7 +126,7 @@ namespace Forays{
 			light_radius = t.light_radius;
 		}
 		public Tile(TileType type_,string name_,char symbol_,Color color_,bool passable_,bool opaque_,TileType? toggles_into_){
-			type = type_;
+			ttype = type_;
 			name = name_;
 			the_name = "the " + name;
 			switch(name[0]){
@@ -158,7 +158,7 @@ namespace Forays{
 			light_radius = 0;
 		}
 		public override string ToString(){
-			switch(type){
+			switch(ttype){
 			case TileType.FLOOR:
 				return ".";
 			case TileType.WALL:
@@ -211,7 +211,7 @@ namespace Forays{
 			}
 		}
 		public bool Is(TileType t){
-			if(type == t){
+			if(ttype == t){
 				return true;
 			}
 			return false;
@@ -341,7 +341,7 @@ namespace Forays{
 			}
 		}
 		public string Preposition(){
-			switch(type){
+			switch(ttype){
 			case TileType.FLOOR:
 			case TileType.STAIRS:
 				return " on ";
@@ -362,7 +362,7 @@ namespace Forays{
 				return true;
 			}
 			else{
-				if(inv.type == item.type && !inv.do_not_stack && !item.do_not_stack){
+				if(inv.itype == item.itype && !inv.do_not_stack && !item.do_not_stack){
 					inv.quantity += item.quantity;
 					return true;
 				}
@@ -395,7 +395,7 @@ namespace Forays{
 		public void Toggle(PhysicalObject toggler,TileType toggle_to){
 			bool lighting_update = false;
 			List<PhysicalObject> light_sources = new List<PhysicalObject>();
-			TileType original_type = type;
+			TileType original_type = ttype;
 			if(opaque != Prototype(toggle_to).opaque){
 				for(int i=row-1;i<=row+1;++i){
 					for(int j=col-1;j<=col+1;++j){
@@ -440,7 +440,7 @@ namespace Forays{
 				}
 			}
 			if(toggler != null && toggler != player){
-				if(type == TileType.DOOR_C && original_type == TileType.DOOR_O){
+				if(ttype == TileType.DOOR_C && original_type == TileType.DOOR_O){
 					if(player.CanSee(this)){
 						B.Add(toggler.TheVisible() + " closes the door. ");
 					}
@@ -450,7 +450,7 @@ namespace Forays{
 						}
 					}
 				}
-				if(type == TileType.DOOR_O && original_type == TileType.DOOR_C){
+				if(ttype == TileType.DOOR_O && original_type == TileType.DOOR_C){
 					if(player.CanSee(this)){
 						B.Add(toggler.TheVisible() + " opens the door. ");
 					}
@@ -473,7 +473,7 @@ namespace Forays{
 			the_name=Prototype(type_).the_name;
 			symbol=Prototype(type_).symbol;
 			color=Prototype(type_).color;
-			type=Prototype(type_).type;
+			ttype=Prototype(type_).ttype;
 			passable=Prototype(type_).passable;
 			opaque=Prototype(type_).opaque;
 			toggles_into=Prototype(type_).toggles_into;
@@ -625,9 +625,9 @@ namespace Forays{
 			}
 		}
 		public async Task TriggerTrap(){
-			if(actor().type == ActorType.FIRE_DRAKE){
+			if(actor().atype == ActorType.FIRE_DRAKE){
 				if(name == "floor"){
-					B.Add(actor().the_name + " smashes " + Tile.Prototype(type).a_name + ". ",this);
+					B.Add(actor().the_name + " smashes " + Tile.Prototype(ttype).a_name + ". ",this);
 				}
 				else{
 					B.Add(actor().the_name + " smashes " + the_name + ". ",this);
@@ -639,7 +639,7 @@ namespace Forays{
 				B.Add("*CLICK* ",this);
 				await B.PrintAll();
 			}
-			switch(type){
+			switch(ttype){
 			case TileType.GRENADE_TRAP:
 			{
 				if(player.CanSee(actor())){
@@ -689,9 +689,9 @@ namespace Forays{
 				for(int i=2;i<=8;i+=2){
 					Tile t = this;
 					bool good = true;
-					while(t.type != TileType.WALL){
+					while(t.ttype != TileType.WALL){
 						t = t.TileInDirection(i);
-						if(t.opaque && t.type != TileType.WALL){
+						if(t.opaque && t.ttype != TileType.WALL){
 							good = false;
 							break;
 						}
@@ -708,7 +708,7 @@ namespace Forays{
 					}
 					if(good && t.row > 0 && t.row < ROWS-1 && t.col > 0 && t.col < COLS-1){
 						foreach(Tile tt in t.TilesWithinDistance(1)){
-							if(tt.type != TileType.WALL){
+							if(tt.ttype != TileType.WALL){
 								good = false;
 							}
 						}
@@ -726,7 +726,7 @@ namespace Forays{
 				else{
 					int dir = dirs[Global.Roll(dirs.Count)-1];
 					Tile first = this;
-					while(first.type != TileType.WALL){
+					while(first.ttype != TileType.WALL){
 						first = first.TileInDirection(dir);
 					}
 					first.TileInDirection(dir).TurnToFloor();
@@ -841,8 +841,8 @@ namespace Forays{
 					}
 				}
 				foreach(Actor a in ActorsWithinDistance(12,true)){
-					if(a.type != ActorType.LARGE_BAT && a.type != ActorType.BLOOD_MOTH && a.type != ActorType.CARNIVOROUS_BRAMBLE
-					&& a.type != ActorType.LASHER_FUNGUS && a.type != ActorType.PHASE_SPIDER){
+					if(a.atype != ActorType.LARGE_BAT && a.atype != ActorType.BLOOD_MOTH && a.atype != ActorType.CARNIVOROUS_BRAMBLE
+					&& a.atype != ActorType.LASHER_FUNGUS && a.atype != ActorType.PHASE_SPIDER){
 						a.FindPath(this);
 					}
 				}
@@ -856,7 +856,7 @@ namespace Forays{
 				}
 				else{
 					if(!actor().HasAttr(AttrType.IMMUNE_TOXINS) && !actor().HasAttr(AttrType.UNDEAD) && !actor().HasAttr(Forays.AttrType.BLINDSIGHT)
-					&& actor().type != ActorType.BLOOD_MOTH && actor().type != ActorType.PHASE_SPIDER){
+					&& actor().atype != ActorType.BLOOD_MOTH && actor().atype != ActorType.PHASE_SPIDER){
 						if(player.CanSee(actor())){
 							B.Add(actor().the_name + " seems to have trouble seeing. ");
 						}
@@ -939,7 +939,7 @@ namespace Forays{
 			}
 		}
 		public void OpenChest(){
-			if(type == TileType.CHEST){
+			if(ttype == TileType.CHEST){
 				if(Global.Roll(1,10) == 10){
 					List<int> upgrades = new List<int>();
 					if(Global.Roll(1,2) == 2 && !player.weapons.Contains(WeaponType.FLAMEBRAND)){
@@ -1066,7 +1066,7 @@ namespace Forays{
 					}
 					Item i = Item.Create(Item.RandomItem(),player);
 					if(i != null){
-						B.Add("You find " + Item.Prototype(i.type).AName() + ". ");
+						B.Add("You find " + Item.Prototype(i.itype).AName() + ". ");
 						if(no_room){
 							B.Add("Your pack is too full to pick it up. ");
 						}
@@ -1136,7 +1136,7 @@ namespace Forays{
 			return false;
 		}
 		public bool IsTrap(){
-			switch(type){
+			switch(ttype){
 			case TileType.QUICKFIRE_TRAP:
 			case TileType.GRENADE_TRAP:
 			case TileType.LIGHT_TRAP:
@@ -1155,7 +1155,7 @@ namespace Forays{
 			}
 		}
 		public bool IsTrapOrVent(){
-			return IsTrap() || type == TileType.FIRE_GEYSER || type == TileType.FOG_VENT || type == TileType.POISON_GAS_VENT;
+			return IsTrap() || ttype == TileType.FIRE_GEYSER || ttype == TileType.FOG_VENT || ttype == TileType.POISON_GAS_VENT;
 		}
 		public bool IsKnownTrap(){
 			if(IsTrap() && name != "floor"){
@@ -1164,7 +1164,7 @@ namespace Forays{
 			return false;
 		}
 		public bool IsShrine(){
-			switch(type){
+			switch(ttype){
 			case TileType.COMBAT_SHRINE:
 			case TileType.DEFENSE_SHRINE:
 			case TileType.MAGIC_SHRINE:
@@ -1177,7 +1177,7 @@ namespace Forays{
 			}
 		}
 		public bool ConductsElectricity(){
-			if(IsShrine() || type == TileType.CHEST || type == TileType.RUINED_SHRINE){
+			if(IsShrine() || ttype == TileType.CHEST || ttype == TileType.RUINED_SHRINE){
 				return true;
 			}
 			return false;

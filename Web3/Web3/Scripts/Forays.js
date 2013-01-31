@@ -3125,7 +3125,7 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// Forays.Actor
 	var $Forays_Actor = function() {
-		this.$2$typeField = 0;
+		this.$2$atypeField = 0;
 		this.$2$maxhpField = 0;
 		this.$2$curhpField = 0;
 		this.$2$speedField = 0;
@@ -3148,7 +3148,7 @@
 		this.armors = [];
 		this.magic_items = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(7);
+		this.set_atype(7);
 		this.set_f(new Array(13));
 		this.set_inv([]);
 		this.weapons = [];
@@ -3160,11 +3160,11 @@
 		this.spells = new (Type.makeGenericType($Forays_Dict$2, [$Forays_SpellType, ss.Int32]))();
 	};
 	$Forays_Actor.prototype = {
-		get_type: function() {
-			return this.$2$typeField;
+		get_atype: function() {
+			return this.$2$atypeField;
 		},
-		set_type: function(value) {
-			this.$2$typeField = value;
+		set_atype: function(value) {
+			this.$2$atypeField = value;
 		},
 		get_maxhp: function() {
 			return this.$2$maxhpField;
@@ -3340,7 +3340,7 @@
 										if (torch) {
 											this.updateRadius(0, this.lightRadius());
 										}
-										if (trigger_traps && this.tile().isTrap() && !this.hasAttr(10) && !this.hasAttr(9) && (this.get_type() === 0 || ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()))) {
+										if (trigger_traps && this.tile().isTrap() && !this.hasAttr(10) && !this.hasAttr(9) && (this.get_atype() === 0 || ss.referenceEquals(this.get_target(), $Forays_Actor.get_player()))) {
 											//prevents wandering monsters from triggering traps
 											$t3 = this.tile().triggerTrap();
 											$state = 1;
@@ -3453,7 +3453,7 @@
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + value);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctor8(this, duration, attr, value));
 		},
-		gainAttr$3: function(attr, duration, msg, objs) {
+		gainAttr$4: function(attr, duration, msg, objs) {
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + 1);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, duration, attr, msg, objs));
 		},
@@ -3461,9 +3461,13 @@
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + 1);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, duration, attr, msg));
 		},
-		gainAttr$4: function(attr, duration, value, msg, objs) {
+		gainAttr$5: function(attr, duration, value, msg, objs) {
 			this.attrs.set_item(attr, this.attrs.get_item(attr) + value);
 			$Forays_Actor.get_q().add(new $Forays_Event.$ctore(this, duration, attr, value, msg, objs));
+		},
+		gainAttr$3: function(attr, duration, value, msg) {
+			this.attrs.set_item(attr, this.attrs.get_item(attr) + value);
+			$Forays_Actor.get_q().add(new $Forays_Event.$ctorb(this, duration, attr, value, msg));
 		},
 		gainAttrRefreshDuration: function(attr, duration) {
 			$Forays_Actor.get_q().killEvents(this, attr);
@@ -3506,7 +3510,7 @@
 			}
 			var total = this.totalSkill(4);
 			if (!$Forays_PhysicalObject.get_m().tile.get_item(r, c).isLit()) {
-				if (this.get_type() === 0 || !$Forays_Actor.get_player().hasAttr(85)) {
+				if (this.get_atype() === 0 || !$Forays_Actor.get_player().hasAttr(85)) {
 					//+2 stealth while in darkness unless shadowsight is in effect
 					total += 2;
 				}
@@ -3543,11 +3547,11 @@
 			return result;
 		},
 		woundStatus: function() {
-			if (this.get_type() === 53) {
+			if (this.get_atype() === 53) {
 				if (ss.isValue(this.group) && this.group.length > 0) {
 					for (var $t1 = 0; $t1 < this.group.length; $t1++) {
 						var a = this.group[$t1];
-						if (a.get_type() === 12) {
+						if (a.get_atype() === 12) {
 							return a.woundStatus();
 						}
 					}
@@ -3592,7 +3596,7 @@
 			return result;
 		},
 		canWander: function() {
-			switch (this.get_type()) {
+			switch (this.get_atype()) {
 				case 4:
 				case 7:
 				case 6:
@@ -3615,7 +3619,7 @@
 			}
 		},
 		alwaysWanders: function() {
-			switch (this.get_type()) {
+			switch (this.get_atype()) {
 				case 17:
 				case 28:
 				case 36:
@@ -3660,7 +3664,7 @@
 								skip_input = false;
 								if (this.hasAttr(44)) {
 									if ($Forays_PhysicalObject.get_m().get_wiz_lite() || $Forays_Actor.get_player().hasAttr(16) && this.distanceFrom($Forays_Actor.get_player()) <= $Forays_Actor.get_player().get_light_radius() && $Forays_Actor.get_player().hasBresenhamLine(this.get_row(), this.get_col())) {
-										$Forays_Actor.get_b().add(this.you('turn') + ' to dust! ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('turn') + ' to dust! ', this);
 										$t1 = this.takeDamage$1(0, 2, 9999, null);
 										$state = 2;
 										$t1.continueWith($sm);
@@ -3680,7 +3684,7 @@
 							}
 							case 1: {
 								$state = -1;
-								if (this.get_type() === 54) {
+								if (this.get_atype() === 54) {
 									this.attrs.set_item(69, this.attrs.get_item(69) - 1);
 									if (this.attrs.get_item(69) < 0) {
 										$t2 = this.takeDamage$1(0, 2, 9999, null);
@@ -3726,7 +3730,7 @@
 											break;
 										}
 									}
-									$Forays_Actor.get_b().add('You fall. ', []);
+									$Forays_Actor.get_b().add('You fall. ');
 									$t7 = $Forays_Actor.get_b().printAll();
 									$state = 6;
 									$t7.continueWith($sm);
@@ -3747,9 +3751,9 @@
 							}
 							case 5: {
 								$state = -1;
-								if (this.get_type() === 2 && this.tile().is$1(35)) {
-									if ($Forays_Actor.get_player().tile().get_type() === 35) {
-										$Forays_Actor.get_b().add('You fall. ', []);
+								if (this.get_atype() === 2 && this.tile().is$1(35)) {
+									if ($Forays_Actor.get_player().tile().get_ttype() === 35) {
+										$Forays_Actor.get_b().add('You fall. ');
 										$t9 = $Forays_Actor.get_b().printAll();
 										$state = 9;
 										$t9.continueWith($sm);
@@ -3757,10 +3761,10 @@
 									}
 									else {
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' drops to the next level. ', []);
+											$Forays_Actor.get_b().add(this.get_the_name() + ' drops to the next level. ');
 										}
 										else {
-											$Forays_Actor.get_b().add('You hear a crash as ' + this.get_the_name() + ' drops to the next level. ', []);
+											$Forays_Actor.get_b().add('You hear a crash as ' + this.get_the_name() + ' drops to the next level. ');
 										}
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctorf(null, null, ($Forays_Global.roll(20) + 50) * 100, 21, 109, this.get_curhp(), ''));
 										this.attrs.set_item(107, 0);
@@ -3830,7 +3834,7 @@
 									}
 								}
 								else if (this.hasAttr(36) && !this.hasAttr(37) && $Forays_Global.oneIn(4) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
-									$Forays_Actor.get_b().add(this.you('fall') + ' asleep. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('fall') + ' asleep. ', this);
 									duration = 4 + $Forays_Global.roll(2);
 									this.attrs.set_item(37, this.durationOfMagicalEffect(duration));
 								}
@@ -3865,8 +3869,8 @@
 								rr = $Forays_Global.roll$1(1, 20);
 								rc = $Forays_Global.roll$1(1, 64);
 								if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
-									if (this.get_type() === 0) {
-										$Forays_Actor.get_b().add('You are suddenly somewhere else. ', []);
+									if (this.get_atype() === 0) {
+										$Forays_Actor.get_b().add('You are suddenly somewhere else. ');
 										this.interrupt();
 										$t14 = this.move(rr, rc);
 										$state = 17;
@@ -3879,7 +3883,7 @@
 											seen = true;
 										}
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' suddenly disappears. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' suddenly disappears. ', this);
 										}
 										$t15 = this.move(rr, rc);
 										$state = 18;
@@ -3896,21 +3900,21 @@
 									this.attrs.set_item(37, this.attrs.get_item(37) - 1);
 									$Forays_Global.flushInput();
 									if (!this.hasAttr(37)) {
-										$Forays_Actor.get_b().add(this.you('wake') + ' up. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('wake') + ' up. ', this);
 									}
-									if (this.get_type() !== 0) {
+									if (this.get_atype() !== 0) {
 										this.q1();
 										skip_input = true;
 									}
 								}
 								if (this.hasAttr(28)) {
 									this.attrs.set_item(28, this.attrs.get_item(28) - 1);
-									if (this.get_type() === 0) {
+									if (this.get_atype() === 0) {
 										$Forays_Actor.get_b().addDependingOnLastPartialMessage('You can\'t move! ');
 									}
 									else {
 										//handled differently for the player: since the map still needs to be drawn,
-										$Forays_Actor.get_b().add(this.get_the_name() + ' can\'t move! ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' can\'t move! ', this);
 										this.q1();
 										// this is handled in InputHuman().
 										skip_input = true;
@@ -3923,17 +3927,17 @@
 									skip_input = true;
 								}
 								if (this.hasAttr(30)) {
-									if (this.get_type() !== 0) {
-										damage = $Forays_Global.roll$1($Forays_AttackList.attack(this.get_type(), 0).damage.dice, 6) + this.totalSkill(0);
+									if (this.get_atype() !== 0) {
+										damage = $Forays_Global.roll$1($Forays_AttackList.attack(this.get_atype(), 0).damage.dice, 6) + this.totalSkill(0);
 										this.attrs.set_item(30, this.attrs.get_item(30) - damage);
 										if (this.attrs.get_item(30) < 0) {
 											this.attrs.set_item(30, 0);
 										}
 										if (this.hasAttr(30)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' attempts to break free. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' attempts to break free. ', this);
 										}
 										else {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' breaks free! ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' breaks free! ', this);
 										}
 										this.q1();
 										skip_input = true;
@@ -3945,12 +3949,12 @@
 									$t16 = $Forays_PhysicalObject.get_m().allActors();
 									for ($t17 = 0; $t17 < $t16.length; $t17++) {
 										a2 = $t16[$t17];
-										if (a2.get_type() === 22 && this.distanceFrom(a2) < dist && this.hasLOS$1(a2.get_row(), a2.get_col())) {
+										if (a2.get_atype() === 22 && this.distanceFrom(a2) < dist && this.hasLOS$1(a2.get_row(), a2.get_col())) {
 											banshee = a2;
 											dist = this.distanceFrom(a2);
 										}
 									}
-									if (this.get_type() === 0) {
+									if (this.get_atype() === 0) {
 										if (ss.isValue(banshee)) {
 											$Forays_Actor.get_b().addDependingOnLastPartialMessage('You flee. ');
 											$t18 = this.aI_Step$1(banshee, true);
@@ -3967,14 +3971,14 @@
 									else {
 										//same story
 										if (ss.isValue(banshee)) {
-											$Forays_Actor.get_b().add(this.you('flee') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('flee') + '. ', this);
 											$t19 = this.aI_Step$1(banshee, true);
 											$state = 22;
 											$t19.continueWith($sm);
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youFeel() + ' unsettled. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youFeel() + ' unsettled. ', this);
 											$state = 21;
 											continue $sm1;
 										}
@@ -3994,10 +3998,10 @@
 								$t15.getResult();
 								if ($Forays_Actor.get_player().canSee(this.tile())) {
 									if (seen) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' reappears. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' reappears. ', this);
 									}
 									else {
-										$Forays_Actor.get_b().add(this.get_a_name() + ' suddenly appears! ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_a_name() + ' suddenly appears! ', this);
 									}
 								}
 								$state = 16;
@@ -4046,7 +4050,7 @@
 										if (this.get_curhp() > this.get_maxhp()) {
 											this.set_curhp(this.get_maxhp());
 										}
-										$Forays_Actor.get_b().add(this.you('regenerate') + '. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('regenerate') + '. ', this);
 									}
 									else {
 										hplimit = 10;
@@ -4089,11 +4093,11 @@
 							case 23: {
 								$state = -1;
 								if (this.hasAttr(31) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
-									if (this.get_type() === 52) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' burns slowly. ', [this]);
+									if (this.get_atype() === 52) {
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' burns slowly. ', this);
 									}
 									else {
-										$Forays_Actor.get_b().add(this.youAre() + ' on fire! ', [this]);
+										$Forays_Actor.get_b().add$1(this.youAre() + ' on fire! ', this);
 									}
 									$t21 = this.takeDamage$2(1, 0, $Forays_Global.roll$1(this.attrs.get_item(31), 6), null, '*burned to death');
 									$state = 26;
@@ -4114,11 +4118,11 @@
 							case 25: {
 								$state = -1;
 								if (this.hasAttr(43) && this.tile().isLit() && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
-									if (this.get_type() === 0) {
-										$Forays_Actor.get_b().add('The light burns you! ', []);
+									if (this.get_atype() === 0) {
+										$Forays_Actor.get_b().add('The light burns you! ');
 									}
 									else {
-										$Forays_Actor.get_b().add('The light burns ' + this.get_the_name() + '. ', [this]);
+										$Forays_Actor.get_b().add$1('The light burns ' + this.get_the_name() + '. ', this);
 									}
 									$t22 = this.takeDamage$2(0, 2, $Forays_Global.roll(6), null, '*shriveled in the light');
 									$state = 28;
@@ -4141,15 +4145,15 @@
 								if (this.hasAttr(94) && ss.referenceEquals(this, $Forays_Actor.get_player()) && this.time_of_last_action < $Forays_Actor.get_q().get_turn()) {
 									if (this.attrs.get_item(94) === 2) {
 										if (this.attrs.get_item(92) >= this.get_curhp() && !this.hasAttr(67)) {
-											$Forays_Actor.get_b().add('You can\'t resist the poison any longer. ', []);
-											$Forays_Actor.get_b().add('You lose consciousness. ', []);
+											$Forays_Actor.get_b().add('You can\'t resist the poison any longer. ');
+											$Forays_Actor.get_b().add('You lose consciousness. ');
 											$t23 = this.takeDamage$2(0, 2, this.get_curhp(), null, '*eaten alive by a pack of compys');
 											$state = 31;
 											$t23.continueWith($sm);
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add('You manage to stay awake! ', []);
+											$Forays_Actor.get_b().add('You manage to stay awake! ');
 											this.attrs.set_item(94, 0);
 											$state = 30;
 											continue $sm1;
@@ -4181,7 +4185,7 @@
 							case 29: {
 								$state = -1;
 								if (!skip_input) {
-									if (this.get_type() === 0) {
+									if (this.get_atype() === 0) {
 										$t24 = this.inputHuman();
 										$state = 33;
 										$t24.continueWith($sm);
@@ -4223,10 +4227,10 @@
 											if ($t28 - $t27 * 5 < $Forays_Global.roll$1(1, 100)) {
 												this.attrs.set_item(77, -1);
 												if (this.distanceFrom($Forays_Actor.get_player()) > 3) {
-													$Forays_Actor.get_b().add('You notice ' + this.get_a_name() + '. ', []);
+													$Forays_Actor.get_b().add('You notice ' + this.get_a_name() + '. ');
 												}
 												else {
-													$Forays_Actor.get_b().add('You notice ' + this.get_a_name() + ' nearby. ', []);
+													$Forays_Actor.get_b().add('You notice ' + this.get_a_name() + ' nearby. ');
 												}
 											}
 										}
@@ -4248,7 +4252,7 @@
 										}
 									}
 								}
-								if (this.hasAttr(31) && this.attrs.get_item(31) < 5 && this.time_of_last_action < $Forays_Actor.get_q().get_turn() && this.get_type() !== 52) {
+								if (this.hasAttr(31) && this.attrs.get_item(31) < 5 && this.time_of_last_action < $Forays_Actor.get_q().get_turn() && this.get_atype() !== 52) {
 									if ($Forays_Global.coinFlip()) {
 										if (this.attrs.get_item(31) >= this.get_light_radius()) {
 											this.updateRadius(this.attrs.get_item(31), this.attrs.get_item(31) + 1);
@@ -4331,7 +4335,7 @@
 								if (this.hasAttr(81)) {
 									if (this.path.length === 0) {
 										if (!this.findAutoexplorePath()) {
-											$Forays_Actor.get_b().add('You don\'t see a path for further exploration. ', []);
+											$Forays_Actor.get_b().add('You don\'t see a path for further exploration. ');
 										}
 									}
 								}
@@ -4396,10 +4400,10 @@
 										this.attrs.set_item(30, 0);
 									}
 									if (this.hasAttr(30)) {
-										$Forays_Actor.get_b().add('You attempt to break free. ', []);
+										$Forays_Actor.get_b().add('You attempt to break free. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('You break free! ', []);
+										$Forays_Actor.get_b().add('You break free! ');
 									}
 									this.q1();
 									return true;
@@ -4459,12 +4463,12 @@
 								i.set_row(-1);
 								i.set_col(-1);
 								this.tile().set_inv(null);
-								$Forays_Actor.get_b().add('You pick up ' + i.theName() + '. ', []);
+								$Forays_Actor.get_b().add('You pick up ' + i.theName() + '. ');
 								added = false;
 								$t9 = this.get_inv();
 								for ($t10 = 0; $t10 < $t9.length; $t10++) {
 									item = $t9[$t10];
-									if (item.get_type() === i.get_type() && !item.get_do_not_stack() && !i.get_do_not_stack()) {
+									if (item.get_itype() === i.get_itype() && !item.get_do_not_stack() && !i.get_do_not_stack()) {
 										item.set_quantity(item.get_quantity() + i.get_quantity());
 										added = true;
 										break;
@@ -4583,7 +4587,7 @@
 											for ($t19 = 0; $t19 < $t18.length; $t19++) {
 												t2 = $t18[$t19];
 												//if(t2 != opposite && t2.name == "floor"){
-												if (!ss.referenceEquals(t2, opposite) && (t2.get_passable() || t2.get_type() === 3)) {
+												if (!ss.referenceEquals(t2, opposite) && (t2.get_passable() || t2.get_ttype() === 3)) {
 													num_floors++;
 													floor_dir = this.directionOf(t2);
 												}
@@ -4650,7 +4654,7 @@
 										this.set_curhp(this.get_curhp() + ss.Int32.div(this.get_maxhp() - this.get_curhp(), 2));
 										//recover half of your missing health
 										this.resetSpells();
-										$Forays_Actor.get_b().add('You rest...you feel great! ', []);
+										$Forays_Actor.get_b().add('You rest...you feel great! ');
 										$t22 = $Forays_Actor.get_b().print(false);
 										$state = 19;
 										$t22.continueWith($sm);
@@ -4678,7 +4682,7 @@
 										}
 										else {
 											this.attrs.set_item(78, this.attrs.get_item(78) + 1);
-											$Forays_Actor.get_b().add('You rest... ', []);
+											$Forays_Actor.get_b().add('You rest... ');
 											this.q1();
 											$tcs.setResult(true);
 											return;
@@ -4706,7 +4710,7 @@
 								$state = -1;
 								if (monsters_visible2) {
 									this.attrs.set_item(78, 0);
-									$Forays_Actor.get_b().add('You rest...you are interrupted! ', []);
+									$Forays_Actor.get_b().add('You rest...you are interrupted! ');
 									$t26 = $Forays_Actor.get_b().print(false);
 									$state = 22;
 									$t26.continueWith($sm);
@@ -4714,7 +4718,7 @@
 								}
 								else {
 									this.attrs.set_item(78, 0);
-									$Forays_Actor.get_b().add('You rest...you stop resting. ', []);
+									$Forays_Actor.get_b().add('You rest...you stop resting. ');
 									$t27 = $Forays_Actor.get_b().print(false);
 									$state = 23;
 									$t27.continueWith($sm);
@@ -4826,12 +4830,12 @@
 									if (this.hasFeat(6) && this.enemiesAdjacent() > 0) {
 										if (!this.hasAttr(32) && !this.hasAttr(31)) {
 											this.attrs.set_item(82, this.attrs.get_item(82) + 1);
-											$Forays_Actor.get_b().add('You ready yourself. ', []);
+											$Forays_Actor.get_b().add('You ready yourself. ');
 										}
 									}
 									if (this.hasAttr(32)) {
 										this.attrs.set_item(32, 0);
-										$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+										$Forays_Actor.get_b().add('You stop the flames from spreading. ');
 									}
 									else if (this.hasAttr(31)) {
 										update = false;
@@ -4852,15 +4856,15 @@
 											this.updateRadius(oldradius, this.lightRadius());
 										}
 										if (this.hasAttr(31)) {
-											$Forays_Actor.get_b().add('You put out some of the fire. ', []);
+											$Forays_Actor.get_b().add('You put out some of the fire. ');
 											//better message?
 										}
 										else {
-											$Forays_Actor.get_b().add('You put out the fire. ', []);
+											$Forays_Actor.get_b().add('You put out the fire. ');
 										}
 									}
 									if (ss.isValue($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv())) {
-										$Forays_Actor.get_b().add('You see ' + $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().aName() + '. ', []);
+										$Forays_Actor.get_b().add('You see ' + $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_inv().aName() + '. ');
 									}
 									this.QS();
 									$state = 29;
@@ -4878,7 +4882,7 @@
 									$t39 = this.tilesAtDistance(1);
 									for ($t40 = 0; $t40 < $t39.length; $t40++) {
 										t3 = $t39[$t40];
-										if (t3.get_type() === 3 || t3.get_type() === 2 || t3.get_type() === 28 || this.hasFeat(17) && t3.isKnownTrap()) {
+										if (t3.get_ttype() === 3 || t3.get_ttype() === 2 || t3.get_ttype() === 28 || this.hasFeat(17) && t3.isKnownTrap()) {
 											if (ss.isNullOrUndefined(t3.actor()) && (ss.isNullOrUndefined(t3.get_inv()) || t3.isTrap())) {
 												dir2 = this.directionOf(t3);
 												++total;
@@ -4887,7 +4891,7 @@
 									}
 									if (total === 1) {
 										t4 = this.tileInDirection(dir2);
-										if (t4.get_type() === 3 || t4.get_type() === 2 || t4.get_type() === 28) {
+										if (t4.get_ttype() === 3 || t4.get_ttype() === 2 || t4.get_ttype() === 28) {
 											$t41 = this.stunnedThisTurn();
 											$state = 35;
 											$t41.continueWith($sm);
@@ -4895,7 +4899,7 @@
 										}
 										else if (t4.isTrap()) {
 											if (this.grabPreventsMovement(t4)) {
-												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ', []);
+												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ');
 												this.q0();
 												$tcs.setResult(true);
 												return;
@@ -4925,10 +4929,10 @@
 									if ($Forays_Weapon.baseWeapon(this.weapons[0]) === 4 || this.hasFeat(0)) {
 										if (this.actorsAtDistance(1).length > 0) {
 											if (this.actorsAtDistance(1).length === 1) {
-												$Forays_Actor.get_b().add('You can\'t fire with an enemy so close. ', []);
+												$Forays_Actor.get_b().add('You can\'t fire with an enemy so close. ');
 											}
 											else {
-												$Forays_Actor.get_b().add('You can\'t fire with enemies so close. ', []);
+												$Forays_Actor.get_b().add('You can\'t fire with enemies so close. ');
 											}
 											this.q0();
 											$state = 38;
@@ -4942,7 +4946,7 @@
 										}
 									}
 									else {
-										$Forays_Actor.get_b().add('You can\'t fire arrows without your bow equipped. ', []);
+										$Forays_Actor.get_b().add('You can\'t fire arrows without your bow equipped. ');
 										this.q0();
 										$state = 38;
 										continue $sm1;
@@ -5052,10 +5056,10 @@
 										if (a7.hasAttr(75) && a7.hasLOE(this)) {
 											if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 												if (this.canSee(a7)) {
-													$Forays_Actor.get_b().add(a7.your() + ' presence prevents you from casting! ', []);
+													$Forays_Actor.get_b().add(a7.your() + ' presence prevents you from casting! ');
 												}
 												else {
-													$Forays_Actor.get_b().add('Something prevents you from casting! ', []);
+													$Forays_Actor.get_b().add('Something prevents you from casting! ');
 												}
 											}
 											this.q0();
@@ -5099,7 +5103,7 @@
 										return;
 									}
 									else {
-										$Forays_Actor.get_b().add('You don\'t know any spells. ', []);
+										$Forays_Actor.get_b().add('You don\'t know any spells. ');
 										this.q0();
 										$state = 41;
 										continue $sm1;
@@ -5129,28 +5133,28 @@
 												return;
 											}
 											else {
-												$Forays_Actor.get_b().add('You don\'t need to rest right now. ', []);
+												$Forays_Actor.get_b().add('You don\'t need to rest right now. ');
 												this.q0();
 												$state = 43;
 												continue $sm1;
 											}
 										}
 										else {
-											$Forays_Actor.get_b().add('You can\'t rest while there are enemies around! ', []);
+											$Forays_Actor.get_b().add('You can\'t rest while there are enemies around! ');
 											this.q0();
 											$state = 43;
 											continue $sm1;
 										}
 									}
 									else {
-										$Forays_Actor.get_b().add('You find it impossible to rest again on this dungeon level. ', []);
+										$Forays_Actor.get_b().add('You find it impossible to rest again on this dungeon level. ');
 										this.q0();
 										$state = 43;
 										continue $sm1;
 									}
 								}
 								else if (ch === '>') {
-									if ($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_type() === 4) {
+									if ($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_ttype() === 4) {
 										$t67 = this.stunnedThisTurn();
 										$state = 46;
 										$t67.continueWith($sm);
@@ -5161,7 +5165,7 @@
 										$t72 = $Forays_PhysicalObject.get_m().allTiles();
 										for ($t73 = 0; $t73 < $t72.length; $t73++) {
 											t6 = $t72[$t73];
-											if (t6.get_type() === 4 && t6.get_seen()) {
+											if (t6.get_ttype() === 4 && t6.get_seen()) {
 												stairs = t6;
 												break;
 											}
@@ -5174,7 +5178,7 @@
 											continue $sm1;
 										}
 										else {
-											$Forays_Actor.get_b().add('You don\'t see any stairs here. ', []);
+											$Forays_Actor.get_b().add('You don\'t see any stairs here. ');
 											this.q0();
 											$state = 45;
 											continue $sm1;
@@ -5189,7 +5193,7 @@
 								}
 								else if (ch === 'g' || ch === ';') {
 									if (ss.isNullOrUndefined(this.tile().get_inv())) {
-										if (this.tile().get_type() === 5) {
+										if (this.tile().get_ttype() === 5) {
 											$t75 = this.stunnedThisTurn();
 											$state = 49;
 											$t75.continueWith($sm);
@@ -5202,7 +5206,7 @@
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add('There\'s nothing here to pick up. ', []);
+											$Forays_Actor.get_b().add('There\'s nothing here to pick up. ');
 											this.q0();
 											$state = 48;
 											continue $sm1;
@@ -5217,7 +5221,7 @@
 								}
 								else if (ch === 'd') {
 									if (this.get_inv().length === 0) {
-										$Forays_Actor.get_b().add('You have nothing to drop. ', []);
+										$Forays_Actor.get_b().add('You have nothing to drop. ');
 										this.q0();
 										$state = 52;
 										continue $sm1;
@@ -5250,7 +5254,7 @@
 								}
 								else if (ch === 'i') {
 									if (this.get_inv().length === 0) {
-										$Forays_Actor.get_b().add('You have nothing in your pack. ', []);
+										$Forays_Actor.get_b().add('You have nothing in your pack. ');
 										this.q0();
 										$state = 54;
 										continue $sm1;
@@ -5284,7 +5288,7 @@
 								}
 								else if (ch === 'a') {
 									if (this.get_inv().length === 0) {
-										$Forays_Actor.get_b().add('You have nothing in your pack. ', []);
+										$Forays_Actor.get_b().add('You have nothing in your pack. ');
 										this.q0();
 										$state = 56;
 										continue $sm1;
@@ -5324,7 +5328,7 @@
 								}
 								else if (ch === '!' || ch === '@' || ch === '#' || ch === '$' || ch === '%') {
 									if (this.hasAttr(39)) {
-										$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ', []);
+										$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ');
 										this.q0();
 										$state = 59;
 										continue $sm1;
@@ -5512,7 +5516,7 @@
 									continue $sm1;
 								}
 								else {
-									$Forays_Actor.get_b().add('Press \'?\' for help. ', []);
+									$Forays_Actor.get_b().add('Press \'?\' for help. ');
 									this.q0();
 									$state = 29;
 									continue $sm1;
@@ -5585,20 +5589,20 @@
 									return true;
 								}
 								if ($Forays_Global.roll(5) <= 4) {
-									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '. ', []);
+									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t4.get_ttype()).get_the_name() + '. ');
 									t4.toggle(this);
 									this.q1();
 									$state = 34;
 									continue $sm1;
 								}
 								else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
-									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '! ', []);
+									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t4.get_ttype()).get_the_name() + '! ');
 									this.q1();
 									$state = 34;
 									continue $sm1;
 								}
 								else {
-									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t4.get_type()).get_the_name() + '! ', []);
+									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t4.get_ttype()).get_the_name() + '! ');
 									$t43 = this.move(t4.get_row(), t4.get_col());
 									$state = 75;
 									$t43.continueWith($sm);
@@ -5613,7 +5617,7 @@
 									if (t5.isKnownTrap()) {
 										if (this.hasFeat(17)) {
 											if (this.grabPreventsMovement(t5)) {
-												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ', []);
+												$Forays_Actor.get_b().add('You can\'t currently reach that trap. ');
 												this.q0();
 												return true;
 											}
@@ -5623,14 +5627,14 @@
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add('You don\'t know how to disable that trap. ', []);
+											$Forays_Actor.get_b().add('You don\'t know how to disable that trap. ');
 											this.q0();
 											$tcs.setResult(true);
 											return;
 										}
 									}
 									else {
-										$t147 = t5.get_type();
+										$t147 = t5.get_ttype();
 										if ($t147 === 3 || $t147 === 2 || $t147 === 28) {
 											$t47 = this.stunnedThisTurn();
 											$state = 77;
@@ -5638,13 +5642,13 @@
 											return;
 										}
 										else if ($t147 === 5) {
-											$Forays_Actor.get_b().add('Stand on the chest and press \'g\' to retrieve its contents. ', []);
+											$Forays_Actor.get_b().add('Stand on the chest and press \'g\' to retrieve its contents. ');
 											this.q0();
 											$state = 34;
 											continue $sm1;
 										}
 										else if ($t147 === 4) {
-											$Forays_Actor.get_b().add('Stand on the stairs and press \'>\' to descend. ', []);
+											$Forays_Actor.get_b().add('Stand on the stairs and press \'>\' to descend. ');
 											this.q0();
 											$state = 34;
 											continue $sm1;
@@ -5725,7 +5729,7 @@
 									continue $sm1;
 								}
 								this.attrs.set_item(78, 1);
-								$Forays_Actor.get_b().add('You rest... ', []);
+								$Forays_Actor.get_b().add('You rest... ');
 								this.q1();
 								$state = 43;
 								continue $sm1;
@@ -5786,7 +5790,7 @@
 									$state = 29;
 									continue $sm1;
 								}
-								$t148 = this.tile().get_type();
+								$t148 = this.tile().get_ttype();
 								if ($t148 === 21) {
 									this.increaseSkill(0);
 									$state = 86;
@@ -5869,12 +5873,12 @@
 										}
 										i4.set_row(-1);
 										i4.set_col(-1);
-										$Forays_Actor.get_b().add('You pick up ' + i4.theName() + '. ', []);
+										$Forays_Actor.get_b().add('You pick up ' + i4.theName() + '. ');
 										added1 = false;
 										$t84 = this.get_inv();
 										for ($t85 = 0; $t85 < $t84.length; $t85++) {
 											item1 = $t84[$t85];
-											if (item1.get_type() === i4.get_type() && !item1.get_do_not_stack() && !i4.get_do_not_stack()) {
+											if (item1.get_itype() === i4.get_itype() && !item1.get_do_not_stack() && !i4.get_do_not_stack()) {
 												item1.set_quantity(item1.get_quantity() + i4.get_quantity());
 												added1 = true;
 												break;
@@ -5891,12 +5895,12 @@
 										newitem = new $Forays_Item.$ctor1(i5, this.get_row(), this.get_col());
 										newitem.set_quantity(space_left);
 										i5.set_quantity(i5.get_quantity() - space_left);
-										$Forays_Actor.get_b().add('You pick up ' + newitem.theName() + ', but have no room for the other ' + i5.get_quantity().toString() + '. ', []);
+										$Forays_Actor.get_b().add('You pick up ' + newitem.theName() + ', but have no room for the other ' + i5.get_quantity().toString() + '. ');
 										added2 = false;
 										$t86 = this.get_inv();
 										for ($t87 = 0; $t87 < $t86.length; $t87++) {
 											item2 = $t86[$t87];
-											if (item2.get_type() === newitem.get_type() && !item2.get_do_not_stack() && !newitem.get_do_not_stack()) {
+											if (item2.get_itype() === newitem.get_itype() && !item2.get_do_not_stack() && !newitem.get_do_not_stack()) {
 												item2.set_quantity(item2.get_quantity() + newitem.get_quantity());
 												added2 = true;
 												break;
@@ -5909,7 +5913,7 @@
 									}
 								}
 								else {
-									$Forays_Actor.get_b().add('Your pack is too full to pick up ' + this.tile().get_inv().theName() + '. ', []);
+									$Forays_Actor.get_b().add('Your pack is too full to pick up ' + this.tile().get_inv().theName() + '. ');
 									this.q0();
 								}
 								$state = 48;
@@ -5982,7 +5986,7 @@
 								}
 								if (!weapon_changed && !armor_changed) {
 									if (cursed_weapon) {
-										$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ', []);
+										$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ');
 									}
 									this.q0();
 									$state = 95;
@@ -6011,11 +6015,11 @@
 									}
 								}
 								if (this.hasFeat(0)) {
-									$Forays_Actor.get_b().add('You quickly ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ', []);
+									$Forays_Actor.get_b().add('You quickly ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ');
 									this.q0();
 								}
 								else {
-									$Forays_Actor.get_b().add('You ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ', []);
+									$Forays_Actor.get_b().add('You ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ');
 									this.q1();
 								}
 								this.updateOnEquip$2(old_weapon1, this.weapons[0]);
@@ -6041,7 +6045,7 @@
 										done6 = true;
 									}
 								}
-								$Forays_Actor.get_b().add('You wear your ' + $Forays_Armor.name$1(this.armors[0]) + '. ', []);
+								$Forays_Actor.get_b().add('You wear your ' + $Forays_Armor.name$1(this.armors[0]) + '. ');
 								this.q1();
 								this.updateOnEquip(old_armor1, this.armors[0]);
 								$state = 61;
@@ -6066,20 +6070,20 @@
 										//normal light radius is 6
 									}
 									if (!$Forays_PhysicalObject.get_m().get_wiz_dark()) {
-										$Forays_Actor.get_b().add('You bring out your torch. ', []);
+										$Forays_Actor.get_b().add('You bring out your torch. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('You bring out your torch, but it gives off no light! ', []);
+										$Forays_Actor.get_b().add('You bring out your torch, but it gives off no light! ');
 									}
 								}
 								else {
 									this.updateRadius$1(this.lightRadius(), 0, true);
 									this.updateRadius(0, this.attrs.get_item(31));
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
-										$Forays_Actor.get_b().add('You put away your torch. ', []);
+										$Forays_Actor.get_b().add('You put away your torch. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('You put away your torch. The air still shines brightly. ', []);
+										$Forays_Actor.get_b().add('You put away your torch. The air still shines brightly. ');
 									}
 								}
 								this.q1();
@@ -6234,11 +6238,11 @@
 								else if ($t149 === 6) {
 									if (!this.hasAttr(103)) {
 										this.attrs.set_item(103, this.attrs.get_item(103) + 1);
-										$Forays_Actor.get_b().add('On. ', []);
+										$Forays_Actor.get_b().add('On. ');
 									}
 									else {
 										this.attrs.set_item(103, 0);
-										$Forays_Actor.get_b().add('Off. ', []);
+										$Forays_Actor.get_b().add('Off. ');
 									}
 									this.q0();
 									$state = 70;
@@ -6321,7 +6325,7 @@
 									this.skills.set_item(2, 10);
 									this.skills.set_item(3, 10);
 									this.skills.set_item(4, 10);
-									$t135 = $Forays_Extensions.getValues($Forays_FeatType);
+									$t135 = this.getFeatTypes();
 									for ($t136 = 0; $t136 < $t135.length; $t136++) {
 										f = $t135[$t136];
 										if (f !== 21 && f !== 20) {
@@ -6329,7 +6333,7 @@
 										}
 									}
 									this.q0();
-									$Forays_Actor.get_b().add('"I HAVE THE POWERRRR!" ', []);
+									$Forays_Actor.get_b().add('"I HAVE THE POWERRRR!" ');
 									$state = 70;
 									continue $sm1;
 								}
@@ -6466,20 +6470,20 @@
 									return true;
 								}
 								if ($Forays_Global.roll(5) <= 4) {
-									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '. ', []);
+									$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(t5.get_ttype()).get_the_name() + '. ');
 									t5.toggle(this);
 									this.q1();
 									$state = 34;
 									continue $sm1;
 								}
 								else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
-									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
+									$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(t5.get_ttype()).get_the_name() + '! ');
 									this.q1();
 									$state = 34;
 									continue $sm1;
 								}
 								else {
-									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t5.get_type()).get_the_name() + '! ', []);
+									$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(t5.get_ttype()).get_the_name() + '! ');
 									$t46 = this.move(t5.get_row(), t5.get_col());
 									$state = 107;
 									$t46.continueWith($sm);
@@ -6567,7 +6571,7 @@
 							}
 							case 82: {
 								$state = -1;
-								$Forays_Actor.get_b().add('You walk down the stairs. ', []);
+								$Forays_Actor.get_b().add('You walk down the stairs. ');
 								$t69 = $Forays_Actor.get_b().printAll();
 								$state = 112;
 								$t69.continueWith($sm);
@@ -6604,7 +6608,7 @@
 								i3 = $t78.getResult();
 								if (i3 !== -1) {
 									unknown = [];
-									$t79 = $Forays_Extensions.getValues($Forays_SpellType);
+									$t79 = $Forays_Actor.getSpellTypes();
 									for ($t80 = 0; $t80 < $t79.length; $t80++) {
 										spell2 = $t79[$t80];
 										if (!this.hasSpell(spell2) && spell2 !== 20 && spell2 !== 21 && spell2 !== 22 && spell2 !== 24 && spell2 !== 23) {
@@ -6617,7 +6621,7 @@
 									learned = $Forays_Extensions.random($Forays_SpellType).call(null, unknown);
 									this.spells.set_item(learned, 1);
 									$Forays_Actor.spells_in_order.add(learned);
-									$Forays_Actor.get_b().add('You forget ' + $Forays_Spell.name$1(forgotten) + '. You learn ' + $Forays_Spell.name$1(learned) + '. ', []);
+									$Forays_Actor.get_b().add('You forget ' + $Forays_Spell.name$1(forgotten) + '. You learn ' + $Forays_Spell.name$1(learned) + '. ');
 									this.tile().transformTo(26);
 								}
 								else {
@@ -6632,13 +6636,13 @@
 							}
 							case 86: {
 								$state = -1;
-								if (this.tile().get_type() !== 27) {
+								if (this.tile().get_ttype() !== 27) {
 									this.q1();
 								}
-								if (this.tile().get_type() === 23 && $Forays_Actor.spells_in_order.length > 1) {
+								if (this.tile().get_ttype() === 23 && $Forays_Actor.spells_in_order.length > 1) {
 									this.tile().transformTo(27);
 								}
-								else if (this.tile().get_type() !== 27) {
+								else if (this.tile().get_ttype() !== 27) {
 									this.tile().transformTo(26);
 								}
 								$t81 = this.tilesAtDistance(2);
@@ -6754,10 +6758,10 @@
 										}
 									}
 									if (this.hasFeat(0) && !armor_changed) {
-										$Forays_Actor.get_b().add('You quickly ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ', []);
+										$Forays_Actor.get_b().add('You quickly ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('You ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ', []);
+										$Forays_Actor.get_b().add('You ready your ' + $Forays_Weapon.name$1(this.weapons[0]) + '. ');
 									}
 									this.updateOnEquip$2(old_weapon, this.weapons[0]);
 								}
@@ -6771,11 +6775,11 @@
 											done4 = true;
 										}
 									}
-									$Forays_Actor.get_b().add('You wear your ' + $Forays_Armor.name$1(this.armors[0]) + '. ', []);
+									$Forays_Actor.get_b().add('You wear your ' + $Forays_Armor.name$1(this.armors[0]) + '. ');
 									this.updateOnEquip(old_armor, this.armors[0]);
 								}
 								if (cursed_weapon) {
-									$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ', []);
+									$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.weapons[0]) + ' is stuck to your hand and can\'t be dropped. ');
 								}
 								if (this.hasFeat(0) && !armor_changed) {
 									this.q0();
@@ -6900,7 +6904,7 @@
 									if (ss.isValue(t17)) {
 										t17.toggle$1(null, 35);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(t17, 100, 22));
-										$Forays_Actor.get_b().add('The floor begins to collapse! ', []);
+										$Forays_Actor.get_b().add('The floor begins to collapse! ');
 									}
 								}
 								this.q0();
@@ -6988,47 +6992,47 @@
 								}
 								i6 = this.get_inv()[num];
 								if (i6.get_quantity() <= 1) {
-									if (this.tile().get_type() === 31) {
-										$Forays_Actor.get_b().add('You drop ' + i6.theName() + ' into the healing pool. ', []);
+									if (this.tile().get_ttype() === 31) {
+										$Forays_Actor.get_b().add('You drop ' + i6.theName() + ' into the healing pool. ');
 										this.get_inv().remove(i6);
 										if (this.get_curhp() < this.get_maxhp()) {
-											$Forays_Actor.get_b().add('The pool glows briefly. ', []);
-											$Forays_Actor.get_b().add('You suddenly feel great again! ', []);
-											$Forays_Actor.get_b().add('The healing pool dries up. ', []);
+											$Forays_Actor.get_b().add('The pool glows briefly. ');
+											$Forays_Actor.get_b().add('You suddenly feel great again! ');
+											$Forays_Actor.get_b().add('The healing pool dries up. ');
 											this.set_curhp(this.get_maxhp());
 										}
 										else {
-											$Forays_Actor.get_b().add('The pool glows briefly, then dries up. ', []);
+											$Forays_Actor.get_b().add('The pool glows briefly, then dries up. ');
 										}
 										this.tile().turnToFloor();
 										this.q1();
 									}
 									else if (this.tile().getItem(i6)) {
-										$Forays_Actor.get_b().add('You drop ' + i6.theName() + '. ', []);
+										$Forays_Actor.get_b().add('You drop ' + i6.theName() + '. ');
 										this.get_inv().remove(i6);
 										i6.set_ignored(true);
 										this.q1();
 									}
 									else {
-										$Forays_Actor.get_b().add('There is no room. ', []);
+										$Forays_Actor.get_b().add('There is no room. ');
 										this.q0();
 									}
 									$state = 52;
 									continue $sm1;
 								}
-								else if (this.tile().get_type() === 31) {
+								else if (this.tile().get_ttype() === 31) {
 									newitem1 = new $Forays_Item.$ctor1(i6, this.get_row(), this.get_col());
 									newitem1.set_quantity(1);
 									i6.set_quantity(i6.get_quantity() - 1);
-									$Forays_Actor.get_b().add('You drop ' + newitem1.theName() + ' into the healing pool. ', []);
+									$Forays_Actor.get_b().add('You drop ' + newitem1.theName() + ' into the healing pool. ');
 									if (this.get_curhp() < this.get_maxhp()) {
-										$Forays_Actor.get_b().add('The pool glows briefly. ', []);
-										$Forays_Actor.get_b().add('You suddenly feel great again! ', []);
-										$Forays_Actor.get_b().add('The healing pool dries up. ', []);
+										$Forays_Actor.get_b().add('The pool glows briefly. ');
+										$Forays_Actor.get_b().add('You suddenly feel great again! ');
+										$Forays_Actor.get_b().add('The healing pool dries up. ');
 										this.set_curhp(this.get_maxhp());
 									}
 									else {
-										$Forays_Actor.get_b().add('The pool glows briefly, then dries up. ', []);
+										$Forays_Actor.get_b().add('The pool glows briefly, then dries up. ');
 									}
 									this.tile().turnToFloor();
 									this.q1();
@@ -7173,8 +7177,8 @@
 							case 123: {
 								$state = -1;
 								$t71.getResult();
-								$Forays_Actor.get_b().add('You enter a sweltering cavern. ', []);
-								$Forays_Actor.get_b().add('Bones lie scattered across the sulfurous ground. ', []);
+								$Forays_Actor.get_b().add('You enter a sweltering cavern. ');
+								$Forays_Actor.get_b().add('Bones lie scattered across the sulfurous ground. ');
 								$state = 121;
 								continue $sm1;
 							}
@@ -7192,13 +7196,13 @@
 								}
 								else if (count >= i6.get_quantity() || count === -1) {
 									if (this.tile().getItem(i6)) {
-										$Forays_Actor.get_b().add('You drop ' + i6.theName() + '. ', []);
+										$Forays_Actor.get_b().add('You drop ' + i6.theName() + '. ');
 										this.get_inv().remove(i6);
 										i6.set_ignored(true);
 										this.q1();
 									}
 									else {
-										$Forays_Actor.get_b().add('There is no room. ', []);
+										$Forays_Actor.get_b().add('There is no room. ');
 										this.q0();
 									}
 								}
@@ -7207,12 +7211,12 @@
 									newitem2.set_quantity(count);
 									if (this.tile().getItem(newitem2)) {
 										i6.set_quantity(i6.get_quantity() - count);
-										$Forays_Actor.get_b().add('You drop ' + newitem2.theName() + '. ', []);
+										$Forays_Actor.get_b().add('You drop ' + newitem2.theName() + '. ');
 										newitem2.set_ignored(true);
 										this.q1();
 									}
 									else {
-										$Forays_Actor.get_b().add('There is no room. ', []);
+										$Forays_Actor.get_b().add('There is no room. ');
 										this.q0();
 									}
 								}
@@ -7259,6 +7263,9 @@
 			$sm();
 			return $tcs.task;
 		},
+		getFeatTypes: function() {
+			return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+		},
 		playerWalk: function(dir) {
 			var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1, $t2, $t3, $t4, grabbers, $t5, $t6, a, $t7, $t11, done, $t8, $t9, $t10;
 			var $sm = Function.mkdel(this, function() {
@@ -7289,12 +7296,12 @@
 											$t3 = this.actorInDirection(dir).attrs;
 											$t3.set_item(14, $t3.get_item(14) + 1);
 											if (!this.isHiddenFrom(this.actorInDirection(dir))) {
-												$Forays_Actor.get_b().add('You walk straight into ' + this.actorInDirection(dir).aVisible() + '! ', []);
+												$Forays_Actor.get_b().add('You walk straight into ' + this.actorInDirection(dir).aVisible() + '! ');
 											}
 											else {
-												$Forays_Actor.get_b().add('You walk straight into ' + this.actorInDirection(dir).aVisible() + '! ', []);
+												$Forays_Actor.get_b().add('You walk straight into ' + this.actorInDirection(dir).aVisible() + '! ');
 												if (this.canSee(this.actorInDirection(dir))) {
-													$Forays_Actor.get_b().add(this.actorInDirection(dir).get_the_name() + ' looks just as surprised as you. ', []);
+													$Forays_Actor.get_b().add(this.actorInDirection(dir).get_the_name() + ' looks just as surprised as you. ');
 												}
 												this.actorInDirection(dir).player_visibility_duration = -1;
 												$t4 = this.actorInDirection(dir).attrs;
@@ -7315,26 +7322,26 @@
 													grabbers.add(a);
 												}
 											}
-											$Forays_Actor.get_b().add($Forays_Extensions.random($Forays_Actor).call(null, grabbers).get_the_name() + ' prevents you from moving away! ', []);
+											$Forays_Actor.get_b().add($Forays_Extensions.random($Forays_Actor).call(null, grabbers).get_the_name() + ' prevents you from moving away! ');
 											this.q0();
 											return true;
 										}
-										if (this.tileInDirection(dir).get_type() === 4) {
+										if (this.tileInDirection(dir).get_ttype() === 4) {
 											if (!$Forays_Global.option(4)) {
-												$Forays_Actor.get_b().add('There are stairs here - press > to descend. ', []);
+												$Forays_Actor.get_b().add('There are stairs here - press > to descend. ');
 											}
 											else {
-												$Forays_Actor.get_b().add('There are stairs here. ', []);
+												$Forays_Actor.get_b().add('There are stairs here. ');
 											}
 										}
 										if (this.tileInDirection(dir).isShrine()) {
-											$Forays_Actor.get_b().add(this.tileInDirection(dir).get_the_name() + ' glows faintly - press g to touch it. ', []);
+											$Forays_Actor.get_b().add(this.tileInDirection(dir).get_the_name() + ' glows faintly - press g to touch it. ');
 										}
 										if (this.tileInDirection(dir).is$1(5)) {
-											$Forays_Actor.get_b().add('There is a chest here - press g to open it. ', []);
+											$Forays_Actor.get_b().add('There is a chest here - press g to open it. ');
 										}
 										if (this.tileInDirection(dir).is$1(31)) {
-											$Forays_Actor.get_b().add('There is a healing pool here. ', []);
+											$Forays_Actor.get_b().add('There is a healing pool here. ');
 											$t7 = $Forays_Help.tutorialTip(9);
 											$state = 5;
 											$t7.continueWith($sm);
@@ -7343,14 +7350,14 @@
 										$state = 4;
 										continue $sm1;
 									}
-									else if (this.tileInDirection(dir).get_type() === 3 || this.tileInDirection(dir).get_type() === 28) {
+									else if (this.tileInDirection(dir).get_ttype() === 3 || this.tileInDirection(dir).get_ttype() === 28) {
 										$t11 = this.stunnedThisTurn();
 										$state = 6;
 										$t11.continueWith($sm);
 										return;
 									}
 									else {
-										$Forays_Actor.get_b().add('There is ' + this.tileInDirection(dir).get_a_name() + ' in the way. ', []);
+										$Forays_Actor.get_b().add('There is ' + this.tileInDirection(dir).get_a_name() + ' in the way. ');
 										this.q0();
 										$state = 1;
 										continue $sm1;
@@ -7424,7 +7431,7 @@
 							case 7: {
 								$state = -1;
 								if (ss.isValue(this.tileInDirection(dir).get_inv())) {
-									$Forays_Actor.get_b().add('You see ' + this.tileInDirection(dir).get_inv().aName() + '. ', []);
+									$Forays_Actor.get_b().add('You see ' + this.tileInDirection(dir).get_inv().aName() + '. ');
 								}
 								$t9 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
 								$state = 10;
@@ -7502,12 +7509,12 @@
 										this.set_target($Forays_Actor.get_player());
 										this.target_location = $Forays_PhysicalObject.get_m().tile.get_item($Forays_Actor.get_player().get_row(), $Forays_Actor.get_player().get_col());
 										if (($Forays_Actor.get_player().isWithinSightRangeOf(this) || this.tile().isLit()) && $Forays_Actor.get_player().hasLOS(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + '\'s gaze meets your eyes! ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + '\'s gaze meets your eyes! ', this);
 											if (this.distanceFrom($Forays_Actor.get_player()) <= 6) {
 												$Forays_Actor.get_player().makeNoise();
 											}
 										}
-										$Forays_Actor.get_b().add(this.get_the_name() + ' snarls loudly. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' snarls loudly. ', this);
 										this.q1();
 										no_act = true;
 									}
@@ -7536,108 +7543,108 @@
 												}
 											}
 										}
-										switch (this.get_type()) {
+										switch (this.get_atype()) {
 											case 1:
 											case 19: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' squeaks at you. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' squeaks at you. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 3:
 											case 14:
 											case 15: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' growls. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' growls. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 7: {
 												if (!$Forays_PhysicalObject.get_m().get_wiz_lite() && !$Forays_PhysicalObject.get_m().get_wiz_dark() && $Forays_Actor.get_player().lightRadius() > 0) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' notices your light. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' notices your light. ', this);
 												}
 												break;
 											}
 											case 13:
 											case 20: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' yells. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' yells. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 18: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' moans. Uhhhhhhghhh. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' moans. Uhhhhhhghhh. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 5: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' snarls at you. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' snarls at you. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 11: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' makes a chittering sound. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' makes a chittering sound. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 8:
 											case 30:
 											case 33: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' shouts. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' shouts. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 22: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' shrieks. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' shrieks. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 23: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' howls. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' howls. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 25: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' starts babbling incoherently. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' starts babbling incoherently. ');
 												break;
 											}
 											case 27: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' cackles. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' cackles. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 28: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' squeaks. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' squeaks. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 38: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' bellows at you. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' bellows at you. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 21: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' hisses faintly. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' hisses faintly. ');
 												break;
 											}
 											case 39:
 											case 48: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' snarls loudly. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' snarls loudly. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
 											case 36: {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' stares at you for a moment. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' stares at you for a moment. ', this);
 												break;
 											}
 											case 43: {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' starts moving. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' starts moving. ', this);
 												break;
 											}
 											case 50: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' starts chanting in low tones. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' starts chanting in low tones. ');
 												break;
 											}
 											case 31:
 											case 46: {
-												$Forays_Actor.get_b().add(this.theVisible() + ' growls viciously. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' growls viciously. ');
 												$Forays_Actor.get_player().makeNoise();
 												break;
 											}
@@ -7650,7 +7657,7 @@
 												break;
 											}
 											default: {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' notices you. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' notices you. ', this);
 												break;
 											}
 										}
@@ -7671,23 +7678,23 @@
 										this.set_target(null);
 									}
 								}
-								if (this.get_type() === 37 && this.tile().isLit()) {
-									$Forays_Actor.get_b().add('The marble horror reverts to its statue form. ', [this]);
-									this.set_type(55);
+								if (this.get_atype() === 37 && this.tile().isLit()) {
+									$Forays_Actor.get_b().add$1('The marble horror reverts to its statue form. ', this);
+									this.set_atype(55);
 									this.setName('marble horror statue');
 									this.attrs.set_item(12, 1);
 									this.attrs.set_item(103, 1);
 									this.attrs.set_item(64, 1);
 								}
-								if (this.get_type() === 55 && !this.tile().isLit()) {
-									$Forays_Actor.get_b().add('The marble horror animates once more. ', [this]);
-									this.set_type(37);
+								if (this.get_atype() === 55 && !this.tile().isLit()) {
+									$Forays_Actor.get_b().add$1('The marble horror animates once more. ', this);
+									this.set_atype(37);
 									this.setName('marble horror');
 									this.attrs.set_item(12, 0);
 									this.attrs.set_item(103, 0);
 									this.attrs.set_item(64, 0);
 								}
-								if (this.get_type() === 28 && ss.isValue(this.group) && ss.isValue(this.get_target())) {
+								if (this.get_atype() === 28 && ss.isValue(this.group) && ss.isValue(this.get_target())) {
 									if (!$Forays_Extensions.any($Forays_Actor).call(null, this.group, function(a1) {
 										return a1.get_curhp() < a1.get_maxhp();
 									}) && this.get_target().get_curhp() >= 20 && !this.get_target().hasAttr(37) && !this.get_target().hasAttr(28) && !this.get_target().hasAttr(86)) {
@@ -7695,11 +7702,11 @@
 										this.target_location = null;
 									}
 								}
-								if (!no_act && this.get_type() !== 13 && this.get_type() !== 52 && this.get_type() !== 7 && this.get_type() !== 54 && this.get_type() !== 53 && this.get_type() !== 18 && this.get_type() !== 10) {
+								if (!no_act && this.get_atype() !== 13 && this.get_atype() !== 52 && this.get_atype() !== 7 && this.get_atype() !== 54 && this.get_atype() !== 53 && this.get_atype() !== 18 && this.get_atype() !== 10) {
 									if (this.hasAttr(6)) {
 										if (this.hasAttr(32) && $Forays_Global.oneIn(10)) {
 											this.attrs.set_item(32, 0);
-											$Forays_Actor.get_b().add(this.get_the_name() + ' stops the flames from spreading. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' stops the flames from spreading. ', this);
 											this.q1();
 											no_act = true;
 											$state = 1;
@@ -7717,7 +7724,7 @@
 													if (update) {
 														this.updateRadius(oldradius, this.lightRadius());
 													}
-													$Forays_Actor.get_b().add(this.get_the_name() + ' puts out the fire. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out the fire. ', this);
 													this.q1();
 													no_act = true;
 													$state = 1;
@@ -7742,10 +7749,10 @@
 														this.updateRadius(oldradius1, this.lightRadius());
 													}
 													if (this.hasAttr(31)) {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' puts out some of the fire. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out some of the fire. ', this);
 													}
 													else {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' puts out the fire. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out the fire. ', this);
 													}
 													this.q1();
 													no_act = true;
@@ -7754,10 +7761,10 @@
 												}
 												else if (this.attrs.get_item(31) > 2 && $Forays_Global.roll(2) + this.attrs.get_item(31) >= 5) {
 													if (this.hasAttr(5)) {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' runs around with arms flailing. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' runs around with arms flailing. ', this);
 													}
 													else {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' flails about. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' flails about. ', this);
 													}
 													$t2 = this.aI_Step(this.tileInDirection($Forays_Global.randomDirection()));
 													$state = 2;
@@ -7783,10 +7790,10 @@
 														this.updateRadius(oldradius2, this.lightRadius());
 													}
 													if (this.hasAttr(31)) {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' puts out some of the fire. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out some of the fire. ', this);
 													}
 													else {
-														$Forays_Actor.get_b().add(this.get_the_name() + ' puts out the fire. ', [this]);
+														$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out the fire. ', this);
 													}
 													this.q1();
 													no_act = true;
@@ -7801,14 +7808,14 @@
 									else {
 										if (this.hasAttr(32) && $Forays_Global.coinFlip()) {
 											this.attrs.set_item(32, 0);
-											if (this.get_type() === 21) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' reforms itself to stop the flames. ', [this]);
+											if (this.get_atype() === 21) {
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' reforms itself to stop the flames. ', this);
 											}
-											else if (this.get_type() === 22 || this.get_type() === 32) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' stops the flames from spreading. ', [this]);
+											else if (this.get_atype() === 22 || this.get_atype() === 32) {
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' stops the flames from spreading. ', this);
 											}
 											else {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' rolls on the ground to stop the flames. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' rolls on the ground to stop the flames. ', this);
 											}
 											this.q1();
 											no_act = true;
@@ -7832,24 +7839,24 @@
 												this.updateRadius(oldradius3, this.lightRadius());
 											}
 											if (this.hasAttr(31)) {
-												if (this.get_type() === 21) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' reforms itself to put out some of the fire. ', [this]);
+												if (this.get_atype() === 21) {
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' reforms itself to put out some of the fire. ', this);
 												}
-												else if (this.get_type() === 22) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' puts out some of the fire. ', [this]);
+												else if (this.get_atype() === 22) {
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out some of the fire. ', this);
 												}
 												else {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' rolls on the ground to put out some of the fire. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' rolls on the ground to put out some of the fire. ', this);
 												}
 											}
-											else if (this.get_type() === 21) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' reforms itself to put out the fire. ', [this]);
+											else if (this.get_atype() === 21) {
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' reforms itself to put out the fire. ', this);
 											}
-											else if (this.get_type() === 22) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' puts out the fire. ', [this]);
+											else if (this.get_atype() === 22) {
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' puts out the fire. ', this);
 											}
 											else {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' rolls on the ground to put out the fire. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' rolls on the ground to put out the fire. ', this);
 											}
 											this.q1();
 											no_act = true;
@@ -7888,7 +7895,7 @@
 										}
 									}
 									if (!this.hasAttr(64) && !this.hasAttr(103) && !this.hasAttr(61)) {
-										if (this.get_type() !== 18 && this.get_type() !== 52 && this.get_type() !== 6 && this.get_type() !== 34 && this.get_type() !== 13 && this.get_type() !== 24 && this.get_type() !== 37 && this.get_type() !== 47) {
+										if (this.get_atype() !== 18 && this.get_atype() !== 52 && this.get_atype() !== 6 && this.get_atype() !== 34 && this.get_atype() !== 13 && this.get_atype() !== 24 && this.get_atype() !== 37 && this.get_atype() !== 47) {
 											$t5 = this.tilesWithinDistance(1);
 											for ($t6 = 0; $t6 < $t5.length; $t6++) {
 												t1 = $t5[$t6];
@@ -7902,7 +7909,7 @@
 										}
 									}
 									if (!this.hasAttr(67) && !this.hasAttr(1) && !this.hasAttr(2)) {
-										if (this.get_type() !== 13 && this.get_type() !== 24 && this.get_type() !== 47) {
+										if (this.get_atype() !== 13 && this.get_atype() !== 24 && this.get_atype() !== 47) {
 											$t7 = this.tilesWithinDistance(1);
 											for ($t8 = 0; $t8 < $t7.length; $t8++) {
 												t2 = $t7[$t8];
@@ -7952,7 +7959,7 @@
 							}
 							case 3: {
 								$state = -1;
-								if (this.get_type() === 47 && !this.hasAttr(69)) {
+								if (this.get_atype() === 47 && !this.hasAttr(69)) {
 									this.attrs.set_item(76, 1);
 									//if the knight was off balance, it regains its shield here.
 								}
@@ -8005,7 +8012,7 @@
 							}
 							case 5: {
 								$state = -1;
-								if (this.get_type() === 9) {
+								if (this.get_atype() === 9) {
 									if (this.hasAttr(70)) {
 										if (this.tile().isLit()) {
 											this.attrs.set_item(70, 5);
@@ -8015,13 +8022,13 @@
 										}
 									}
 									else if (this.tile().isLit()) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' is blinded by the light! ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' is blinded by the light! ', this);
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										this.attrs.set_item(70, 5);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, ($Forays_Global.roll(2) + 4) * 100, 69, this.get_the_name() + ' is no longer blinded. ', [this]));
 									}
 								}
-								if (this.get_type() === 21) {
+								if (this.get_atype() === 21) {
 									this.calculateDimming();
 								}
 								$state = -1;
@@ -8053,7 +8060,7 @@
 								if (this.path.length > 0) {
 									this.path.clear();
 								}
-								$t263 = this.get_type();
+								$t263 = this.get_atype();
 								if ($t263 === 4 || $t263 === 62) {
 									if (this.distanceFrom(this.get_target()) === 1) {
 										idx = $Forays_Global.roll$1(1, 2) - 1;
@@ -8184,10 +8191,10 @@
 										else {
 											if ($Forays_Actor.get_player().hasLOS(this.tileInDirection(dir))) {
 												if (!this.tileInDirection(dir).get_passable()) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', this);
 												}
 												else if (ss.isValue(this.actorInDirection(dir))) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', this);
 												}
 											}
 											this.QS();
@@ -8214,22 +8221,22 @@
 									if (this.hasAttr(69)) {
 										dir1 = $Forays_Global.randomDirection();
 										if (!this.tileInDirection(dir1).get_passable()) {
-											$Forays_Actor.get_b().add(this.you('stagger') + ' into ' + this.tileInDirection(dir1).get_the_name() + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('stagger') + ' into ' + this.tileInDirection(dir1).get_the_name() + '. ', this);
 											$state = 16;
 											continue $sm1;
 										}
 										else if (ss.isValue(this.actorInDirection(dir1))) {
-											$Forays_Actor.get_b().add(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir1).theVisible() + '. ', [this, this.actorInDirection(dir1)]);
+											$Forays_Actor.get_b().add$2(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir1).theVisible() + '. ', [this, this.actorInDirection(dir1)]);
 											$state = 16;
 											continue $sm1;
 										}
 										else if (this.grabPreventsMovement(this.tileInDirection(dir1))) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' staggers and almost falls over. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' staggers and almost falls over. ', this);
 											$state = 16;
 											continue $sm1;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.you('stagger') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('stagger') + '. ', this);
 											$t18 = this.move(this.tileInDirection(dir1).get_row(), this.tileInDirection(dir1).get_col());
 											$state = 17;
 											$t18.continueWith($sm);
@@ -8390,12 +8397,12 @@
 											}
 										}
 										if ($Forays_Global.coinFlip()) {
-											$Forays_Actor.get_b().add(this.you('whisper') + ' \'' + invocation + '\'. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('whisper') + ' \'' + invocation + '\'. ', this);
 										}
 										else {
-											$Forays_Actor.get_b().add(this.you('scream') + ' \'' + invocation.toUpperCase() + '\'. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('scream') + ' \'' + invocation.toUpperCase() + '\'. ', this);
 										}
-										$Forays_Actor.get_b().add('Flames erupt from ' + this.get_the_name() + '. ', [this]);
+										$Forays_Actor.get_b().add$1('Flames erupt from ' + this.get_the_name() + '. ', this);
 										if (this.lightRadius() < 2) {
 											this.updateRadius(this.lightRadius(), 2);
 										}
@@ -8405,10 +8412,10 @@
 											a = $t38[$t39];
 											if (!a.hasAttr(61) && !a.hasAttr(64) && !a.hasAttr(31) && !a.hasAttr(32) && !a.hasAttr(33)) {
 												if (a.get_name() === 'you') {
-													$Forays_Actor.get_b().add('You start to catch fire! ', []);
+													$Forays_Actor.get_b().add('You start to catch fire! ');
 												}
 												else {
-													$Forays_Actor.get_b().add(a.get_the_name() + ' starts to catch fire. ', [a]);
+													$Forays_Actor.get_b().add$1(a.get_the_name() + ' starts to catch fire. ', a);
 												}
 												a.attrs.set_item(32, 1);
 											}
@@ -8494,10 +8501,10 @@
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										this.animateProjectile(this.get_target(), 13, '%');
 										if (this.get_target().canSee(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' throws a bola at ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+											$Forays_Actor.get_b().add$3(this.get_the_name() + ' throws a bola at ' + this.get_target().get_the_name() + '. ', this, this.get_target());
 										}
 										else {
-											$Forays_Actor.get_b().add('A bola whirls toward ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+											$Forays_Actor.get_b().add$3('A bola whirls toward ' + this.get_target().get_the_name() + '. ', this, this.get_target());
 										}
 										this.attrs.set_item(77, -1);
 										$t67 = this.get_target().attrs;
@@ -8505,7 +8512,7 @@
 										$t68 = this.get_target();
 										$t68.set_speed($t68.get_speed() + 100);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this.get_target(), ($Forays_Global.roll(3) + 5) * 100, 35, this.get_target().youAre() + ' no longer slowed. ', [this.get_target()]));
-										$Forays_Actor.get_b().add(this.get_target().youAre() + ' slowed by the bola. ', [this.get_target()]);
+										$Forays_Actor.get_b().add$1(this.get_target().youAre() + ' slowed by the bola. ', this.get_target());
 										this.q1();
 										$state = 50;
 										continue $sm1;
@@ -8548,13 +8555,13 @@
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, ($Forays_Global.roll(5) + 5) * 100, 69));
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add(this.you('scream') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('scream') + '. ', this);
 										}
 										else if (this.distanceFrom($Forays_Actor.get_player()) <= 12) {
-											$Forays_Actor.get_b().add('You hear a scream! ', []);
+											$Forays_Actor.get_b().add('You hear a scream! ');
 										}
 										else {
-											$Forays_Actor.get_b().add('You hear a distant scream! ', []);
+											$Forays_Actor.get_b().add('You hear a distant scream! ');
 										}
 										i = 1;
 										targets = [];
@@ -8567,7 +8574,7 @@
 												done = true;
 											}
 											if (i > 100) {
-												$Forays_Actor.get_b().add(this.get_target().you('resist') + ' the scream. ', [this.get_target()]);
+												$Forays_Actor.get_b().add$1(this.get_target().you('resist') + ' the scream. ', this.get_target());
 												this.q1();
 												return;
 											}
@@ -8710,25 +8717,25 @@
 								}
 								else if ($t263 === 27) {
 									if (this.get_curhp() < this.get_maxhp() && !this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' curses you! ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' curses you! ');
 										switch ($Forays_Global.roll(4)) {
 											case 1: {
-												$Forays_Actor.get_b().add('You become allergic to light! ', []);
+												$Forays_Actor.get_b().add('You become allergic to light! ');
 												this.get_target().gainAttrRefreshDuration$1(43, 10000, 'You are no longer allergic to light. ', []);
 												break;
 											}
 											case 2: {
-												$Forays_Actor.get_b().add('The floor suddenly looks like a wonderful spot for a nap. ', []);
+												$Forays_Actor.get_b().add('The floor suddenly looks like a wonderful spot for a nap. ');
 												this.get_target().gainAttrRefreshDuration$1(36, 10000, 'You are no longer quite so drowsy. ', []);
 												break;
 											}
 											case 3: {
-												$Forays_Actor.get_b().add('Every sound you make becomes amplified and echoes across the dungeon. ', []);
+												$Forays_Actor.get_b().add('Every sound you make becomes amplified and echoes across the dungeon. ');
 												this.get_target().gainAttrRefreshDuration$1(38, 10000, 'Your sounds are no longer amplified. ', []);
 												break;
 											}
 											case 4: {
-												$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.get_target().weapons[0]) + ' becomes stuck to your hand! ', []);
+												$Forays_Actor.get_b().add('Your ' + $Forays_Weapon.name$1(this.get_target().weapons[0]) + ' becomes stuck to your hand! ');
 												this.get_target().gainAttrRefreshDuration$1(39, 10000, 'Your ' + $Forays_Weapon.name$1(this.get_target().weapons[0]) + ' is no longer stuck to your hand. ', []);
 												break;
 											}
@@ -8768,7 +8775,7 @@
 								}
 								else if ($t263 === 29) {
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
-										$Forays_Actor.get_b().add(this.theVisible() + ' breathes poisonous gas. ', []);
+										$Forays_Actor.get_b().add(this.theVisible() + ' breathes poisonous gas. ');
 										area = [];
 										$t132 = this.get_target().tilesWithinDistance(1);
 										for ($t133 = 0; $t133 < $t132.length; $t133++) {
@@ -8837,17 +8844,17 @@
 										dir3 = this.attrs.get_item(70);
 										cw = $Forays_Global.coinFlip();
 										if (this.tileInDirection(dir3).get_passable() && ss.isNullOrUndefined(this.actorInDirection(dir3)) && !this.grabPreventsMovement(this.tileInDirection(dir3))) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' leaps forward swinging his axe! ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' leaps forward swinging his axe! ', this);
 											$t138 = this.move(this.tileInDirection(dir3).get_row(), this.tileInDirection(dir3).get_col());
 											$state = 82;
 											$t138.continueWith($sm);
 											return;
 										}
 										else if (ss.isValue(this.actorInDirection(dir3)) || this.grabPreventsMovement(this.tileInDirection(dir3))) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' swings his axe furiously! ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' swings his axe furiously! ', this);
 											a6 = this.actorInDirection(this.rotateDirection(dir3, cw));
 											if (ss.isValue(a6)) {
-												$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
+												$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a6.get_the_name() + '. ', this, a6);
 												$t142 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 												$state = 84;
 												$t142.continueWith($sm);
@@ -8857,7 +8864,7 @@
 											continue $sm1;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' turns to face ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+											$Forays_Actor.get_b().add$3(this.get_the_name() + ' turns to face ' + this.get_target().get_the_name() + '. ', this, this.get_target());
 											this.attrs.set_item(70, this.directionOf(this.get_target()));
 											this.q1();
 											$state = 81;
@@ -8887,7 +8894,7 @@
 									else if (this.distanceFrom(this.get_target()) <= 12) {
 										if (this.tile().isLit() && !this.hasAttr(69)) {
 											this.attrs.set_item(69, this.attrs.get_item(69) + 1);
-											$Forays_Actor.get_b().add(this.get_the_name() + ' gestures. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' gestures. ', this);
 											tiles = [];
 											$t148 = this.get_target().tilesWithinDistance(6);
 											for ($t149 = 0; $t149 < $t148.length; $t149++) {
@@ -8907,14 +8914,14 @@
 												}
 											}
 											if (tiles.length === 0) {
-												$Forays_Actor.get_b().add('Nothing happens. ', [this]);
+												$Forays_Actor.get_b().add$1('Nothing happens. ', this);
 											}
 											else {
 												if (tiles.length === 1) {
-													$Forays_Actor.get_b().add('A blood moth appears! ', []);
+													$Forays_Actor.get_b().add('A blood moth appears! ');
 												}
 												else {
-													$Forays_Actor.get_b().add('Blood moths appear! ', []);
+													$Forays_Actor.get_b().add('Blood moths appear! ');
 												}
 												for (i7 = 0; i7 < 2; ++i7) {
 													if (tiles.length > 0) {
@@ -8948,7 +8955,7 @@
 									$t154 = this.get_target().tilesAtDistance(1);
 									for ($t155 = 0; $t155 < $t154.length; $t155++) {
 										t14 = $t154[$t155];
-										if (t14.get_type() === 0) {
+										if (t14.get_ttype() === 0) {
 											++walls;
 											if (ss.isNullOrUndefined(t14.actor())) {
 												++count;
@@ -8959,17 +8966,17 @@
 										$t156 = this.get_target().tilesAtDistance(1);
 										for ($t157 = 0; $t157 < $t156.length; $t157++) {
 											t15 = $t156[$t157];
-											if (t15.get_type() === 0 && ss.isNullOrUndefined(t15.actor())) {
+											if (t15.get_ttype() === 0 && ss.isNullOrUndefined(t15.actor())) {
 												$Forays_Actor.create$1(54, t15.get_row(), t15.get_col(), true, true);
 												$Forays_PhysicalObject.get_m().actor.get_item$1(t15.p).player_visibility_duration = -1;
 												$Forays_PhysicalObject.get_m().actor.get_item$1(t15.p).attrs.set_item(69, 20);
 											}
 										}
 										if (count >= 2) {
-											$Forays_Actor.get_b().add('Mud tentacles emerge from the walls! ', []);
+											$Forays_Actor.get_b().add('Mud tentacles emerge from the walls! ');
 										}
 										else {
-											$Forays_Actor.get_b().add('A mud tentacle emerges from the wall! ', []);
+											$Forays_Actor.get_b().add('A mud tentacle emerges from the wall! ');
 										}
 										this.q1();
 										$state = 91;
@@ -9060,7 +9067,7 @@
 												}
 												if (ss.isValue(tile) && !ss.referenceEquals(tile.actor(), thrall)) {
 													this.gainAttr(69, 400);
-													$Forays_Actor.get_b().add(this.theVisible() + ' teleports ' + thrall.theVisible() + '. ', [this, thrall]);
+													$Forays_Actor.get_b().add$3(this.theVisible() + ' teleports ' + thrall.theVisible() + '. ', this, thrall);
 													$Forays_PhysicalObject.get_m().draw();
 													$t169 = thrall.move(tile.get_row(), tile.get_col());
 													$state = 99;
@@ -9093,7 +9100,7 @@
 											}
 											else if (!this.hasAttr(70) && !thrall.hasAttr(73)) {
 												this.gainAttr(70, 1500);
-												$Forays_Actor.get_b().add(this.theVisible() + ' shields ' + thrall.theVisible() + '. ', [this, thrall]);
+												$Forays_Actor.get_b().add$3(this.theVisible() + ' shields ' + thrall.theVisible() + '. ', this, thrall);
 												$Forays_Actor.get_b().displayNow();
 												$Forays_Screen.animateStorm$1(thrall.p, 1, 2, 5, '*', 1);
 												thrall.attrs.set_item(73, 25);
@@ -9145,7 +9152,7 @@
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 8) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, $Forays_Global.roll(2) * 100 + 150, 69));
-										$Forays_Actor.get_b().add(this.get_the_name() + ' tosses a grenade toward ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+										$Forays_Actor.get_b().add$3(this.get_the_name() + ' tosses a grenade toward ' + this.get_target().get_the_name() + '. ', this, this.get_target());
 										tiles1 = [];
 										$t178 = this.get_target().tilesWithinDistance(1);
 										for ($t179 = 0; $t179 < $t178.length; $t179++) {
@@ -9157,14 +9164,14 @@
 										t29 = tiles1[$Forays_Global.roll(tiles1.length) - 1];
 										if (ss.isValue(t29.actor())) {
 											if (ss.referenceEquals(t29.actor(), $Forays_Actor.get_player())) {
-												$Forays_Actor.get_b().add('It lands under you! ', []);
+												$Forays_Actor.get_b().add('It lands under you! ');
 											}
 											else {
-												$Forays_Actor.get_b().add('It lands under ' + t29.actor().get_the_name() + '. ', [t29.actor()]);
+												$Forays_Actor.get_b().add$1('It lands under ' + t29.actor().get_the_name() + '. ', t29.actor());
 											}
 										}
 										else if (ss.isValue(t29.get_inv())) {
-											$Forays_Actor.get_b().add('It lands under ' + t29.get_inv().theName() + '. ', [t29]);
+											$Forays_Actor.get_b().add$1('It lands under ' + t29.get_inv().theName() + '. ', t29);
 										}
 										t29.features.add(0);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(t29, 100, 8));
@@ -9384,7 +9391,7 @@
 									if (!this.hasAttr(69) && this.distanceFrom(this.get_target()) <= 12) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, ($Forays_Global.roll(4) + 8) * 100, 69));
-										$Forays_Actor.get_b().add(this.get_the_name() + ' calls out to the dead. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' calls out to the dead. ', this);
 										summon = ($Forays_Global.coinFlip() ? 6 : 18);
 										tiles2 = [];
 										$t240 = this.tilesWithinDistance(2);
@@ -9404,11 +9411,11 @@
 											}
 										}
 										if (tiles2.length === 0 || ss.isValue(this.group) && this.group.length > 3) {
-											$Forays_Actor.get_b().add('Nothing happens. ', [this]);
+											$Forays_Actor.get_b().add$1('Nothing happens. ', this);
 										}
 										else {
 											t31 = $Forays_Extensions.random($Forays_Tile).call(null, tiles2);
-											$Forays_Actor.get_b().add($Forays_Actor.prototype$1(summon).get_a_name() + ' digs through the floor! ', []);
+											$Forays_Actor.get_b().add($Forays_Actor.prototype$1(summon).get_a_name() + ' digs through the floor! ');
 											$Forays_Actor.create$1(summon, t31.get_row(), t31.get_col(), true, true);
 											$Forays_PhysicalObject.get_m().actor.get_item(t31.get_row(), t31.get_col()).player_visibility_duration = -1;
 											if (ss.isNullOrUndefined(this.group)) {
@@ -9471,12 +9478,12 @@
 								else if ($t263 === 51) {
 									if (this.get_curhp() <= 10 && !$Forays_PhysicalObject.get_m().get_wiz_dark()) {
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' absorbs the light from the air. ', []);
+											$Forays_Actor.get_b().add(this.get_the_name() + ' absorbs the light from the air. ');
 										}
 										else {
-											$Forays_Actor.get_b().add('Something drains the light from the air. ', []);
+											$Forays_Actor.get_b().add('Something drains the light from the air. ');
 										}
-										$Forays_Actor.get_b().add(this.get_the_name() + ' is restored. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' is restored. ', this);
 										this.set_curhp(this.get_maxhp());
 										$Forays_PhysicalObject.get_m().set_wiz_dark(true);
 										$Forays_PhysicalObject.get_m().set_wiz_lite(false);
@@ -9499,26 +9506,26 @@
 								}
 								else if ($t263 === 2) {
 									if ($Forays_Actor.get_player().magic_items.contains(1) && this.distanceFrom($Forays_Actor.get_player()) <= 12 && this.canSee($Forays_Actor.get_player())) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ');
 										$t253 = this.getBestLine($Forays_Actor.get_player());
 										for ($t254 = 0; $t254 < $t253.length; $t254++) {
 											t32 = $t253[$t254];
 											$Forays_Screen.animateStorm$1(t32.p, 1, 2, 3, '*', 3);
 										}
-										$Forays_Actor.get_b().add('Your ring of resistance melts and drips onto the floor! ', []);
+										$Forays_Actor.get_b().add('Your ring of resistance melts and drips onto the floor! ');
 										$Forays_Actor.get_player().magic_items.remove(1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 100, 1));
 										$state = 156;
 										continue $sm1;
 									}
 									else if ($Forays_Actor.get_player().armors[0] === 5 && this.distanceFrom($Forays_Actor.get_player()) <= 12 && this.canSee($Forays_Actor.get_player())) {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' exhales an orange mist toward you. ');
 										$t255 = this.getBestLine($Forays_Actor.get_player());
 										for ($t256 = 0; $t256 < $t255.length; $t256++) {
 											t33 = $t255[$t256];
 											$Forays_Screen.animateStorm$1(t33.p, 1, 2, 3, '*', 3);
 										}
-										$Forays_Actor.get_b().add('The runes drip from your full plate of resistance! ', []);
+										$Forays_Actor.get_b().add('The runes drip from your full plate of resistance! ');
 										$Forays_Actor.get_player().armors[0] = 2;
 										$Forays_Actor.get_player().updateOnEquip(5, 2);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor5(this, 100, 1));
@@ -9656,7 +9663,7 @@
 								$state = -1;
 								$t16.getResult();
 								if (!this.hasAttr(69)) {
-									$Forays_Actor.get_b().add(this.you('adopt') + ' a more aggressive stance. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('adopt') + ' a more aggressive stance. ', this);
 									this.attrs.set_item(98, this.attrs.get_item(98) + 5);
 								}
 								$state = 12;
@@ -9782,7 +9789,7 @@
 							case 31: {
 								$state = -1;
 								if (openspaces.length > 1) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' is suddenly standing all around ' + this.get_target().get_the_name() + '. ', []);
+									$Forays_Actor.get_b().add(this.get_the_name() + ' is suddenly standing all around ' + this.get_target().get_the_name() + '. ');
 									this.q1();
 									$state = 30;
 									continue $sm1;
@@ -9885,7 +9892,7 @@
 							case 47: {
 								$state = -1;
 								if ($t49.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' tries to line up a shot. ', this);
 								}
 								this.QS();
 								$state = 45;
@@ -10120,7 +10127,7 @@
 										this.get_inv().add(item);
 										this.get_target().get_inv().remove(item);
 									}
-									$Forays_Actor.get_b().add(this.youVisible('steal') + ' ' + this.get_target().yourVisible() + ' ' + item.name() + '! ', [this, this.get_target()]);
+									$Forays_Actor.get_b().add$3(this.youVisible('steal') + ' ' + this.get_target().yourVisible() + ' ' + item.name() + '! ', this, this.get_target());
 								}
 								$state = 67;
 								continue $sm1;
@@ -10146,7 +10153,7 @@
 									continue $sm1;
 								}
 								else if (!next.get_passable()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' disappears into ' + next.get_the_name() + '. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' disappears into ' + next.get_the_name() + '. ', this);
 									$t117 = this.tilesWithinDistance(1);
 									for ($t118 = 0; $t118 < $t117.length; $t118++) {
 										t8 = $t117[$t118];
@@ -10223,9 +10230,9 @@
 									this.get_target().gainAttrRefreshDuration$1(92, 5000, 'You no longer feel the effects of the poison. ', []);
 									if (this.get_target().attrs.get_item(92) >= this.get_target().get_curhp()) {
 										if (!this.get_target().hasAttr(94)) {
-											$Forays_Actor.get_b().add('The poison is overwhelming you! ', []);
-											$Forays_Actor.get_b().add('You\'re falling asleep. ', []);
-											$Forays_Actor.get_b().add('You\'ll surely be eaten... ', []);
+											$Forays_Actor.get_b().add('The poison is overwhelming you! ');
+											$Forays_Actor.get_b().add('You\'re falling asleep. ');
+											$Forays_Actor.get_b().add('You\'ll surely be eaten... ');
 											$t128 = $Forays_Actor.get_b().printAll();
 											$state = 193;
 											$t128.continueWith($sm);
@@ -10236,8 +10243,8 @@
 									}
 									else if (this.get_target().attrs.get_item(92) >= ss.Int32.div(this.get_target().get_curhp(), 2) && !this.get_target().hasAttr(93)) {
 										this.get_target().gainAttrRefreshDuration(93, 5000);
-										$Forays_Actor.get_b().add('You feel the subtle poison starting to take effect. ', []);
-										$Forays_Actor.get_b().add('Your injuries make it hard to stay awake. ', []);
+										$Forays_Actor.get_b().add('You feel the subtle poison starting to take effect. ');
+										$Forays_Actor.get_b().add('Your injuries make it hard to stay awake. ');
 										$t130 = $Forays_Actor.get_b().printAll();
 										$state = 194;
 										$t130.continueWith($sm);
@@ -10245,8 +10252,8 @@
 									}
 									else {
 										if (first_bite) {
-											$Forays_Actor.get_b().add('The compy\'s bite makes you momentarily fatigued. ', []);
-											$Forays_Actor.get_b().add('You shake off the effects. ', []);
+											$Forays_Actor.get_b().add('The compy\'s bite makes you momentarily fatigued. ');
+											$Forays_Actor.get_b().add('You shake off the effects. ');
 										}
 										$state = 75;
 										continue $sm1;
@@ -10288,7 +10295,7 @@
 								$t138.getResult();
 								a5 = this.actorInDirection(this.rotateDirection(dir3, cw));
 								if (ss.isValue(a5)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a5.get_the_name() + '. ', this, a5);
 									$t139 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 									$state = 196;
 									$t139.continueWith($sm);
@@ -10307,7 +10314,7 @@
 								$state = -1;
 								a6 = this.actorInDirection(dir3);
 								if (ss.isValue(a6)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
+									$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a6.get_the_name() + '. ', this, a6);
 									$t143 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 									$state = 198;
 									$t143.continueWith($sm);
@@ -10320,7 +10327,7 @@
 								$state = -1;
 								$t145.getResult();
 								if (ss.isValue(this.get_target()) && $Forays_Global.roll(3) === 3) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' screams with fury! ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' screams with fury! ', this);
 									this.attrs.set_item(70, this.directionOf(this.get_target()));
 									$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, 350, 70, this.your() + ' rage diminishes. ', [this]));
 								}
@@ -10502,7 +10509,7 @@
 							case 108: {
 								$state = -1;
 								if ($t180.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' backs away. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' backs away. ', this);
 									this.QS();
 									$state = 107;
 									continue $sm1;
@@ -10674,7 +10681,7 @@
 							case 130: {
 								$state = -1;
 								if ($t202.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' tries to line up a shot. ', this);
 								}
 								this.QS();
 								$state = 128;
@@ -10705,7 +10712,7 @@
 								rc = $Forays_Global.roll$1(1, 64);
 								if (Math.abs(rr - this.get_row()) >= 10 || Math.abs(rc - this.get_col()) >= 10 || Math.abs(rr - this.get_row()) >= 7 && Math.abs(rc - this.get_col()) >= 7) {
 									if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc)) && !this.hasLOS$1(rr, rc)) {
-										$Forays_Actor.get_b().add(this.theVisible() + ' slashes at the air, sending a swirling vortex toward ' + this.get_target().get_the_name() + '. ', [this.get_target()]);
+										$Forays_Actor.get_b().add$1(this.theVisible() + ' slashes at the air, sending a swirling vortex toward ' + this.get_target().get_the_name() + '. ', this.get_target());
 										this.animateBeam$1(this.get_target(), '*', 4);
 										this.get_target().animateStorm(3, 3, 10, '*', 4);
 										$t204 = this.get_target().move(rr, rc);
@@ -10756,7 +10763,7 @@
 							case 137: {
 								$state = -1;
 								if (true !== $t213.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' is off balance! ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' is off balance! ', this);
 									this.attrs.set_item(76, 0);
 								}
 								$state = 135;
@@ -10819,10 +10826,10 @@
 								if ($t235.getResult() && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(target_r1, target_c1))) {
 									if (this.get_target().hasAttr(30)) {
 										if (this.get_target().get_name() === 'you') {
-											$Forays_Actor.get_b().add('You don\'t move far. ', []);
+											$Forays_Actor.get_b().add('You don\'t move far. ');
 										}
 										else {
-											$Forays_Actor.get_b().add(this.get_target().get_the_name() + ' doesn\'t move far. ', [this.get_target()]);
+											$Forays_Actor.get_b().add$1(this.get_target().get_the_name() + ' doesn\'t move far. ', this.get_target());
 										}
 										$state = 141;
 										continue $sm1;
@@ -10905,7 +10912,7 @@
 							case 146: {
 								$state = -1;
 								if (blast) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' fires dark energy at ' + this.get_target().get_the_name() + '. ', [this, this.get_target()]);
+									$Forays_Actor.get_b().add$3(this.get_the_name() + ' fires dark energy at ' + this.get_target().get_the_name() + '. ', this, this.get_target());
 									this.animateBoltProjectile(this.get_target(), 12);
 									$t250 = this.get_target().takeDamage$2(9, 1, $Forays_Global.roll(6), this, '*blasted by a necromancer');
 									$state = 223;
@@ -10941,7 +10948,7 @@
 								$t257.getResult();
 								if (ss.isValue(this.get_target()) && !this.get_target().hasAttr(31) && !this.get_target().hasAttr(32)) {
 									this.get_target().attrs.set_item(32, 1);
-									$Forays_Actor.get_b().add(this.get_target().you('start') + ' catching fire! ', [this.get_target()]);
+									$Forays_Actor.get_b().add$1(this.get_target().you('start') + ' catching fire! ', this.get_target());
 								}
 								$state = 156;
 								continue $sm1;
@@ -11026,7 +11033,7 @@
 							case 170: {
 								$state = -1;
 								if ($t47.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' tries to line up a shot. ', this);
 								}
 								this.QS();
 								$state = 42;
@@ -11382,7 +11389,7 @@
 								$state = -1;
 								a5 = this.actorInDirection(dir3);
 								if (ss.isValue(a5)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a5.get_the_name() + '. ', this, a5);
 									$t140 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 									$state = 259;
 									$t140.continueWith($sm);
@@ -11401,7 +11408,7 @@
 								$state = -1;
 								a6 = this.actorInDirection(this.rotateDirection(dir3, !cw));
 								if (ss.isValue(a6)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a6.get_the_name() + '. ', [this, a6]);
+									$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a6.get_the_name() + '. ', this, a6);
 									$t144 = a6.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 									$state = 261;
 									$t144.continueWith($sm);
@@ -11455,7 +11462,7 @@
 							case 206: {
 								$state = -1;
 								if ($t200.getResult()) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' tries to line up a shot. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' tries to line up a shot. ', this);
 								}
 								this.QS();
 								$state = 125;
@@ -11466,7 +11473,7 @@
 								$t204.getResult();
 								$Forays_PhysicalObject.get_m().draw();
 								this.get_target().animateStorm(3, 3, 10, '*', 4);
-								$Forays_Actor.get_b().add(this.get_target().youAre() + ' transported elsewhere. ', []);
+								$Forays_Actor.get_b().add(this.get_target().youAre() + ' transported elsewhere. ');
 								this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 								$state = 208;
 								continue $sm1;
@@ -11559,7 +11566,7 @@
 									wall_distance_to_center = 9999;
 									center = new $Forays_pos(11, 33);
 									for (i9 = 2; i9 <= 8; i9 += 2) {
-										if (this.tileInDirection(i9).get_type() === 0) {
+										if (this.tileInDirection(i9).get_ttype() === 0) {
 											if (this.tileInDirection(i9).estimatedEuclideanDistanceFromX10$1(center) < wall_distance_to_center) {
 												wall = this.tileInDirection(i9);
 												wall_distance_to_center = this.tileInDirection(i9).estimatedEuclideanDistanceFromX10$1(center);
@@ -11890,7 +11897,7 @@
 								$state = -1;
 								a5 = this.actorInDirection(this.rotateDirection(dir3, !cw));
 								if (ss.isValue(a5)) {
-									$Forays_Actor.get_b().add(this.your() + ' axe hits ' + a5.get_the_name() + '. ', [this, a5]);
+									$Forays_Actor.get_b().add$3(this.your() + ' axe hits ' + a5.get_the_name() + '. ', this, a5);
 									$t141 = a5.takeDamage$2(0, 0, $Forays_Global.roll$1(3, 6), this, 'a berserker\'s axe');
 									$state = 280;
 									$t141.continueWith($sm);
@@ -12320,7 +12327,7 @@
 								if ($t1.getResult()) {
 									return;
 								}
-								$t19 = this.get_type();
+								$t19 = this.get_atype();
 								if ($t19 === 7) {
 									brightest = null;
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
@@ -12416,10 +12423,10 @@
 										else {
 											if ($Forays_Actor.get_player().hasLOS(this.tileInDirection(dir))) {
 												if (!this.tileInDirection(dir).get_passable()) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', this);
 												}
 												else if (ss.isValue(this.actorInDirection(dir))) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', this);
 												}
 											}
 											this.QS();
@@ -12743,7 +12750,7 @@
 								//}
 								//return;
 								//}
-								$t23 = this.get_type();
+								$t23 = this.get_atype();
 								if ($t23 === 4 || $t23 === 62) {
 									$t2 = this.aI_Step(this.tileInDirection($Forays_Global.randomDirection()));
 									$state = 3;
@@ -12845,10 +12852,10 @@
 										else {
 											if ($Forays_Actor.get_player().hasLOS(this.tileInDirection(dir))) {
 												if (!this.tileInDirection(dir).get_passable()) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.tileInDirection(dir).get_the_name() + '. ', this);
 												}
 												else if (ss.isValue(this.actorInDirection(dir))) {
-													$Forays_Actor.get_b().add(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', [this]);
+													$Forays_Actor.get_b().add$1(this.get_the_name() + ' brushes up against ' + this.actorInDirection(dir).theVisible() + '. ', this);
 												}
 											}
 											this.QS();
@@ -13104,7 +13111,7 @@
 				var $t4 = actor.actorsWithinDistance$1(10, true);
 				for (var $t5 = 0; $t5 < $t4.length; $t5++) {
 					var a1 = $t4[$t5];
-					if (a1.get_type() === 21) {
+					if (a1.get_atype() === 21) {
 						if (a1.distanceFrom(actor) < dist) {
 							dist = a1.distanceFrom(actor);
 							closest_shadow = a1;
@@ -13115,7 +13122,7 @@
 					if (actor.hasAttr(46)) {
 						actor.attrs.set_item(46, 0);
 						if (actor.get_light_radius() > 0) {
-							$Forays_Actor.get_b().add(actor.your() + ' light grows brighter. ', [actor]);
+							$Forays_Actor.get_b().add$1(actor.your() + ' light grows brighter. ', actor);
 							if (actor.hasAttr(16)) {
 								actor.updateRadius$1(actor.lightRadius(), 12, true);
 							}
@@ -13150,7 +13157,7 @@
 						if (actor.get_light_radius() > 0) {
 							if (actor.attrs.get_item(31) < actor.get_light_radius()) {
 								//if the player should notice...
-								$Forays_Actor.get_b().add(actor.your() + ' light grows dimmer. ', [actor]);
+								$Forays_Actor.get_b().add$1(actor.your() + ' light grows dimmer. ', actor);
 								actor.updateRadius$1(actor.get_light_radius(), actor.get_light_radius() - difference, true);
 								if (actor.attrs.get_item(31) > actor.get_light_radius()) {
 									actor.updateRadius(actor.get_light_radius(), actor.attrs.get_item(31));
@@ -13164,7 +13171,7 @@
 						if (actor.get_light_radius() > 0) {
 							if (actor.attrs.get_item(31) < actor.get_light_radius() - difference1) {
 								//if the player should notice...
-								$Forays_Actor.get_b().add(actor.your() + ' light grows brighter. ', [actor]);
+								$Forays_Actor.get_b().add$1(actor.your() + ' light grows brighter. ', actor);
 								actor.updateRadius$1(actor.lightRadius(), actor.get_light_radius() - difference1, true);
 							}
 						}
@@ -13298,17 +13305,17 @@
 										walks = ' flies straight into you! ';
 									}
 									if (!this.isHiddenFrom($Forays_Actor.get_player())) {
-										$Forays_Actor.get_b().add(this.theVisible() + walks, []);
+										$Forays_Actor.get_b().add(this.theVisible() + walks);
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' looks startled. ', []);
+											$Forays_Actor.get_b().add(this.get_the_name() + ' looks startled. ');
 										}
 									}
 									else {
 										this.attrs.set_item(77, -1);
 										this.attrs.set_item(14, this.attrs.get_item(14) + 1);
-										$Forays_Actor.get_b().add(this.aVisible() + walks, []);
+										$Forays_Actor.get_b().add(this.aVisible() + walks);
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' looks just as surprised as you. ', []);
+											$Forays_Actor.get_b().add(this.get_the_name() + ' looks just as surprised as you. ');
 										}
 									}
 									return true;
@@ -13391,18 +13398,18 @@
 						switch ($state) {
 							case 0: {
 								$state = -1;
-								if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item(r, c)) && $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() !== 35) {
+								if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item(r, c)) && $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() !== 35) {
 									$t1 = this.move(r, c);
 									$state = 2;
 									$t1.continueWith($sm);
 									return;
 								}
-								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 3 && this.hasAttr(6)) {
+								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() === 3 && this.hasAttr(6)) {
 									$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
 									$tcs.setResult(true);
 									return;
 								}
-								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 28) {
+								else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() === 28) {
 									if (this.hasAttr(9)) {
 										if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.grabPreventsMovement($Forays_PhysicalObject.get_m().tile.get_item(r, c))) {
 											$t2 = this.move(r, c);
@@ -13422,7 +13429,7 @@
 									}
 								}
 								else {
-									if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 20 && this.hasAttr(107)) {
+									if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() === 20 && this.hasAttr(107)) {
 										$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
 										$Forays_PhysicalObject.get_m().tile.get_item(r, c).toggle(this);
 										return true;
@@ -13640,7 +13647,7 @@
 									this.path.removeAt(0);
 								}
 								else {
-									if (this.path.length > 0 && $Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]).get_type() === 35) {
+									if (this.path.length > 0 && $Forays_PhysicalObject.get_m().tile.get_item$1(this.path[0]).get_ttype() === 35) {
 										this.path.clear();
 									}
 									if (this.path.length > 1 && this.distanceFrom$1(this.path[1]) === 1) {
@@ -13695,7 +13702,7 @@
 									return false;
 								}
 								//pos pos_of_target = new pos(a.row,a.col);
-								info = $Forays_AttackList.attack(this.get_type(), attack_idx);
+								info = $Forays_AttackList.attack(this.get_atype(), attack_idx);
 								if (this.weapons[0] !== 11) {
 									info.damage = $Forays_Weapon.damage(this.weapons[0]);
 								}
@@ -13753,12 +13760,12 @@
 								if (ss.referenceEquals(this, $Forays_Actor.get_player()) || ss.referenceEquals(a, $Forays_Actor.get_player())) {
 									player_in_combat = true;
 								}
-								if (attack_idx === 2 && (this.get_type() === 11 || this.get_type() === 2)) {
+								if (attack_idx === 2 && (this.get_atype() === 11 || this.get_atype() === 2)) {
 									hit = true;
 									//hack! these are the 2 'area' attacks that always hit
 									player_in_combat = false;
 								}
-								if (ss.referenceEquals(a, $Forays_Actor.get_player()) && this.get_type() === 53) {
+								if (ss.referenceEquals(a, $Forays_Actor.get_player()) && this.get_atype() === 53) {
 									player_in_combat = false;
 								}
 								if (player_in_combat) {
@@ -13769,15 +13776,15 @@
 								if (hit) {
 									if (this.hasFeat(18) && a.hasAttr(5) && this.isHiddenFrom(a)) {
 										if (!this.hasAttr(68)) {
-											$Forays_Actor.get_b().add(this.you('silently snap') + ' ' + a.your() + ' neck. ', []);
+											$Forays_Actor.get_b().add(this.you('silently snap') + ' ' + a.your() + ' neck. ');
 											$t3 = a.takeDamage$1(0, 2, 9001, this);
 											$state = 4;
 											$t3.continueWith($sm);
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.you('silently snap') + ' ' + a.your() + ' neck. ', []);
-											$Forays_Actor.get_b().add('It doesn\'t seem to affect ' + a.get_the_name() + '. ', []);
+											$Forays_Actor.get_b().add(this.you('silently snap') + ' ' + a.your() + ' neck. ');
+											$Forays_Actor.get_b().add('It doesn\'t seem to affect ' + a.get_the_name() + '. ');
 											$state = 3;
 											continue $sm1;
 										}
@@ -13792,7 +13799,7 @@
 										list.remove(this);
 										//don't consider yourself or the original target
 										if (list.length > 0) {
-											$Forays_Actor.get_b().add(a.you('deflect') + ' the attack. ', [this, a]);
+											$Forays_Actor.get_b().add$3(a.you('deflect') + ' the attack. ', this, a);
 											$t13 = this.attack(attack_idx, list[$Forays_Global.roll$1(1, list.length) - 1]);
 											$state = 7;
 											$t13.continueWith($sm);
@@ -13851,32 +13858,32 @@
 								}
 								if (sneak_attack && crit) {
 									if (!a.hasAttr(1) && !a.hasAttr(2) && !a.hasAttr(3) && !a.hasAttr(107)) {
-										if (a.get_type() !== 0) {
+										if (a.get_atype() !== 0) {
 											//being nice to the player here...
 											switch (this.weapons[0]) {
 												case 0:
 												case 5: {
-													$Forays_Actor.get_b().add('You run ' + a.theVisible() + ' through! ', []);
+													$Forays_Actor.get_b().add('You run ' + a.theVisible() + ' through! ');
 													break;
 												}
 												case 1:
 												case 6: {
-													$Forays_Actor.get_b().add('You bash ' + a.yourVisible() + ' head in! ', []);
+													$Forays_Actor.get_b().add('You bash ' + a.yourVisible() + ' head in! ');
 													break;
 												}
 												case 2:
 												case 7: {
-													$Forays_Actor.get_b().add('You pierce one of ' + a.yourVisible() + ' vital organs! ', []);
+													$Forays_Actor.get_b().add('You pierce one of ' + a.yourVisible() + ' vital organs! ');
 													break;
 												}
 												case 3:
 												case 8: {
-													$Forays_Actor.get_b().add('You bring your staff down on ' + a.yourVisible() + ' head with a loud crack! ', []);
+													$Forays_Actor.get_b().add('You bring your staff down on ' + a.yourVisible() + ' head with a loud crack! ');
 													break;
 												}
 												case 4:
 												case 9: {
-													$Forays_Actor.get_b().add('You choke ' + a.theVisible() + ' with your bowstring! ', []);
+													$Forays_Actor.get_b().add('You choke ' + a.theVisible() + ' with your bowstring! ');
 													break;
 												}
 												default: {
@@ -13891,8 +13898,8 @@
 										}
 										else {
 											//...but not too nice
-											$Forays_Actor.get_b().add(this.aVisible() + ' strikes from hiding! ', []);
-											$Forays_Actor.get_b().add('The deadly attack leaves you stunned! ', []);
+											$Forays_Actor.get_b().add(this.aVisible() + ' strikes from hiding! ');
+											$Forays_Actor.get_b().add('The deadly attack leaves you stunned! ');
 											lotsofdamage = Math.max(dice * 6, ss.Int32.div(a.get_curhp(), 2));
 											a.attrs.set_item(27, a.attrs.get_item(27) + 1);
 											$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(a, $Forays_Global.roll$1(2, 5) * 100, 27, 'You are no longer stunned. '));
@@ -13924,33 +13931,33 @@
 								if (ss.referenceEquals(this, $Forays_Actor.get_player()) || ss.referenceEquals(a, $Forays_Actor.get_player()) || $Forays_Actor.get_player().canSee(this) || $Forays_Actor.get_player().canSee(a)) {
 									//didn't change this yet
 									if (s === '& lunges forward and ^hits *. ') {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' lunges forward and misses ' + a.get_the_name() + '. ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' lunges forward and misses ' + a.get_the_name() + '. ');
 									}
 									else if (s === '& hits * with a blast of cold. ') {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' nearly hits ' + a.get_the_name() + ' with a blast of cold. ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' nearly hits ' + a.get_the_name() + ' with a blast of cold. ');
 									}
 									else if (s.length >= 20 && s.substring(0, 20) === '& extends a tentacle') {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' misses ' + a.get_the_name() + ' with a tentacle. ', []);
+										$Forays_Actor.get_b().add(this.get_the_name() + ' misses ' + a.get_the_name() + ' with a tentacle. ');
 									}
 									else if (this.hasFeat(3)) {
-										$Forays_Actor.get_b().add(this.you('drive') + ' ' + a.theVisible() + ' back. ', []);
+										$Forays_Actor.get_b().add(this.you('drive') + ' ' + a.theVisible() + ' back. ');
 									}
 									else if (a.armorClass() > 0 && !no_armor_message) {
-										if (a.get_type() !== 0) {
-											$Forays_Actor.get_b().add(a.yourVisible() + ' armor blocks ' + this.yourVisible() + ' attack. ', []);
+										if (a.get_atype() !== 0) {
+											$Forays_Actor.get_b().add(a.yourVisible() + ' armor blocks ' + this.yourVisible() + ' attack. ');
 										}
 										else {
 											miss_chance = 25 - plus_to_hit;
 											if ($Forays_Global.roll(miss_chance) <= $Forays_Armor.protection(a.armors[0]) * 2) {
-												$Forays_Actor.get_b().add(a.yourVisible() + ' armor blocks ' + this.yourVisible() + ' attack. ', []);
+												$Forays_Actor.get_b().add(a.yourVisible() + ' armor blocks ' + this.yourVisible() + ' attack. ');
 											}
 											else {
-												$Forays_Actor.get_b().add(this.youVisible$1('miss', true) + ' ' + a.theVisible() + '. ', []);
+												$Forays_Actor.get_b().add(this.youVisible$1('miss', true) + ' ' + a.theVisible() + '. ');
 											}
 										}
 									}
 									else {
-										$Forays_Actor.get_b().add(this.youVisible$1('miss', true) + ' ' + a.theVisible() + '. ', []);
+										$Forays_Actor.get_b().add(this.youVisible$1('miss', true) + ' ' + a.theVisible() + '. ');
 									}
 								}
 								if (this.hasFeat(3)) {
@@ -13989,8 +13996,8 @@
 							case 8: {
 								$state = -1;
 								if (sneak_attack) {
-									$Forays_Actor.get_b().add(this.youVisible('strike') + ' from hiding! ', []);
-									if (this.get_type() !== 0) {
+									$Forays_Actor.get_b().add(this.youVisible('strike') + ' from hiding! ');
+									if (this.get_atype() !== 0) {
 										this.attrs.set_item(77, -1);
 										this.attrs.set_item(14, this.attrs.get_item(14) + 1);
 									}
@@ -13999,7 +14006,7 @@
 										a.attrs.set_item(15, a.attrs.get_item(15) + 1);
 									}
 								}
-								$Forays_Actor.get_b().add(s, [this, a]);
+								$Forays_Actor.get_b().add$3(s, this, a);
 								if (crit) {
 									dmg = dice * 6;
 								}
@@ -14009,7 +14016,7 @@
 								dmg += this.totalSkill(0);
 								r = a.get_row();
 								c = a.get_col();
-								troll = a.get_type() === 31 || a.get_type() === 46;
+								troll = a.get_atype() === 31 || a.get_atype() === 46;
 								mech_shield = a.hasAttr(76);
 								if (crit && mech_shield) {
 									a.attrs.set_item(76, 0);
@@ -14029,9 +14036,9 @@
 							}
 							case 11: {
 								$state = -1;
-								if (a.get_type() === 8) {
+								if (a.get_atype() === 8) {
 									if (a.attrs.get_item(98) > 0) {
-										$Forays_Actor.get_b().add(a.get_the_name() + ' returns to a defensive stance. ', [a]);
+										$Forays_Actor.get_b().add$1(a.get_the_name() + ' returns to a defensive stance. ', a);
 										a.attrs.set_item(98, 0);
 									}
 									a.attrs.set_item(69, a.attrs.get_item(69) + 1);
@@ -14054,7 +14061,7 @@
 											amount = $Forays_Global.roll(6);
 											if (!a.hasAttr(61) || ss.Int32.div(amount, a.attrs.get_item(61)) > 0) {
 												//todo i think resistance is wrong here
-												$Forays_Actor.get_b().add(a.youAre() + ' burned. ', [a]);
+												$Forays_Actor.get_b().add$1(a.youAre() + ' burned. ', a);
 											}
 											$t7 = a.takeDamage$2(1, 0, amount, this, this.get_a_name());
 											$state = 16;
@@ -14086,17 +14093,17 @@
 								$state = -1;
 								if (troll && this.hasAttr(47) && $Forays_PhysicalObject.get_m().tile.get_item(r, c).is(1)) {
 									$Forays_PhysicalObject.get_m().tile.get_item(r, c).features.remove(1);
-									$Forays_Actor.get_b().add('The troll corpse burns to ashes! ', [$Forays_PhysicalObject.get_m().tile.get_item(r, c)]);
+									$Forays_Actor.get_b().add$1('The troll corpse burns to ashes! ', $Forays_PhysicalObject.get_m().tile.get_item(r, c));
 								}
 								if (troll && this.hasAttr(47) && $Forays_PhysicalObject.get_m().tile.get_item(r, c).is(2)) {
 									$Forays_PhysicalObject.get_m().tile.get_item(r, c).features.remove(2);
-									$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [$Forays_PhysicalObject.get_m().tile.get_item(r, c)]);
+									$Forays_Actor.get_b().add$1('The troll seer corpse burns to ashes! ', $Forays_PhysicalObject.get_m().tile.get_item(r, c));
 								}
 								if (this.hasAttr(48) && attack_idx === 0 && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									//hack: only applies to attack 0
 									if (!a.hasAttr(103)) {
 										//to prevent the message
-										$Forays_Actor.get_b().add(a.youAre() + ' chilled. ', [a]);
+										$Forays_Actor.get_b().add$1(a.youAre() + ' chilled. ', a);
 										$t8 = a.takeDamage$2(2, 0, $Forays_Global.roll$1(1, 6), this, this.get_a_name());
 										$state = 18;
 										$t8.continueWith($sm);
@@ -14119,19 +14126,19 @@
 								if (this.hasAttr(49) && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									if (!a.hasAttr(1) && !a.hasAttr(2) && !a.hasAttr(49) && !a.hasAttr(67)) {
 										if (a.hasAttr(29)) {
-											$Forays_Actor.get_b().add(a.youAre() + ' more poisoned. ', [a]);
+											$Forays_Actor.get_b().add$1(a.youAre() + ' more poisoned. ', a);
 										}
 										else {
-											$Forays_Actor.get_b().add(a.youAre() + ' poisoned. ', [a]);
+											$Forays_Actor.get_b().add$1(a.youAre() + ' poisoned. ', a);
 										}
 										a.attrs.set_item(29, a.attrs.get_item(29) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(a, ($Forays_Global.roll(6) + 6) * 100, 29));
 									}
 								}
-								if (this.hasAttr(50) && attack_idx === 1 && this.get_type() === 41 && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
+								if (this.hasAttr(50) && attack_idx === 1 && this.get_atype() === 41 && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									if (!a.hasAttr(67)) {
 										//hack: carrion crawler only
-										$Forays_Actor.get_b().add(a.youAre() + ' paralyzed. ', [a]);
+										$Forays_Actor.get_b().add$1(a.youAre() + ' paralyzed. ', a);
 										a.attrs.set_item(28, $Forays_Global.roll$1(1, 3) + 3);
 									}
 								}
@@ -14145,7 +14152,7 @@
 										}
 										else {
 											if (!a.hasAttr(27)) {
-												$Forays_Actor.get_b().add(a.youAre() + ' stunned. ', [a]);
+												$Forays_Actor.get_b().add$1(a.youAre() + ' stunned. ', a);
 												a.attrs.set_item(27, a.attrs.get_item(27) + 1);
 												duration = ($Forays_Global.roll(4) + 3) * 100;
 												if (crit) {
@@ -14175,8 +14182,8 @@
 								$state = -1;
 								if (this.hasAttr(52) && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									str = '';
-									if (a.get_type() === 0) {
-										$Forays_Actor.get_b().add('Your vision grows weak. ', []);
+									if (a.get_atype() === 0) {
+										$Forays_Actor.get_b().add('Your vision grows weak. ');
 										str = 'Your vision returns to normal. ';
 									}
 									//a.attrs[AttrType.DIM_VISION]++;
@@ -14188,7 +14195,7 @@
 									$t10 = $Forays_PhysicalObject.get_m().tile.get_item(r, c).tilesWithinDistance(1);
 									for ($t11 = 0; $t11 < $t10.length; $t11++) {
 										t = $t10[$t11];
-										if (ss.isNullOrUndefined(t.actor()) && (t.get_type() === 1 || t.get_type() === 7)) {
+										if (ss.isNullOrUndefined(t.actor()) && (t.get_ttype() === 1 || t.get_ttype() === 7)) {
 											if ($Forays_Global.coinFlip()) {
 												//50% for each...
 												tiles.add(t);
@@ -14197,7 +14204,7 @@
 									}
 									for ($t12 = 0; $t12 < tiles.length; $t12++) {
 										t1 = tiles[$t12];
-										if (t1.get_type() === 7) {
+										if (t1.get_ttype() === 7) {
 											$Forays_Actor.get_q().killEvents$1(t1, 10);
 										}
 										else {
@@ -14209,17 +14216,17 @@
 								if (this.hasAttr(56) && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !this.hasAttr(97) && this.distanceFrom(a) === 1) {
 									a.attrs.set_item(96, a.attrs.get_item(96) + 1);
 									this.attrs.set_item(97, this.directionOf(a));
-									$Forays_Actor.get_b().add(this.get_the_name() + ' grabs ' + a.get_the_name() + '. ', [this, a]);
+									$Forays_Actor.get_b().add$3(this.get_the_name() + ' grabs ' + a.get_the_name() + '. ', this, a);
 								}
 								if (this.hasAttr(55) && this.get_curhp() < this.get_maxhp()) {
 									this.set_curhp(this.get_curhp() + 10);
 									if (this.get_curhp() > this.get_maxhp()) {
 										this.set_curhp(this.get_maxhp());
 									}
-									$Forays_Actor.get_b().add(this.youFeel() + ' restored. ', [this]);
+									$Forays_Actor.get_b().add$1(this.youFeel() + ' restored. ', this);
 								}
 								if (this.hasAttr(54) && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
-									$Forays_Actor.get_b().add(a.youAre() + ' stunned. ', [a]);
+									$Forays_Actor.get_b().add$1(a.youAre() + ' stunned. ', a);
 									duration1 = 550;
 									if (crit) {
 										duration1 += 250;
@@ -14228,12 +14235,12 @@
 									a.gainAttrRefreshDuration$1(27, duration1, a.youAre() + ' no longer stunned. ', [a]);
 								}
 								if (crit && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
-									$Forays_Actor.get_b().add(a.youAre() + ' stunned. ', [a]);
+									$Forays_Actor.get_b().add$1(a.youAre() + ' stunned. ', a);
 									a.gainAttrRefreshDuration$1(27, 250, a.youAre() + ' no longer stunned. ', [a]);
 								}
-								if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && a.get_type() === 8) {
+								if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && a.get_atype() === 8) {
 									if (a.attrs.get_item(98) > 0) {
-										$Forays_Actor.get_b().add(a.get_the_name() + ' returns to a defensive stance. ', [a]);
+										$Forays_Actor.get_b().add$1(a.get_the_name() + ' returns to a defensive stance. ', a);
 										a.attrs.set_item(98, 0);
 									}
 									a.attrs.set_item(69, a.attrs.get_item(69) + 1);
@@ -14351,10 +14358,10 @@
 									}
 								}
 								if (this.hasAttr(57)) {
-									$Forays_Actor.get_b().add(this.you('fire') + ' a flaming arrow. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('fire') + ' a flaming arrow. ', this);
 								}
 								else {
-									$Forays_Actor.get_b().add(this.you('fire') + ' an arrow. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('fire') + ' an arrow. ', this);
 								}
 								$Forays_Actor.get_b().displayNow();
 								if (ss.isValue(a)) {
@@ -14366,12 +14373,12 @@
 								idx = 0;
 								for ($t2 = 0; $t2 < misses.length; $t2++) {
 									s = misses[$t2];
-									$Forays_Actor.get_b().add(s, [missed[idx]]);
+									$Forays_Actor.get_b().add$1(s, missed[idx]);
 									++idx;
 								}
 								if (ss.isValue(a)) {
 									if (a.hasAttr(66)) {
-										$Forays_Actor.get_b().add('The arrow sticks out ineffectively from ' + a.get_the_name() + '. ', [a]);
+										$Forays_Actor.get_b().add$1('The arrow sticks out ineffectively from ' + a.get_the_name() + '. ', a);
 										$state = 2;
 										continue $sm1;
 									}
@@ -14388,14 +14395,14 @@
 											critical_target -= missing_fifths;
 										}
 										if ($Forays_Global.roll$1(1, 20) >= critical_target) {
-											$Forays_Actor.get_b().add('The arrow critically hits ' + a.get_the_name() + '. ', [a]);
+											$Forays_Actor.get_b().add$1('The arrow critically hits ' + a.get_the_name() + '. ', a);
 											$t3 = a.takeDamage$2(8, 0, 18 + this.totalSkill(0), this, this.your() + ' arrow');
 											$state = 4;
 											$t3.continueWith($sm);
 											return;
 										}
 										else {
-											$Forays_Actor.get_b().add('The arrow hits ' + a.get_the_name() + '. ', [a]);
+											$Forays_Actor.get_b().add$1('The arrow hits ' + a.get_the_name() + '. ', a);
 											$t4 = a.takeDamage$2(8, 0, $Forays_Global.roll$1(3, 6) + this.totalSkill(0), this, this.your() + ' arrow');
 											$state = 5;
 											$t4.continueWith($sm);
@@ -14405,7 +14412,7 @@
 								}
 								else {
 									if (!actor_present) {
-										$Forays_Actor.get_b().add('The arrow hits ' + t.get_the_name() + '. ', [t]);
+										$Forays_Actor.get_b().add$1('The arrow hits ' + t.get_the_name() + '. ', t);
 									}
 									$state = 2;
 									continue $sm1;
@@ -14451,7 +14458,7 @@
 								}
 								w = this.weapons[$t5];
 								if (w === 9) {
-									$Forays_Actor.get_b().add(a.get_the_name() + ' is blasted with holy energy! ', [a]);
+									$Forays_Actor.get_b().add$1(a.get_the_name() + ' is blasted with holy energy! ', a);
 									$t6 = a.takeDamage$1(9, 1, $Forays_Global.roll$1(3, 6), this);
 									$state = 9;
 									$t6.continueWith($sm);
@@ -14595,13 +14602,13 @@
 									this.attrs.set_item(30, this.attrs.get_item(30) - ss.Int32.div(dmg.get_amount() * 9, 10));
 									if (this.attrs.get_item(30) <= 0) {
 										this.attrs.set_item(30, 0);
-										$Forays_Actor.get_b().add('The ice breaks! ', [this]);
+										$Forays_Actor.get_b().add$1('The ice breaks! ', this);
 									}
 									//dmg.amount = dmg.amount / 2;
 									dmg.set_amount(ss.Int32.div(dmg.get_amount(), 10));
 								}
 								if (this.hasAttr(76)) {
-									$Forays_Actor.get_b().add(this.your() + ' shield moves to protect it from harm. ', [this]);
+									$Forays_Actor.get_b().add$1(this.your() + ' shield moves to protect it from harm. ', this);
 									return true;
 								}
 								if (this.hasAttr(103)) {
@@ -14626,7 +14633,7 @@
 										this.attrs.set_item(73, 0);
 									}
 									if (!this.hasAttr(73)) {
-										$Forays_Actor.get_b().add(this.your() + ' arcane shield crumbles. ', [this]);
+										$Forays_Actor.get_b().add$1(this.your() + ' arcane shield crumbles. ', this);
 									}
 								}
 								resisted = false;
@@ -14637,7 +14644,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' undamaged. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' undamaged. ', this);
 										}
 										break;
 									}
@@ -14647,7 +14654,7 @@
 											for (i = this.attrs.get_item(58); i > 0; --i) {
 												div = div * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div));
@@ -14656,7 +14663,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14666,7 +14673,7 @@
 											for (i1 = this.attrs.get_item(60); i1 > 0; --i1) {
 												div1 = div1 * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div1));
@@ -14675,7 +14682,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14685,7 +14692,7 @@
 											for (i2 = this.attrs.get_item(59); i2 > 0; --i2) {
 												div2 = div2 * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div2));
@@ -14694,7 +14701,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14704,7 +14711,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14718,7 +14725,7 @@
 											for (i3 = this.attrs.get_item(61); i3 > 0; --i3) {
 												div3 = div3 * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div3));
@@ -14734,8 +14741,8 @@
 											//B.Add(the_name + " leaps about as it catches fire! ",this);
 											//}
 										}
-										else if (this.get_type() !== 52) {
-											$Forays_Actor.get_b().add(this.youAre() + ' unburnt. ', [this]);
+										else if (this.get_atype() !== 52) {
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unburnt. ', this);
 										}
 										break;
 									}
@@ -14749,7 +14756,7 @@
 											for (i4 = this.attrs.get_item(62); i4 > 0; --i4) {
 												div4 = div4 * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div4));
@@ -14758,7 +14765,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14768,7 +14775,7 @@
 											for (i5 = this.attrs.get_item(63); i5 > 0; --i5) {
 												div5 = div5 * 2;
 											}
-											$Forays_Actor.get_b().add(this.you('resist') + '. ', [this]);
+											$Forays_Actor.get_b().add$1(this.you('resist') + '. ', this);
 											resisted = true;
 										}
 										dmg.set_amount(ss.Int32.div(dmg.get_amount(), div5));
@@ -14777,7 +14784,7 @@
 											damage_dealt = true;
 										}
 										else {
-											$Forays_Actor.get_b().add(this.youAre() + ' unharmed. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youAre() + ' unharmed. ', this);
 										}
 										break;
 									}
@@ -14788,16 +14795,16 @@
 										if (dmg.get_amount() > 0) {
 											this.set_curhp(this.get_curhp() - dmg.get_amount());
 											damage_dealt = true;
-											if (this.get_type() === 0) {
+											if (this.get_atype() === 0) {
 												if (this.tile().is(6)) {
-													$Forays_Actor.get_b().add('The poisonous gas burns your skin! ', []);
+													$Forays_Actor.get_b().add('The poisonous gas burns your skin! ');
 												}
 												else {
-													$Forays_Actor.get_b().add('You feel the poison coursing through your veins! ', []);
+													$Forays_Actor.get_b().add('You feel the poison coursing through your veins! ');
 												}
 											}
 											else if ($Forays_Global.roll$1(1, 5) === 5) {
-												$Forays_Actor.get_b().add(this.get_the_name() + ' shudders. ', [this]);
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' shudders. ', this);
 											}
 										}
 										break;
@@ -14843,13 +14850,13 @@
 										$Forays_Global.flushInput();
 									}
 									if (ss.isValue(dmg.source)) {
-										if (this.get_type() !== 0 && !ss.referenceEquals(dmg.source, this)) {
+										if (this.get_atype() !== 0 && !ss.referenceEquals(dmg.source, this)) {
 											this.set_target(dmg.source);
 											this.target_location = $Forays_PhysicalObject.get_m().tile.get_item(dmg.source.get_row(), dmg.source.get_col());
 											if (dmg.source.isHiddenFrom(this)) {
 												this.player_visibility_duration = -1;
 											}
-											if (this.get_type() === 33 && ss.referenceEquals(dmg.source, $Forays_Actor.get_player()) && !this.hasAttr(69) && !$Forays_PhysicalObject.get_m().get_wiz_lite() && !this.canSee($Forays_Actor.get_player()) && this.get_curhp() > 0) {
+											if (this.get_atype() === 33 && ss.referenceEquals(dmg.source, $Forays_Actor.get_player()) && !this.hasAttr(69) && !$Forays_PhysicalObject.get_m().get_wiz_lite() && !this.canSee($Forays_Actor.get_player()) && this.get_curhp() > 0) {
 												$t2 = [];
 												$t2.add('Show yourself');
 												$t2.add('Reveal yourself');
@@ -14876,9 +14883,9 @@
 												$t4.add('cur');
 												$t4.add('rogue');
 												noun = $t4;
-												$Forays_Actor.get_b().add(this.theVisible() + ' shouts "' + $Forays_Extensions.random(String).call(null, verb) + ', ' + $Forays_Extensions.random(String).call(null, adjective) + ' ' + $Forays_Extensions.random(String).call(null, noun) + '!" ', []);
-												$Forays_Actor.get_b().add(this.get_the_name() + ' raises a gauntlet. ', [this]);
-												$Forays_Actor.get_b().add('Sunlight fills the dungeon. ', []);
+												$Forays_Actor.get_b().add(this.theVisible() + ' shouts "' + $Forays_Extensions.random(String).call(null, verb) + ', ' + $Forays_Extensions.random(String).call(null, adjective) + ' ' + $Forays_Extensions.random(String).call(null, noun) + '!" ');
+												$Forays_Actor.get_b().add$1(this.get_the_name() + ' raises a gauntlet. ', this);
+												$Forays_Actor.get_b().add('Sunlight fills the dungeon. ');
 												$Forays_PhysicalObject.get_m().set_wiz_lite(true);
 												$Forays_PhysicalObject.get_m().set_wiz_dark(false);
 												this.attrs.set_item(69, this.attrs.get_item(69) + 1);
@@ -14888,7 +14895,7 @@
 									if (this.hasAttr(74) && !this.hasAttr(69)) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, ($Forays_Global.roll$1(1, 5) + 1) * 100, 69));
-										$Forays_Actor.get_b().add(this.you('retaliate') + ' with a burst of spores! ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('retaliate') + ' with a burst of spores! ', this);
 										for (i6 = 2; i6 <= 8; i6 += 2) {
 											this.animateStorm(i6, 1, ss.Int32.div((i6 * 2 + 1) * (i6 * 2 + 1), 4), '*', 13);
 										}
@@ -14896,28 +14903,28 @@
 										for ($t6 = 0; $t6 < $t5.length; $t6++) {
 											a = $t5[$t6];
 											if (this.hasLOE$1(a.get_row(), a.get_col()) && !ss.referenceEquals(a, this)) {
-												$Forays_Actor.get_b().add('The spores hit ' + a.get_the_name() + '. ', [a]);
+												$Forays_Actor.get_b().add$1('The spores hit ' + a.get_the_name() + '. ', a);
 												if (!a.hasAttr(1) && !a.hasAttr(2) && !a.hasAttr(74) && !a.hasAttr(67)) {
 													duration = $Forays_Global.roll$1(2, 4);
 													a.attrs.set_item(29, a.attrs.get_item(29) + 1);
 													$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(a, duration * 100, 29));
 													if (a.get_name() === 'you') {
-														$Forays_Actor.get_b().add('You are poisoned. ', []);
+														$Forays_Actor.get_b().add('You are poisoned. ');
 													}
 													if (!a.hasAttr(27)) {
 														a.attrs.set_item(27, a.attrs.get_item(27) + 1);
 														$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(a, duration * 100, 27, a.youAre() + ' no longer stunned. ', [a]));
-														$Forays_Actor.get_b().add(a.youAre() + ' stunned. ', [a]);
+														$Forays_Actor.get_b().add$1(a.youAre() + ' stunned. ', a);
 													}
 												}
 												else {
-													$Forays_Actor.get_b().add(a.youAre() + ' unaffected. ', [a]);
+													$Forays_Actor.get_b().add$1(a.youAre() + ' unaffected. ', a);
 												}
 											}
 										}
 									}
 									if (this.hasAttr(72) && ss.isValue(dmg.source)) {
-										$Forays_Actor.get_b().add(this.yourVisible() + ' holy shield burns ' + dmg.source.theVisible() + '. ', [this, dmg.source]);
+										$Forays_Actor.get_b().add$2(this.yourVisible() + ' holy shield burns ' + dmg.source.theVisible() + '. ', [this, dmg.source]);
 										amount = $Forays_Global.roll$1(2, 6);
 										if (amount >= dmg.source.get_curhp()) {
 											amount = dmg.source.get_curhp() - 1;
@@ -14944,7 +14951,7 @@
 								$state = -1;
 								if (this.hasFeat(15) && dmg.type !== 4 && this.attrs.get_item(84) < 5) {
 									//if(!Global.Option(OptionType.NO_BLOOD_BOIL_MESSAGE)){
-									$Forays_Actor.get_b().add('Your blood boils! ', []);
+									$Forays_Actor.get_b().add('Your blood boils! ');
 									//}
 									this.set_speed(this.get_speed() - 10);
 									this.attrs.set_item(84, this.attrs.get_item(84) + 1);
@@ -14953,15 +14960,15 @@
 									//GainAttr(AttrType.BLOOD_BOILED,1001,attrs[Forays.AttrType.BLOOD_BOILED],"Your blood cools. ");
 									$Forays_Actor.get_q().add(new $Forays_Event.$ctorb(this, 1000, 84, this.attrs.get_item(84), 'Your blood cools. '));
 								}
-								if (this.get_type() === 47) {
+								if (this.get_atype() === 47) {
 									if (this.get_curhp() <= 10 && this.get_curhp() > 0 && !this.hasAttr(69) && !this.hasAttr(70)) {
 										if ($Forays_Global.coinFlip()) {
-											$Forays_Actor.get_b().add(this.your() + ' arms are destroyed! ', [this]);
+											$Forays_Actor.get_b().add$1(this.your() + ' arms are destroyed! ', this);
 											this.attrs.set_item(69, this.attrs.get_item(69) + 1);
 											this.attrs.set_item(76, 0);
 										}
 										else {
-											$Forays_Actor.get_b().add(this.your() + ' legs are destroyed! ', [this]);
+											$Forays_Actor.get_b().add$1(this.your() + ' legs are destroyed! ', this);
 											this.attrs.set_item(70, this.attrs.get_item(70) + 1);
 											this.attrs.set_item(12, this.attrs.get_item(12) + 1);
 											this.path.clear();
@@ -14975,11 +14982,11 @@
 							case 3: {
 								$state = -1;
 								if (this.get_curhp() <= 0) {
-									if (this.get_type() === 0) {
+									if (this.get_atype() === 0) {
 										if (this.magic_items.contains(0)) {
 											this.magic_items.remove(0);
 											this.set_curhp(1);
-											$Forays_Actor.get_b().add('Your pendant glows brightly, then crumbles to dust. ', []);
+											$Forays_Actor.get_b().add('Your pendant glows brightly, then crumbles to dust. ');
 											$state = 6;
 											continue $sm1;
 										}
@@ -14992,7 +14999,7 @@
 											}
 											$Forays_PhysicalObject.get_m().draw();
 											if ($Forays_Global.gamE_OVER === false) {
-												$Forays_Actor.get_b().add('You die. ', []);
+												$Forays_Actor.get_b().add('You die. ');
 											}
 											$t8 = $Forays_Actor.get_b().printAll();
 											$state = 7;
@@ -15003,7 +15010,7 @@
 									else {
 										if (this.hasAttr(107)) {
 											$Forays_PhysicalObject.get_m().draw();
-											$Forays_Actor.get_b().add('The fire drake dies. ', []);
+											$Forays_Actor.get_b().add('The fire drake dies. ');
 											$t9 = $Forays_Actor.get_b().printAll();
 											$state = 9;
 											$t9.continueWith($sm);
@@ -15015,7 +15022,7 @@
 								}
 								else {
 									if (this.hasFeat(14) && damage_dealt && this.get_curhp() < 20 && old_hp >= 20) {
-										$Forays_Actor.get_b().add('You can feel no pain! ', []);
+										$Forays_Actor.get_b().add('You can feel no pain! ');
 										this.attrs.set_item(103, this.attrs.get_item(103) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, 500, 103, 'You can feel pain again. '));
 									}
@@ -15040,11 +15047,11 @@
 								$state = -1;
 								$t9.getResult();
 								if ($Forays_Actor.get_player().get_curhp() > 0) {
-									$Forays_Actor.get_b().add('The threat to your nation has been slain! You begin the long trek home to deliver the good news... ', []);
+									$Forays_Actor.get_b().add('The threat to your nation has been slain! You begin the long trek home to deliver the good news... ');
 									$Forays_Global.killeD_BY = 'Died of ripe old age';
 								}
 								else {
-									$Forays_Actor.get_b().add('The threat to your nation has been slain! Unfortunately, you won\'t be able to deliver the news... ', []);
+									$Forays_Actor.get_b().add('The threat to your nation has been slain! Unfortunately, you won\'t be able to deliver the news... ');
 								}
 								$t10 = $Forays_Actor.get_b().printAll();
 								$state = 11;
@@ -15053,7 +15060,7 @@
 							}
 							case 8: {
 								$state = -1;
-								if (this.get_type() === 30 && dmg.get_amount() < 1000) {
+								if (this.get_atype() === 30 && dmg.get_amount() < 1000) {
 									//hack
 									if (!this.hasAttr(69)) {
 										this.attrs.set_item(69, this.attrs.get_item(69) + 1);
@@ -15062,19 +15069,19 @@
 										if (!this.hasAttr(70)) {
 											this.attrs.set_item(70, this.directionOf($Forays_Actor.get_player()));
 										}
-										$Forays_Actor.get_b().add(this.get_the_name() + ' somehow remains standing! He screams with fury! ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' somehow remains standing! He screams with fury! ', this);
 									}
 									return true;
 								}
 								if (this.hasAttr(25) && dmg.type !== 1) {
-									$Forays_Actor.get_b().add(this.get_the_name() + ' falls to the ground, still twitching. ', [this]);
+									$Forays_Actor.get_b().add$1(this.get_the_name() + ' falls to the ground, still twitching. ', this);
 									troll = null;
 									for (i7 = 0; i7 < $Forays_Actor.$COLS && ss.isNullOrUndefined(troll); ++i7) {
 										$t11 = this.tilesAtDistance(i7);
 										for ($t12 = 0; $t12 < $t11.length; $t12++) {
 											t = $t11[$t12];
 											if (t.get_passable() && !t.is(1) && !t.is(2) && !t.is(3)) {
-												if (this.get_type() === 31) {
+												if (this.get_atype() === 31) {
 													t.features.add(1);
 												}
 												else {
@@ -15096,23 +15103,23 @@
 									//everything that deals this much damage
 									if (this.hasAttr(1) || this.hasAttr(2)) {
 										//prints its own message
-										$Forays_Actor.get_b().add(this.get_the_name() + ' is destroyed. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' is destroyed. ', this);
 									}
 									else {
-										$Forays_Actor.get_b().add(this.get_the_name() + ' dies. ', [this]);
+										$Forays_Actor.get_b().add$1(this.get_the_name() + ' dies. ', this);
 									}
 								}
 								if (this.lightRadius() > 0) {
 									this.updateRadius(this.lightRadius(), 0);
 								}
-								if (this.get_type() === 21) {
+								if (this.get_atype() === 21) {
 									if ($Forays_Actor.get_player().hasAttr(46)) {
-										this.set_type(18);
+										this.set_atype(18);
 										//awful awful hack. (CalculateDimming checks for Shadows)
 										this.calculateDimming();
 									}
 								}
-								if (this.get_type() === 43) {
+								if (this.get_atype() === 43) {
 									$t13 = this.tilesWithinDistance(4);
 									for ($t14 = 0; $t14 < $t13.length; $t14++) {
 										t1 = $t13[$t14];
@@ -15127,7 +15134,7 @@
 									$t15 = $Forays_Actor.get_player().attrs;
 									$t15.set_item(88, $t15.get_item(88) + 1);
 								}
-								if (this.hasAttr(6) && this.get_type() !== 53 && this.get_type() !== 2 || this.get_type() === 18) {
+								if (this.hasAttr(6) && this.get_atype() !== 53 && this.get_atype() !== 2 || this.get_atype() === 18) {
 									if ($Forays_Global.coinFlip() && !this.hasAttr(26)) {
 										this.tile().getItem($Forays_Item.create$1($Forays_Item.randomItem(), -1, -1));
 									}
@@ -15153,12 +15160,12 @@
 								}
 								if (ss.isValue(this.group)) {
 									if (this.group.length >= 2 && ss.referenceEquals(this, this.group[0]) && this.hasAttr(11)) {
-										if (this.get_type() !== 50 && this.get_type() !== 12) {
+										if (this.get_atype() !== 50 && this.get_atype() !== 12) {
 											$t18 = this.group[1].attrs;
 											$t18.set_item(11, $t18.get_item(11) + 1);
 										}
 									}
-									if (this.group.length <= 2 || this.get_type() === 50 || this.get_type() === 12) {
+									if (this.group.length <= 2 || this.get_atype() === 50 || this.get_atype() === 12) {
 										for ($t19 = 0; $t19 < this.group.length; $t19++) {
 											a1 = this.group[$t19];
 											if (!ss.referenceEquals(a1, this)) {
@@ -15282,7 +15289,7 @@
 							}
 							case 13: {
 								$state = -1;
-								$Forays_Actor.get_b().add('Your cloak vanishes completely! ', []);
+								$Forays_Actor.get_b().add('Your cloak vanishes completely! ');
 								this.magic_items.remove(3);
 								$state = 6;
 								continue $sm1;
@@ -15312,7 +15319,7 @@
 							}
 							case 15: {
 								$state = -1;
-								$Forays_Actor.get_b().add('You escape. ', []);
+								$Forays_Actor.get_b().add('You escape. ');
 								$state = 12;
 								continue $sm1;
 							}
@@ -15384,7 +15391,7 @@
 								$state = -1;
 								idx = line.indexOf($Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()));
 								if (idx === -1) {
-									$Forays_Actor.get_b().add('DEBUG: Error - ' + this.get_the_name() + '\'s position doesn\'t seem to be in the line. ', []);
+									$Forays_Actor.get_b().add('DEBUG: Error - ' + this.get_the_name() + '\'s position doesn\'t seem to be in the line. ');
 									return false;
 								}
 								next = line[idx + 1];
@@ -15392,12 +15399,12 @@
 								no_movement = this.grabPreventsMovement(next) || this.hasAttr(12);
 								if (next.get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())) && !no_movement) {
 									if ($Forays_Actor.get_player().canSee(this.tile())) {
-										$Forays_Actor.get_b().add(this.youAre() + ' knocked back. ', [this]);
+										$Forays_Actor.get_b().add$1(this.youAre() + ' knocked back. ', this);
 									}
 									if (this.hasAttr(30)) {
 										this.attrs.set_item(30, 0);
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
-											$Forays_Actor.get_b().add('The ice breaks! ', [this]);
+											$Forays_Actor.get_b().add$1('The ice breaks! ', this);
 										}
 									}
 									$t1 = this.move(next.get_row(), next.get_col());
@@ -15411,7 +15418,7 @@
 									immobilized = this.hasAttr(30);
 									if (!next.get_passable()) {
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
-											$Forays_Actor.get_b().add(this.youVisibleAre() + ' knocked into ' + next.theVisible() + '. ', [this, next]);
+											$Forays_Actor.get_b().add$2(this.youVisibleAre() + ' knocked into ' + next.theVisible() + '. ', [this, next]);
 										}
 										$t2 = this.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), source, '*smashed against ' + next.get_a_name());
 										$state = 4;
@@ -15420,7 +15427,7 @@
 									}
 									else if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item$1(next.p))) {
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
-											$Forays_Actor.get_b().add(this.youVisibleAre() + ' knocked into ' + $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).theVisible() + '. ', [this, $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())]);
+											$Forays_Actor.get_b().add$2(this.youVisibleAre() + ' knocked into ' + $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).theVisible() + '. ', [this, $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())]);
 											//vis
 										}
 										this_name = this.get_a_name();
@@ -15432,7 +15439,7 @@
 									else {
 										//grabbed
 										if ($Forays_Actor.get_player().canSee(this.tile())) {
-											$Forays_Actor.get_b().add(this.youVisibleAre() + ' knocked about. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youVisibleAre() + ' knocked about. ', this);
 										}
 										grabber = null;
 										$t5 = this.actorsAtDistance(1);
@@ -15483,7 +15490,7 @@
 								$state = -1;
 								if (immobilized && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c))) {
 									if ($Forays_Actor.get_player().canSee(this.tile())) {
-										$Forays_Actor.get_b().add('The ice breaks! ', [this]);
+										$Forays_Actor.get_b().add$1('The ice breaks! ', this);
 									}
 								}
 								$state = 1;
@@ -15640,10 +15647,10 @@
 									if (a.hasAttr(75) && a.hasLOE(this)) {
 										if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 											if (this.canSee(a)) {
-												$Forays_Actor.get_b().add(a.your() + ' presence disrupts your spell! ', []);
+												$Forays_Actor.get_b().add(a.your() + ' presence disrupts your spell! ');
 											}
 											else {
-												$Forays_Actor.get_b().add('Something disrupts your spell! ', []);
+												$Forays_Actor.get_b().add('Something disrupts your spell! ');
 											}
 										}
 										return false;
@@ -15674,10 +15681,10 @@
 									}
 									if ($Forays_Global.roll$1(1, 100) - fail <= 0) {
 										if ($Forays_Actor.get_player().canSee(this)) {
-											$Forays_Actor.get_b().add('Sparks fly from ' + this.your() + ' fingers. ', [this]);
+											$Forays_Actor.get_b().add$1('Sparks fly from ' + this.your() + ' fingers. ', this);
 										}
 										else if ($Forays_Actor.get_player().distanceFrom(this) <= 4 || $Forays_Actor.get_player().distanceFrom(this) <= 12 && $Forays_Actor.get_player().hasLOS$1(this.get_row(), this.get_col())) {
-											$Forays_Actor.get_b().add('You hear words of magic, but nothing happens. ', []);
+											$Forays_Actor.get_b().add('You hear words of magic, but nothing happens. ');
 										}
 										this.q1();
 										return true;
@@ -15696,9 +15703,9 @@
 								}
 								if (spell === 0) {
 									if (!this.hasAttr(16)) {
-										$Forays_Actor.get_b().add('You cast shine. ', []);
+										$Forays_Actor.get_b().add('You cast shine. ');
 										if (!$Forays_PhysicalObject.get_m().get_wiz_dark()) {
-											$Forays_Actor.get_b().add('Your torch begins to shine brightly. ', []);
+											$Forays_Actor.get_b().add('Your torch begins to shine brightly. ');
 										}
 										this.attrs.set_item(16, this.attrs.get_item(16) + 1);
 										if (this.get_light_radius() > 0) {
@@ -15708,7 +15715,7 @@
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, 10000, 16, 'Your torch no longer shines as brightly. '));
 									}
 									else {
-										$Forays_Actor.get_b().add('Your torch is already shining brightly! ', []);
+										$Forays_Actor.get_b().add('Your torch is already shining brightly! ');
 										return false;
 									}
 									$state = 2;
@@ -15761,10 +15768,10 @@
 								}
 								else if (spell === 6) {
 									if (!this.hasAttr(41)) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' bloodscent. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' bloodscent. ', this);
 										this.attrs.set_item(41, this.attrs.get_item(41) + 1);
-										if (this.get_type() === 0) {
-											$Forays_Actor.get_b().add('You smell fear. ', []);
+										if (this.get_atype() === 0) {
+											$Forays_Actor.get_b().add('You smell fear. ');
 											$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, 10000, 41, 'You lose the scent. '));
 										}
 										else {
@@ -15772,7 +15779,7 @@
 										}
 									}
 									else {
-										$Forays_Actor.get_b().add('You can already smell the blood of your enemies. ', []);
+										$Forays_Actor.get_b().add('You can already smell the blood of your enemies. ');
 										return false;
 									}
 									$state = 2;
@@ -15790,14 +15797,14 @@
 								}
 								else if (spell === 8) {
 									if (!this.hasAttr(85)) {
-										$Forays_Actor.get_b().add('You cast shadowsight. ', []);
-										$Forays_Actor.get_b().add('Your eyes pierce the darkness. ', []);
+										$Forays_Actor.get_b().add('You cast shadowsight. ');
+										$Forays_Actor.get_b().add('Your eyes pierce the darkness. ');
 										duration = 10001;
 										this.gainAttr$2(85, duration, 'You no longer see as well in darkness. ');
 										this.gainAttr(22, duration);
 									}
 									else {
-										$Forays_Actor.get_b().add('Your eyes are already attuned to darkness. ', []);
+										$Forays_Actor.get_b().add('Your eyes are already attuned to darkness. ');
 										return false;
 									}
 									$state = 2;
@@ -15812,10 +15819,10 @@
 											targets.add(a6);
 										}
 									}
-									$Forays_Actor.get_b().add(this.you('cast') + ' voltaic surge. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' voltaic surge. ', this);
 									this.animateExplosion(this, 2, 18, '*');
 									if (targets.length === 0) {
-										$Forays_Actor.get_b().add('The air around ' + this.get_the_name() + ' crackles. ', [this]);
+										$Forays_Actor.get_b().add$1('The air around ' + this.get_the_name() + ' crackles. ', this);
 										$state = 14;
 										continue $sm1;
 									}
@@ -15826,7 +15833,7 @@
 										}
 										a7 = $Forays_Extensions.random($Forays_Actor).call(null, targets);
 										targets.remove(a7);
-										$Forays_Actor.get_b().add('Electricity blasts ' + a7.get_the_name() + '. ', [a7]);
+										$Forays_Actor.get_b().add$1('Electricity blasts ' + a7.get_the_name() + '. ', a7);
 										$t41 = a7.takeDamage$2(3, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
 										$state = 15;
 										$t41.continueWith($sm);
@@ -15844,23 +15851,23 @@
 									continue $sm1;
 								}
 								else if (spell === 11) {
-									$Forays_Actor.get_b().add('You cast retreat. ', []);
+									$Forays_Actor.get_b().add('You cast retreat. ');
 									if (ss.isNullOrUndefined(this.target_location)) {
 										this.target_location = $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col());
-										$Forays_Actor.get_b().add('You create a rune of transport on ' + $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_the_name() + '. ', []);
+										$Forays_Actor.get_b().add('You create a rune of transport on ' + $Forays_PhysicalObject.get_m().tile.get_item(this.get_row(), this.get_col()).get_the_name() + '. ');
 										this.target_location.features.add(4);
 										$state = 18;
 										continue $sm1;
 									}
 									else if (ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(this.target_location.get_row(), this.target_location.get_col())) && this.target_location.get_passable()) {
-										$Forays_Actor.get_b().add('You activate your rune of transport. ', []);
+										$Forays_Actor.get_b().add('You activate your rune of transport. ');
 										$t44 = this.move(this.target_location.get_row(), this.target_location.get_col());
 										$state = 19;
 										$t44.continueWith($sm);
 										return;
 									}
 									else {
-										$Forays_Actor.get_b().add('Something blocks your transport. ', []);
+										$Forays_Actor.get_b().add('Something blocks your transport. ');
 										$state = 18;
 										continue $sm1;
 									}
@@ -15878,7 +15885,7 @@
 								else if (spell === 13) {
 									i2 = this.directionOfOnlyUnblocked$1(0, true);
 									if (i2 === 0) {
-										$Forays_Actor.get_b().add('There\'s no wall here. ', [this]);
+										$Forays_Actor.get_b().add$1('There\'s no wall here. ', this);
 										$tcs.setResult(false);
 										return;
 									}
@@ -15946,29 +15953,29 @@
 								}
 								else if (spell === 19) {
 									targets2 = this.actorsWithinDistance$1(5, true);
-									$Forays_Actor.get_b().add(this.you('cast') + ' blizzard. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' blizzard. ', this);
 									this.animateStorm(5, 8, 24, '*', 17);
-									$Forays_Actor.get_b().add('A massive ice storm surrounds ' + this.get_the_name() + '. ', [this]);
+									$Forays_Actor.get_b().add$1('A massive ice storm surrounds ' + this.get_the_name() + '. ', this);
 									$state = 35;
 									continue $sm1;
 								}
 								else if (spell === 20) {
 									if (!this.hasAttr(71)) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' bless. ', [this]);
-										$Forays_Actor.get_b().add(this.you('shine') + ' briefly with inner light. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' bless. ', this);
+										$Forays_Actor.get_b().add$1(this.you('shine') + ' briefly with inner light. ', this);
 										this.attrs.set_item(71, this.attrs.get_item(71) + 1);
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctor4(this, 400, 71));
 									}
 									else {
-										$Forays_Actor.get_b().add(this.youAre() + ' already blessed! ', [this]);
+										$Forays_Actor.get_b().add$1(this.youAre() + ' already blessed! ', this);
 										return false;
 									}
 									$state = 2;
 									continue $sm1;
 								}
 								else if (spell === 21) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' minor heal. ', [this]);
-									$Forays_Actor.get_b().add('A bluish glow surrounds ' + this.get_the_name() + '. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' minor heal. ', this);
+									$Forays_Actor.get_b().add$1('A bluish glow surrounds ' + this.get_the_name() + '. ', this);
 									$t76 = this.takeDamage$1(5, 2, $Forays_Global.roll$1(4, 6), null);
 									$state = 36;
 									$t76.continueWith($sm);
@@ -15976,14 +15983,14 @@
 								}
 								else if (spell === 22) {
 									if (!this.hasAttr(72)) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' holy shield. ', [this]);
-										$Forays_Actor.get_b().add('A fiery halo appears above ' + this.get_the_name() + '. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' holy shield. ', this);
+										$Forays_Actor.get_b().add$1('A fiery halo appears above ' + this.get_the_name() + '. ', this);
 										this.attrs.set_item(72, this.attrs.get_item(72) + 1);
 										duration2 = ($Forays_Global.roll$1(3, 2) + 1) * 100;
 										$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(this, duration2, 72, this.get_the_name() + '\'s halo fades. ', [this]));
 									}
 									else {
-										$Forays_Actor.get_b().add(this.your() + ' holy shield is already active. ', [this]);
+										$Forays_Actor.get_b().add$1(this.your() + ' holy shield is already active. ', this);
 										return false;
 									}
 									$state = 2;
@@ -16004,21 +16011,21 @@
 							case 3: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' immolate. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' immolate. ', this);
 									a1 = this.firstActorInLine$1(line);
 									if (ss.isValue(a1)) {
 										this.animateBeam$2($Forays_Extensions.toFirstObstruction(line), '*', 16);
 										if (!a1.hasAttr(61) && !a1.hasAttr(32) && !a1.hasAttr(31)) {
 											if (a1.get_name() === 'you') {
-												$Forays_Actor.get_b().add('You start to catch fire! ', []);
+												$Forays_Actor.get_b().add('You start to catch fire! ');
 											}
 											else {
-												$Forays_Actor.get_b().add(a1.get_the_name() + ' starts to catch fire. ', [a1]);
+												$Forays_Actor.get_b().add$1(a1.get_the_name() + ' starts to catch fire. ', a1);
 											}
 											a1.attrs.set_item(32, a1.attrs.get_item(32) + 1);
 										}
 										else {
-											$Forays_Actor.get_b().add(a1.you('shrug') + ' off the flames. ', [a1]);
+											$Forays_Actor.get_b().add$1(a1.you('shrug') + ' off the flames. ', a1);
 										}
 									}
 									else {
@@ -16029,14 +16036,14 @@
 											}
 										}
 										this.animateBeam$2(line, '*', 16);
-										$Forays_Actor.get_b().add(this.you('throw') + ' flames. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('throw') + ' flames. ', this);
 										if ($Forays_Extensions.last($Forays_Tile).call(null, line).is(1)) {
 											$Forays_Extensions.last($Forays_Tile).call(null, line).features.remove(1);
-											$Forays_Actor.get_b().add('The troll corpse burns to ashes! ', [$Forays_Extensions.last($Forays_Tile).call(null, line)]);
+											$Forays_Actor.get_b().add$1('The troll corpse burns to ashes! ', $Forays_Extensions.last($Forays_Tile).call(null, line));
 										}
 										if ($Forays_Extensions.last($Forays_Tile).call(null, line).is(2)) {
 											$Forays_Extensions.last($Forays_Tile).call(null, line).features.remove(2);
-											$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [$Forays_Extensions.last($Forays_Tile).call(null, line)]);
+											$Forays_Actor.get_b().add$1('The troll seer corpse burns to ashes! ', $Forays_Extensions.last($Forays_Tile).call(null, line));
 										}
 									}
 								}
@@ -16056,12 +16063,12 @@
 								$state = -1;
 								if (ss.isValue(t)) {
 									a2 = $Forays_PhysicalObject.get_m().actor.get_item(t.get_row(), t.get_col());
-									$Forays_Actor.get_b().add(this.you('cast') + ' force palm. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' force palm. ', this);
 									//AnimateMapCell(t,Color.DarkCyan,"*");
 									$Forays_Actor.get_b().displayNow();
 									$Forays_Screen.animateMapCell$1(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor4('*', 5), 100);
 									if (ss.isValue(a2)) {
-										$Forays_Actor.get_b().add(this.you('strike') + ' ' + a2.theVisible() + '. ', [this, a2]);
+										$Forays_Actor.get_b().add$2(this.you('strike') + ' ' + a2.theVisible() + '. ', [this, a2]);
 										s1 = a2.get_the_name();
 										s2 = a2.get_a_name();
 										line2 = this.getBestExtendedLine$1(a2.get_row(), a2.get_col());
@@ -16074,18 +16081,18 @@
 									}
 									else {
 										if (t.get_passable()) {
-											$Forays_Actor.get_b().add('You strike at empty space. ', []);
+											$Forays_Actor.get_b().add('You strike at empty space. ');
 										}
 										else {
-											$Forays_Actor.get_b().add('You strike ' + t.get_the_name() + ' with your palm. ', []);
-											if (t.get_type() === 3) {
+											$Forays_Actor.get_b().add('You strike ' + t.get_the_name() + ' with your palm. ');
+											if (t.get_ttype() === 3) {
 												//heh, why not?
-												$Forays_Actor.get_b().add('It flies open! ', []);
+												$Forays_Actor.get_b().add('It flies open! ');
 												t.toggle(this);
 											}
-											if (t.get_type() === 20) {
+											if (t.get_ttype() === 20) {
 												//and this one gives it an actual use
-												$Forays_Actor.get_b().add('A hidden door flies open! ', []);
+												$Forays_Actor.get_b().add('A hidden door flies open! ');
 												t.toggle(this);
 												t.toggle(this);
 											}
@@ -16111,21 +16118,21 @@
 							case 7: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' freeze. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' freeze. ', this);
 									a3 = this.firstActorInLine$1(line);
 									if (ss.isValue(a3)) {
 										this.animateBoltBeam$1($Forays_Extensions.toFirstObstruction(line), 8);
 										if (!a3.hasAttr(30) && !a3.hasAttr(95)) {
-											$Forays_Actor.get_b().add(a3.youAre() + ' encased in ice. ', [a3]);
+											$Forays_Actor.get_b().add$1(a3.youAre() + ' encased in ice. ', a3);
 											a3.attrs.set_item(30, 25);
 										}
 										else {
-											$Forays_Actor.get_b().add('The beam dissipates on the remaining ice. ', [a3]);
+											$Forays_Actor.get_b().add$1('The beam dissipates on the remaining ice. ', a3);
 										}
 									}
 									else {
 										this.animateBoltBeam$1(line, 8);
-										$Forays_Actor.get_b().add('A bit of ice forms on ' + t.get_the_name() + '. ', [t]);
+										$Forays_Actor.get_b().add$1('A bit of ice forms on ' + t.get_the_name() + '. ', t);
 									}
 								}
 								else {
@@ -16147,8 +16154,8 @@
 									a4 += this.get_row();
 									b += this.get_col();
 									if ($Forays_PhysicalObject.get_m().boundsCheck(a4, b) && $Forays_PhysicalObject.get_m().tile.get_item(a4, b).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(a4, b))) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' blink. ', [this]);
-										$Forays_Actor.get_b().add(this.you('step') + ' through a rip in reality. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' blink. ', this);
+										$Forays_Actor.get_b().add$1(this.you('step') + ' through a rip in reality. ', this);
 										this.animateStorm(2, 3, 4, '*', 14);
 										$t12 = this.move(a4, b);
 										$state = 41;
@@ -16173,11 +16180,11 @@
 							case 10: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' scorch. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' scorch. ', this);
 									a5 = this.firstActorInLine$1(line);
 									if (ss.isValue(a5)) {
 										this.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 16);
-										$Forays_Actor.get_b().add('The scorching bolt hits ' + a5.get_the_name() + '. ', [a5]);
+										$Forays_Actor.get_b().add$1('The scorching bolt hits ' + a5.get_the_name() + '. ', a5);
 										$t14 = a5.takeDamage$2(1, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
 										$state = 43;
 										$t14.continueWith($sm);
@@ -16191,14 +16198,14 @@
 											}
 										}
 										this.animateProjectile$2(line, '*', 16);
-										$Forays_Actor.get_b().add('The scorching bolt hits ' + t.get_the_name() + '. ', [t]);
+										$Forays_Actor.get_b().add$1('The scorching bolt hits ' + t.get_the_name() + '. ', t);
 										if ($Forays_Extensions.last($Forays_Tile).call(null, line).is(1)) {
 											$Forays_Extensions.last($Forays_Tile).call(null, line).features.remove(1);
-											$Forays_Actor.get_b().add('The troll corpse burns to ashes! ', [$Forays_Extensions.last($Forays_Tile).call(null, line)]);
+											$Forays_Actor.get_b().add$1('The troll corpse burns to ashes! ', $Forays_Extensions.last($Forays_Tile).call(null, line));
 										}
 										if ($Forays_Extensions.last($Forays_Tile).call(null, line).is(2)) {
 											$Forays_Extensions.last($Forays_Tile).call(null, line).features.remove(2);
-											$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [$Forays_Extensions.last($Forays_Tile).call(null, line)]);
+											$Forays_Actor.get_b().add$1('The troll seer corpse burns to ashes! ', $Forays_Extensions.last($Forays_Tile).call(null, line));
 										}
 										$state = 42;
 										continue $sm1;
@@ -16221,7 +16228,7 @@
 							case 12: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' lightning bolt. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' lightning bolt. ', this);
 									bolt_target = null;
 									damage_targets = [];
 									for ($t17 = 0; $t17 < line.length; $t17++) {
@@ -16371,7 +16378,7 @@
 									}
 									else {
 										this.animateBeam$2(line, '*', 18);
-										$Forays_Actor.get_b().add('The bolt hits ' + t.get_the_name() + '. ', [t]);
+										$Forays_Actor.get_b().add$1('The bolt hits ' + t.get_the_name() + '. ', t);
 										$state = 44;
 										continue $sm1;
 									}
@@ -16401,18 +16408,18 @@
 								$state = -1;
 								if (ss.isValue(t)) {
 									a8 = t.actor();
-									$Forays_Actor.get_b().add(this.you('cast') + ' magic hammer. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' magic hammer. ', this);
 									$Forays_Actor.get_b().displayNow();
 									$Forays_Screen.animateMapCell$1(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor4('*', 7), 100);
 									if (ss.isValue(a8)) {
-										$Forays_Actor.get_b().add(this.you$1('smash', true) + ' ' + a8.theVisible() + '. ', [this, a8]);
+										$Forays_Actor.get_b().add$3(this.you$1('smash', true) + ' ' + a8.theVisible() + '. ', this, a8);
 										$t43 = a8.takeDamage$2(9, 1, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
 										$state = 47;
 										$t43.continueWith($sm);
 										return;
 									}
 									else {
-										$Forays_Actor.get_b().add('You smash ' + t.get_the_name() + '. ', []);
+										$Forays_Actor.get_b().add('You smash ' + t.get_the_name() + '. ');
 										$state = 46;
 										continue $sm1;
 									}
@@ -16446,11 +16453,11 @@
 							case 20: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' glacial blast. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' glacial blast. ', this);
 									a9 = this.firstActorInLine$1(line);
 									if (ss.isValue(a9)) {
 										this.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 17);
-										$Forays_Actor.get_b().add('The glacial blast hits ' + a9.get_the_name() + '. ', [a9]);
+										$Forays_Actor.get_b().add$1('The glacial blast hits ' + a9.get_the_name() + '. ', a9);
 										$t46 = a9.takeDamage$2(2, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
 										$state = 49;
 										$t46.continueWith($sm);
@@ -16458,7 +16465,7 @@
 									}
 									else {
 										this.animateProjectile$2(line, '*', 17);
-										$Forays_Actor.get_b().add('The glacial blast hits ' + t.get_the_name() + '. ', [t]);
+										$Forays_Actor.get_b().add$1('The glacial blast hits ' + t.get_the_name() + '. ', t);
 										$state = 48;
 										continue $sm1;
 									}
@@ -16478,8 +16485,8 @@
 							case 23: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									if (t.get_type() === 0) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' passage. ', [this]);
+									if (t.get_ttype() === 0) {
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' passage. ', this);
 										ch = new $Forays_colorchar.$ctor2(8, '!');
 										if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 											$Forays_Game.console.cursorVisible = false;
@@ -16503,7 +16510,7 @@
 									}
 									else {
 										if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
-											$Forays_Actor.get_b().add('There\'s no wall here. ', [this]);
+											$Forays_Actor.get_b().add$1('There\'s no wall here. ', this);
 										}
 										$tcs.setResult(false);
 										return;
@@ -16534,10 +16541,10 @@
 									if (ss.isValue(a10)) {
 										t = a10.tile();
 									}
-									$Forays_Actor.get_b().add(this.you('cast') + ' flashfire. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' flashfire. ', this);
 									this.animateBoltProjectile$1($Forays_Extensions.toFirstObstruction(line), 3);
 									this.animateExplosion$1(t, 2, '*', 16);
-									$Forays_Actor.get_b().add('Fwoosh! ', [this, t]);
+									$Forays_Actor.get_b().add$2('Fwoosh! ', [this, t]);
 									targets1 = [];
 									prev = $Forays_Extensions.toFirstObstruction(line)[$Forays_Extensions.toFirstObstruction(line).length - 2];
 									$t55 = t.actorsWithinDistance(2);
@@ -16562,11 +16569,11 @@
 												}
 												if (t24.is(1)) {
 													t24.features.remove(1);
-													$Forays_Actor.get_b().add('The troll corpse burns to ashes! ', [t24]);
+													$Forays_Actor.get_b().add$1('The troll corpse burns to ashes! ', t24);
 												}
 												if (t24.is(2)) {
 													t24.features.remove(2);
-													$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [t24]);
+													$Forays_Actor.get_b().add$1('The troll seer corpse burns to ashes! ', t24);
 												}
 											}
 										}
@@ -16576,11 +16583,11 @@
 											}
 											if (t24.is(1)) {
 												t24.features.remove(1);
-												$Forays_Actor.get_b().add('The troll corpse burns to ashes! ', [t24]);
+												$Forays_Actor.get_b().add$1('The troll corpse burns to ashes! ', t24);
 											}
 											if (t24.is(2)) {
 												t24.features.remove(2);
-												$Forays_Actor.get_b().add('The troll seer corpse burns to ashes! ', [t24]);
+												$Forays_Actor.get_b().add$1('The troll seer corpse burns to ashes! ', t24);
 											}
 										}
 									}
@@ -16604,11 +16611,11 @@
 							case 27: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' sonic boom. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' sonic boom. ', this);
 									a11 = this.firstActorInLine$1(line);
 									if (ss.isValue(a11)) {
 										this.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '~', 6);
-										$Forays_Actor.get_b().add('A wave of sound hits ' + a11.get_the_name() + '. ', [a11]);
+										$Forays_Actor.get_b().add$1('A wave of sound hits ' + a11.get_the_name() + '. ', a11);
 										r = a11.get_row();
 										c = a11.get_col();
 										$t61 = a11.takeDamage$2(9, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
@@ -16618,7 +16625,7 @@
 									}
 									else {
 										this.animateProjectile$2(line, '~', 6);
-										$Forays_Actor.get_b().add('Sonic boom! ', []);
+										$Forays_Actor.get_b().add('Sonic boom! ');
 										$state = 53;
 										continue $sm1;
 									}
@@ -16640,7 +16647,7 @@
 							case 29: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' collapse. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' collapse. ', this);
 									$Forays_Actor.get_b().displayNow();
 									for (dist = 2; dist > 0; --dist) {
 										cells = [];
@@ -16670,7 +16677,7 @@
 									$Forays_Screen.animateMapCell(t.get_row(), t.get_col(), new $Forays_colorchar.$ctor4('X', 11));
 									a12 = t.actor();
 									if (ss.isValue(a12)) {
-										$Forays_Actor.get_b().add('Part of the ceiling falls onto ' + a12.get_the_name() + '. ', [a12]);
+										$Forays_Actor.get_b().add$1('Part of the ceiling falls onto ' + a12.get_the_name() + '. ', a12);
 										$t63 = a12.takeDamage$2(7, 0, $Forays_Global.roll$1(4 + bonus, 6), this, this.get_a_name());
 										$state = 57;
 										$t63.continueWith($sm);
@@ -16678,10 +16685,10 @@
 									}
 									else {
 										if (t.get_row() === 0 || t.get_col() === 0 || t.get_row() === 21 || t.get_col() === 65) {
-											$Forays_Actor.get_b().add('The wall resists. ', []);
+											$Forays_Actor.get_b().add('The wall resists. ');
 										}
-										else if (t.get_type() === 0 || t.get_type() === 20) {
-											$Forays_Actor.get_b().add('The wall crashes down! ', []);
+										else if (t.get_ttype() === 0 || t.get_ttype() === 20) {
+											$Forays_Actor.get_b().add('The wall crashes down! ');
 											t.turnToFloor();
 											$t64 = t.tilesAtDistance(1);
 											for ($t65 = 0; $t65 < $t64.length; $t65++) {
@@ -16712,7 +16719,7 @@
 							case 31: {
 								$state = -1;
 								if (ss.isValue(t)) {
-									$Forays_Actor.get_b().add(this.you('cast') + ' force beam. ', [this]);
+									$Forays_Actor.get_b().add$1(this.you('cast') + ' force beam. ', this);
 									$Forays_Actor.get_b().displayNow();
 									//List<Tile> line2 = GetBestExtendedLine(t.row,t.col);
 									full_line = line.clone();
@@ -16737,7 +16744,7 @@
 								if (ss.isValue(t)) {
 									a13 = t.actor();
 									if (ss.isValue(a13)) {
-										$Forays_Actor.get_b().add(this.you('cast') + ' amnesia. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('cast') + ' amnesia. ', this);
 										//for(int i=0;i<4;++i){
 										//List<pos> cells = new List<pos>();
 										//List<colorchar> chars = new List<colorchar>();
@@ -16749,14 +16756,14 @@
 										//Screen.AnimateMapCells(cells,chars);
 										//}
 										a13.animateStorm(2, 4, 4, '*', 19);
-										$Forays_Actor.get_b().add('You fade from ' + a13.theVisible() + '\'s awareness. ', []);
+										$Forays_Actor.get_b().add('You fade from ' + a13.theVisible() + '\'s awareness. ');
 										a13.player_visibility_duration = 0;
 										a13.set_target(null);
 										a13.target_location = null;
 										a13.attrs.set_item(91, a13.attrs.get_item(91) + 1);
 									}
 									else {
-										$Forays_Actor.get_b().add('There\'s nothing to target there. ', []);
+										$Forays_Actor.get_b().add('There\'s nothing to target there. ');
 										return false;
 									}
 								}
@@ -16775,7 +16782,7 @@
 								idx4 = $Forays_Global.roll$1(1, targets2.length) - 1;
 								a14 = targets2[idx4];
 								targets2.remove(a14);
-								$Forays_Actor.get_b().add('The blizzard hits ' + a14.get_the_name() + '. ', [a14]);
+								$Forays_Actor.get_b().add$1('The blizzard hits ' + a14.get_the_name() + '. ', a14);
 								r1 = a14.get_row();
 								c1 = a14.get_col();
 								$t75 = a14.takeDamage$2(2, 1, $Forays_Global.roll$1(5 + bonus, 6), this, this.get_a_name());
@@ -16791,7 +16798,7 @@
 							}
 							case 2: {
 								$state = -1;
-								if (this.get_type() === 0 && spell !== 18) {
+								if (this.get_atype() === 0 && spell !== 18) {
 									this.makeNoise();
 								}
 								if (!force_of_will) {
@@ -16799,16 +16806,16 @@
 										if (this.hasFeat(9)) {
 											if ($Forays_Global.coinFlip()) {
 												this.magic_penalty++;
-												$Forays_Actor.get_b().add(this.youFeel() + ' drained. ', [this]);
+												$Forays_Actor.get_b().add$1(this.youFeel() + ' drained. ', this);
 											}
-											else if (this.get_type() === 0) {
-												$Forays_Actor.get_b().add('You feel lucky. ', []);
+											else if (this.get_atype() === 0) {
+												$Forays_Actor.get_b().add('You feel lucky. ');
 												//punk
 											}
 										}
 										else {
 											this.magic_penalty++;
-											$Forays_Actor.get_b().add(this.youFeel() + ' drained. ', [this]);
+											$Forays_Actor.get_b().add$1(this.youFeel() + ' drained. ', this);
 										}
 									}
 								}
@@ -16817,7 +16824,7 @@
 									if (this.magic_penalty > 20) {
 										this.magic_penalty = 20;
 									}
-									$Forays_Actor.get_b().add('You drain your magic reserves. ', []);
+									$Forays_Actor.get_b().add('You drain your magic reserves. ');
 								}
 								this.q1();
 								$tcs.setResult(true);
@@ -16834,13 +16841,13 @@
 										return;
 									}
 									else if (!next.get_passable()) {
-										$Forays_Actor.get_b().add(s1 + '\'s corpse is knocked into ' + next.get_the_name() + '. ', [t, next]);
+										$Forays_Actor.get_b().add$2(s1 + '\'s corpse is knocked into ' + next.get_the_name() + '. ', [t, next]);
 										$state = 37;
 										continue $sm1;
 									}
 									else {
 										if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()))) {
-											$Forays_Actor.get_b().add(s1 + '\'s corpse is knocked into ' + $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).get_the_name() + '. ', [t, $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())]);
+											$Forays_Actor.get_b().add$2(s1 + '\'s corpse is knocked into ' + $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).get_the_name() + '. ', [t, $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col())]);
 											$t10 = $Forays_PhysicalObject.get_m().actor.get_item(next.get_row(), next.get_col()).takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), this, s2 + '\'s falling corpse');
 											$state = 63;
 											$t10.continueWith($sm);
@@ -16908,7 +16915,7 @@
 								$state = -1;
 								if ($t43.getResult()) {
 									a8.gainAttrRefreshDuration$1(27, 201, a8.youAre() + ' no longer stunned. ', [a8]);
-									$Forays_Actor.get_b().add(a8.youAre() + ' stunned. ', [a8]);
+									$Forays_Actor.get_b().add$1(a8.youAre() + ' stunned. ', a8);
 								}
 								$state = 46;
 								continue $sm1;
@@ -16956,7 +16963,7 @@
 									continue $sm1;
 								}
 								ac2 = $Forays_Extensions.removeRandom($Forays_Actor).call(null, targets1);
-								$Forays_Actor.get_b().add('The explosion hits ' + ac2.get_the_name() + '. ', [ac2]);
+								$Forays_Actor.get_b().add$1('The explosion hits ' + ac2.get_the_name() + '. ', ac2);
 								$t59 = ac2.takeDamage$2(1, 1, $Forays_Global.roll$1(3 + bonus, 6), this, this.get_a_name());
 								$state = 70;
 								$t59.continueWith($sm);
@@ -16970,7 +16977,7 @@
 								$state = -1;
 								$t61.getResult();
 								if ($Forays_Global.roll$1(1, 10) <= 5 && ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r, c)) && !$Forays_PhysicalObject.get_m().actor.get_item(r, c).hasAttr(27)) {
-									$Forays_Actor.get_b().add(a11.youAre() + ' stunned. ', [a11]);
+									$Forays_Actor.get_b().add$1(a11.youAre() + ' stunned. ', a11);
 									a11.attrs.set_item(27, a11.attrs.get_item(27) + 1);
 									duration1 = this.durationOfMagicalEffect($Forays_Global.roll$1(1, 4) + 2) * 100;
 									$Forays_Actor.get_q().add(new $Forays_Event.$ctorc(a11, duration1, 27, a11.youAre() + ' no longer stunned. ', [a11]));
@@ -17058,7 +17065,7 @@
 								$state = -1;
 								$t75.getResult();
 								if (ss.isValue($Forays_PhysicalObject.get_m().actor.get_item(r1, c1)) && $Forays_Global.roll$1(1, 10) <= 8) {
-									$Forays_Actor.get_b().add(a14.get_the_name() + ' is encased in ice. ', [a14]);
+									$Forays_Actor.get_b().add$1(a14.get_the_name() + ' is encased in ice. ', a14);
 									a14.attrs.set_item(30, 25);
 								}
 								$state = 35;
@@ -17157,14 +17164,14 @@
 								chosen = $Forays_Extensions.random($Forays_Tile).call(null, open_spaces);
 								open_spaces.remove(chosen);
 								if (ss.isValue(chosen.actor())) {
-									$Forays_Actor.get_b().add('A rock falls onto ' + chosen.actor().get_the_name() + '. ', [chosen.actor()]);
+									$Forays_Actor.get_b().add$1('A rock falls onto ' + chosen.actor().get_the_name() + '. ', chosen.actor());
 									$t68 = chosen.actor().takeDamage$2(7, 0, $Forays_Global.roll$1(2, 6), this, this.get_a_name());
 									$state = 79;
 									$t68.continueWith($sm);
 									return;
 								}
 								else {
-									prev1 = chosen.get_type();
+									prev1 = chosen.get_ttype();
 									chosen.transformTo(28);
 									chosen.toggles_into = prev1;
 									$state = 78;
@@ -17181,13 +17188,13 @@
 									return;
 								}
 								else if (!nexttile.get_passable()) {
-									$Forays_Actor.get_b().add(s3 + '\'s corpse is knocked into ' + nexttile.get_the_name() + '. ', [firsttile, nexttile]);
+									$Forays_Actor.get_b().add$2(s3 + '\'s corpse is knocked into ' + nexttile.get_the_name() + '. ', [firsttile, nexttile]);
 									$state = 72;
 									continue $sm1;
 								}
 								else {
 									if (ss.isValue(nextactor)) {
-										$Forays_Actor.get_b().add(s3 + '\'s corpse is knocked into ' + nextactor.theVisible() + '. ', [firsttile, nextactor]);
+										$Forays_Actor.get_b().add$2(s3 + '\'s corpse is knocked into ' + nextactor.theVisible() + '. ', [firsttile, nextactor]);
 										$t73 = nextactor.takeDamage$2(0, 0, $Forays_Global.roll$1(1, 6), this, s21 + '\'s falling corpse');
 										$state = 81;
 										$t73.continueWith($sm);
@@ -17210,7 +17217,7 @@
 									continue $sm1;
 								}
 								ac = damage_targets[$t37];
-								$Forays_Actor.get_b().add('The bolt hits ' + ac.get_the_name() + '. ', [ac]);
+								$Forays_Actor.get_b().add$1('The bolt hits ' + ac.get_the_name() + '. ', ac);
 								$t38 = ac.takeDamage$2(3, 1, $Forays_Global.roll$1(2 + bonus, 6), this, this.get_a_name());
 								$state = 83;
 								$t38.continueWith($sm);
@@ -17302,7 +17309,7 @@
 								$state = -1;
 								$t51.getResult();
 								$Forays_PhysicalObject.get_m().draw();
-								$Forays_Actor.get_b().add(this.you('travel') + ' through the passage. ', [this]);
+								$Forays_Actor.get_b().add$1(this.you('travel') + ' through the passage. ', this);
 								$state = 22;
 								continue $sm1;
 							}
@@ -17321,7 +17328,7 @@
 							}
 							case 88: {
 								$state = -1;
-								$Forays_Actor.get_b().add('The passage is blocked. ', []);
+								$Forays_Actor.get_b().add('The passage is blocked. ');
 								$state = 22;
 								continue $sm1;
 							}
@@ -17469,10 +17476,10 @@
 										if (a1.hasAttr(75) && a1.hasLOE(this)) {
 											if (ss.referenceEquals(this, $Forays_Actor.get_player())) {
 												if (this.canSee(a1)) {
-													$Forays_Actor.get_b().add(a1.your() + ' presence prevents you from casting! ', []);
+													$Forays_Actor.get_b().add(a1.your() + ' presence prevents you from casting! ');
 												}
 												else {
-													$Forays_Actor.get_b().add('Something prevents you from casting! ', []);
+													$Forays_Actor.get_b().add('Something prevents you from casting! ');
 												}
 											}
 											return false;
@@ -17521,7 +17528,7 @@
 										}
 									}
 									else {
-										$Forays_Actor.get_b().add('Your magic reserves are empty! ', []);
+										$Forays_Actor.get_b().add('Your magic reserves are empty! ');
 										$tcs.setResult(false);
 										return;
 									}
@@ -17567,7 +17574,7 @@
 									//}
 									if (this.distanceFrom(t) === 2 && line[1].get_passable() && ss.isNullOrUndefined(line[1].actor()) && !this.grabPreventsMovement(line[1])) {
 										moved = true;
-										$Forays_Actor.get_b().add('You lunge! ', []);
+										$Forays_Actor.get_b().add('You lunge! ');
 										$t2 = this.move(line[1].get_row(), line[1].get_col());
 										$state = 10;
 										$t2.continueWith($sm);
@@ -17616,20 +17623,20 @@
 									if (this.magic_penalty > 20) {
 										this.magic_penalty = 20;
 									}
-									$Forays_Actor.get_b().add('You drain your magic reserves. ', []);
+									$Forays_Actor.get_b().add('You drain your magic reserves. ');
 									amount = $Forays_Global.roll$1(ss.Int32.div(this.totalSkill(2), 2), 6) + 25;
 									if (this.hasAttr(73)) {
-										$Forays_Actor.get_b().add('You strengthen your arcane barrier. ', []);
+										$Forays_Actor.get_b().add('You strengthen your arcane barrier. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('An arcane barrier surrounds you. ', []);
+										$Forays_Actor.get_b().add('An arcane barrier surrounds you. ');
 									}
 									this.attrs.set_item(73, this.attrs.get_item(73) + amount);
 									$Forays_Actor.get_q().killEvents(this, 73);
 									$Forays_Actor.get_q().add(new $Forays_Event.$ctor9(this, 2000, 73, 'Your arcane shield dissolves. '));
 								}
 								else {
-									$Forays_Actor.get_b().add('Your magic reserves are empty! ', []);
+									$Forays_Actor.get_b().add('Your magic reserves are empty! ');
 									return false;
 								}
 								$state = 1;
@@ -17655,31 +17662,31 @@
 								dir = $t14.getResult();
 								if (dir !== -1 && this.tileInDirection(dir).isKnownTrap()) {
 									if (ss.isValue(this.actorInDirection(dir))) {
-										$Forays_Actor.get_b().add('There is ' + this.actorInDirection(dir).aVisible() + ' in the way. ', []);
+										$Forays_Actor.get_b().add('There is ' + this.actorInDirection(dir).aVisible() + ' in the way. ');
 										$state = 13;
 										continue $sm1;
 									}
 									else {
 										if (this.grabPreventsMovement(this.tileInDirection(dir))) {
-											$Forays_Actor.get_b().add('You can\'t currently reach that trap. ', []);
+											$Forays_Actor.get_b().add('You can\'t currently reach that trap. ');
 											this.q0();
 											return true;
 										}
 										if ($Forays_Global.roll(5) <= 4) {
-											$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '. ', []);
+											$Forays_Actor.get_b().add('You disarm ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_ttype()).get_the_name() + '. ');
 											this.tileInDirection(dir).toggle(this);
 											this.q1();
 											$state = 13;
 											continue $sm1;
 										}
 										else if ($Forays_Global.roll(20) <= this.skills.get_item(1)) {
-											$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '! ', []);
+											$Forays_Actor.get_b().add('You almost set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_ttype()).get_the_name() + '! ');
 											this.q1();
 											$state = 13;
 											continue $sm1;
 										}
 										else {
-											$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_type()).get_the_name() + '! ', []);
+											$Forays_Actor.get_b().add('You set off ' + $Forays_Tile.prototype$1(this.tileInDirection(dir).get_ttype()).get_the_name() + '! ');
 											$t15 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
 											$state = 14;
 											$t15.continueWith($sm);
@@ -17704,13 +17711,13 @@
 									if (!t2.get_passable()) {
 										t2 = $Forays_Extensions.lastBeforeSolidTile(line2);
 									}
-									$Forays_Actor.get_b().add('You throw a small stone. ', []);
+									$Forays_Actor.get_b().add('You throw a small stone. ');
 									$t17 = t2.actorsWithinDistance(3);
 									for ($t18 = 0; $t18 < $t17.length; $t18++) {
 										a2 = $t17[$t18];
 										if (!ss.referenceEquals(a2, this) && a2.player_visibility_duration >= 0) {
 											if (a2.hasAttr(89)) {
-												$Forays_Actor.get_b().add(a2.get_the_name() + ' isn\'t fooled. ', [a2]);
+												$Forays_Actor.get_b().add$1(a2.get_the_name() + ' isn\'t fooled. ', a2);
 												a2.player_visibility_duration = 999;
 												//automatic detection next turn
 											}
@@ -17751,11 +17758,11 @@
 								$state = -1;
 								if (!moved) {
 									if (this.grabPreventsMovement(line[1])) {
-										$Forays_Actor.get_b().add('You can\'t currently reach that spot. ', []);
+										$Forays_Actor.get_b().add('You can\'t currently reach that spot. ');
 										return false;
 									}
 									else {
-										$Forays_Actor.get_b().add('The way is blocked! ', []);
+										$Forays_Actor.get_b().add('The way is blocked! ');
 										return false;
 									}
 								}
@@ -17789,7 +17796,7 @@
 								}
 								else {
 									if (this.grabPreventsMovement(t1)) {
-										$Forays_Actor.get_b().add('You can\'t currently reach that spot. ', []);
+										$Forays_Actor.get_b().add('You can\'t currently reach that spot. ');
 									}
 									$tcs.setResult(false);
 									return;
@@ -17836,7 +17843,7 @@
 									actors_moved_past.add(neighbor.actor());
 								}
 								if (neighbor.get_passable() && !moved1) {
-									$Forays_Actor.get_b().add('You tumble. ', []);
+									$Forays_Actor.get_b().add('You tumble. ');
 									$t7 = this.move(t1.get_row(), t1.get_col());
 									$state = 20;
 									$t7.continueWith($sm);
@@ -17859,15 +17866,15 @@
 								if (this.hasAttr(32)) {
 									//copy&paste happened here: todo, make a single fire-handling method
 									this.attrs.set_item(32, 0);
-									$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+									$Forays_Actor.get_b().add('You stop the flames from spreading. ');
 									if (this.hasAttr(33)) {
 										this.attrs.set_item(33, 0);
-										$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+										$Forays_Actor.get_b().add('You stop the flames from spreading. ');
 									}
 								}
 								else if (this.hasAttr(33)) {
 									this.attrs.set_item(33, 0);
-									$Forays_Actor.get_b().add('You stop the flames from spreading. ', []);
+									$Forays_Actor.get_b().add('You stop the flames from spreading. ');
 								}
 								else if (this.hasAttr(31)) {
 									update = false;
@@ -17888,10 +17895,10 @@
 										this.updateRadius(oldradius, this.lightRadius());
 									}
 									if (this.hasAttr(31)) {
-										$Forays_Actor.get_b().add('You put out some of the fire. ', []);
+										$Forays_Actor.get_b().add('You put out some of the fire. ');
 									}
 									else {
-										$Forays_Actor.get_b().add('You put out the fire. ', []);
+										$Forays_Actor.get_b().add('You put out the fire. ');
 									}
 								}
 								$state = 18;
@@ -17918,7 +17925,7 @@
 									return true;
 								}
 								else {
-									$Forays_Actor.get_b().add('The way is blocked! ', []);
+									$Forays_Actor.get_b().add('The way is blocked! ');
 									return false;
 								}
 							}
@@ -17962,27 +17969,27 @@
 									}
 									dir = $Forays_Global.randomDirection();
 									if (!this.tileInDirection(dir).get_passable()) {
-										$Forays_Actor.get_b().add(this.you('stagger') + ' into ' + this.tileInDirection(dir).get_the_name() + '. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('stagger') + ' into ' + this.tileInDirection(dir).get_the_name() + '. ', this);
 										$state = 2;
 										continue $sm1;
 									}
 									else if (ss.isValue(this.actorInDirection(dir))) {
-										$Forays_Actor.get_b().add(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir).theVisible() + '. ', [this, this.actorInDirection(dir)]);
+										$Forays_Actor.get_b().add$2(this.youVisible('stagger') + ' into ' + this.actorInDirection(dir).theVisible() + '. ', [this, this.actorInDirection(dir)]);
 										$state = 2;
 										continue $sm1;
 									}
 									else if (this.grabPreventsMovement(this.tileInDirection(dir))) {
-										if (this.get_type() === 0) {
-											$Forays_Actor.get_b().add('You stagger and almost fall over. ', []);
+										if (this.get_atype() === 0) {
+											$Forays_Actor.get_b().add('You stagger and almost fall over. ');
 										}
 										else {
-											$Forays_Actor.get_b().add(this.get_the_name() + ' staggers and almost falls over. ', [this]);
+											$Forays_Actor.get_b().add$1(this.get_the_name() + ' staggers and almost falls over. ', this);
 										}
 										$state = 2;
 										continue $sm1;
 									}
 									else {
-										$Forays_Actor.get_b().add(this.you('stagger') + '. ', [this]);
+										$Forays_Actor.get_b().add$1(this.you('stagger') + '. ', this);
 										$t1 = this.move(this.tileInDirection(dir).get_row(), this.tileInDirection(dir).get_col());
 										$state = 3;
 										$t1.continueWith($sm);
@@ -18117,7 +18124,7 @@
 					this.attrs.set_item(62, this.attrs.get_item(62) + 1);
 					this.attrs.set_item(63, this.attrs.get_item(63) + 1);
 					if (this.hasAttr(31) || this.hasAttr(32) || this.hasAttr(33)) {
-						$Forays_Actor.get_b().add('You are no longer on fire. ', []);
+						$Forays_Actor.get_b().add('You are no longer on fire. ');
 						var oldradius = this.lightRadius();
 						this.attrs.set_item(31, 0);
 						this.attrs.set_item(32, 0);
@@ -18145,7 +18152,7 @@
 					this.attrs.set_item(62, this.attrs.get_item(62) + 1);
 					this.attrs.set_item(63, this.attrs.get_item(63) + 1);
 					if (this.hasAttr(31) || this.hasAttr(32) || this.hasAttr(33)) {
-						$Forays_Actor.get_b().add('You are no longer on fire. ', []);
+						$Forays_Actor.get_b().add('You are no longer on fire. ');
 						var oldradius = this.lightRadius();
 						this.attrs.set_item(31, 0);
 						this.attrs.set_item(32, 0);
@@ -18681,7 +18688,7 @@
 							$state = -1;
 							learned = [];
 							this.skills.set_item(skill, this.skills.get_item(skill) + 1);
-							$Forays_Actor.get_b().add('You feel a rush of power. ', []);
+							$Forays_Actor.get_b().add('You feel a rush of power. ');
 							//DisplayStats();
 							$t1 = $Forays_Actor.get_b().printAll();
 							$state = 1;
@@ -18797,7 +18804,7 @@
 							if (skill === 2) {
 								unknown = [];
 								unknownstr = [];
-								$t5 = $Forays_Extensions.getValues($Forays_SpellType);
+								$t5 = $Forays_Actor.getSpellTypes();
 								for ($t6 = 0; $t6 < $t5.length; $t6++) {
 									spell = $t5[$t6];
 									if (!this.hasSpell(spell) && spell !== 20 && spell !== 21 && spell !== 22 && spell !== 24 && spell !== 23) {
@@ -18874,7 +18881,7 @@
 							if (learned.length > 0) {
 								for ($t8 = 0; $t8 < learned.length; $t8++) {
 									s = learned[$t8];
-									$Forays_Actor.get_b().add(s, []);
+									$Forays_Actor.get_b().add(s);
 								}
 							}
 							$state = -1;
@@ -19006,14 +19013,14 @@
 					return true;
 				}
 			}
-			if (this.get_type() === 0) {
+			if (this.get_atype() === 0) {
 				if (a.player_visibility_duration < 0) {
 					return false;
 				}
 				return true;
 			}
 			else {
-				if (a.get_type() !== 0) {
+				if (a.get_atype() !== 0) {
 					//monsters are never hidden from each other
 					return false;
 				}
@@ -19069,7 +19076,7 @@
 						else {
 							values.set(i, j, 0);
 						}
-						if ($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_type() === 35) {
+						if ($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_ttype() === 35) {
 							//don't path over chasms
 							values.set(i, j, -1);
 						}
@@ -19156,14 +19163,14 @@
 			var values = Array.multidim(ss.Int32.getDefaultValue(), $Forays_Actor.$ROWS, $Forays_Actor.$COLS);
 			for (var i = 0; i < $Forays_Actor.$ROWS; ++i) {
 				for (var j = 0; j < $Forays_Actor.$COLS; ++j) {
-					if (!$Forays_PhysicalObject.get_m().tile.get_item(i, j).get_passable() && !($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_type() === 3)) {
+					if (!$Forays_PhysicalObject.get_m().tile.get_item(i, j).get_passable() && !($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_ttype() === 3)) {
 						//default is 0 of course
 						values.set(i, j, -1);
 					}
 					if ($Forays_PhysicalObject.get_m().tile.get_item(i, j).isKnownTrap()) {
 						values.set(i, j, -1);
 					}
-					if ($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_type() === 35) {
+					if ($Forays_PhysicalObject.get_m().tile.get_item(i, j).get_ttype() === 35) {
 						values.set(i, j, -1);
 					}
 				}
@@ -19186,7 +19193,7 @@
 									if (s !== i1 || t !== j1) {
 										if (values.get(s, t) === 0) {
 											values.set(s, t, val + 1);
-											if (!$Forays_PhysicalObject.get_m().tile.get_item(s, t).get_seen() && ($Forays_PhysicalObject.get_m().tile.get_item(s, t).get_passable() || $Forays_PhysicalObject.get_m().tile.get_item(s, t).get_type() === 3)) {
+											if (!$Forays_PhysicalObject.get_m().tile.get_item(s, t).get_seen() && ($Forays_PhysicalObject.get_m().tile.get_item(s, t).get_passable() || $Forays_PhysicalObject.get_m().tile.get_item(s, t).get_ttype() === 3)) {
 												//frontiers.AddUnique(new pos(i,j));
 												$Forays_Extensions.addUnique($Forays_pos).call(null, frontiers, new $Forays_pos(s, t));
 												val_plus_one = true;
@@ -19221,7 +19228,7 @@
 				var $t2 = p.positionsAtDistance(1);
 				for (var $t3 = 0; $t3 < $t2.length; $t3++) {
 					var neighbor = $t2[$t3];
-					if (!$Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_seen() && ($Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_passable() || $Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_type() === 3)) {
+					if (!$Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_seen() && ($Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_passable() || $Forays_PhysicalObject.get_m().tile.get_item$1(neighbor).get_ttype() === 3)) {
 						++total;
 					}
 				}
@@ -19681,7 +19688,7 @@
 										$t3 = this.tilesAtDistance(i1);
 										for ($t4 = 0; $t4 < $t3.length; $t4++) {
 											t = $t3[$t4];
-											if (t.get_type() === 4 || t.get_type() === 5 || t.is(0) || t.get_type() === 6 || t.is(3) || t.get_type() === 7 || t.is(1) || t.is(2) || t.is(4) || t.is$1(29) || t.is(6) || t.is(5) || t.is(8) || t.is(9) || t.is(10) || t.is$1(32) || t.is$1(31) || t.is$1(33) || t.isShrine() || ss.isValue(t.get_inv())) {
+											if (t.get_ttype() === 4 || t.get_ttype() === 5 || t.is(0) || t.get_ttype() === 6 || t.is(3) || t.get_ttype() === 7 || t.is(1) || t.is(2) || t.is(4) || t.is$1(29) || t.is(6) || t.is(5) || t.is(8) || t.is(9) || t.is(10) || t.is$1(32) || t.is$1(31) || t.is$1(33) || t.isShrine() || ss.isValue(t.get_inv())) {
 												if (this.canSee(t)) {
 													interesting_targets.add(t);
 												}
@@ -19784,7 +19791,7 @@
 										contents += items[0] + $Forays_PhysicalObject.get_m().tile.get_item(r, c).preposition() + $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_a_name();
 									}
 									else if (items.length === 2) {
-										if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() !== 1) {
+										if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() !== 1) {
 											if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).preposition() === ' and ') {
 												contents += items[0] + ', ' + items[1] + ',';
 												contents += $Forays_PhysicalObject.get_m().tile.get_item(r, c).preposition() + $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_a_name();
@@ -19804,7 +19811,7 @@
 											if (!ss.referenceEquals(s, $Forays_Extensions.last(String).call(null, items))) {
 												contents += s + ', ';
 											}
-											else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() !== 1) {
+											else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() !== 1) {
 												contents += s + ',';
 												//because preposition contains a space already
 											}
@@ -19812,14 +19819,14 @@
 												contents += 'and ' + s;
 											}
 										}
-										if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() !== 1) {
+										if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() !== 1) {
 											contents += $Forays_PhysicalObject.get_m().tile.get_item(r, c).preposition() + $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_a_name();
 										}
 									}
 									if (r === this.get_row() && c === this.get_col()) {
 										if (!first_iteration) {
 											s1 = 'You\'re standing here. ';
-											if (items.length === 0 && $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_type() === 1) {
+											if (items.length === 0 && $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_ttype() === 1) {
 												$Forays_Actor.get_b().displayNow$1(s1);
 											}
 											else {
@@ -19943,7 +19950,7 @@
 												description_on_right = true;
 												max_length = 29;
 											}
-											desc = $Forays_Actor.monsterDescriptionBox($Forays_PhysicalObject.get_m().actor.get_item(r, c).get_type(), max_length);
+											desc = $Forays_Actor.monsterDescriptionBox($Forays_PhysicalObject.get_m().actor.get_item(r, c).get_atype(), max_length);
 											if (description_on_right) {
 												start_c = $Forays_Actor.$COLS - desc[0].length();
 												description_shown_last_time = true;
@@ -20625,7 +20632,7 @@
 		}
 	};
 	$Forays_Actor.$ctor1 = function(a, r, c) {
-		this.$2$typeField = 0;
+		this.$2$atypeField = 0;
 		this.$2$maxhpField = 0;
 		this.$2$curhpField = 0;
 		this.$2$speedField = 0;
@@ -20648,7 +20655,7 @@
 		this.armors = [];
 		this.magic_items = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(a.get_type());
+		this.set_atype(a.get_atype());
 		this.set_name(a.get_name());
 		this.set_the_name(a.get_the_name());
 		this.set_a_name(a.get_a_name());
@@ -20681,7 +20688,7 @@
 		this.magic_penalty = 0;
 	};
 	$Forays_Actor.$ctor3 = function(type_, name_, symbol_, color_, maxhp_, speed_, level_, light_radius_, attrlist) {
-		this.$2$typeField = 0;
+		this.$2$atypeField = 0;
 		this.$2$maxhpField = 0;
 		this.$2$curhpField = 0;
 		this.$2$speedField = 0;
@@ -20704,7 +20711,7 @@
 		this.armors = [];
 		this.magic_items = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(type_);
+		this.set_atype(type_);
 		this.setName(name_);
 		this.set_symbol(symbol_);
 		this.set_color(color_);
@@ -20733,7 +20740,7 @@
 		//row and col are -1
 	};
 	$Forays_Actor.$ctor2 = function(type_, name_, symbol_, color_, maxhp_, speed_, level_, light_radius_) {
-		this.$2$typeField = 0;
+		this.$2$atypeField = 0;
 		this.$2$maxhpField = 0;
 		this.$2$curhpField = 0;
 		this.$2$speedField = 0;
@@ -20756,7 +20763,7 @@
 		this.armors = [];
 		this.magic_items = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(type_);
+		this.set_atype(type_);
 		this.setName(name_);
 		this.set_symbol(symbol_);
 		this.set_color(color_);
@@ -20843,7 +20850,7 @@
 			return null;
 		}
 		var type = $Forays_Global.roll(9) + 56;
-		a.set_type(type);
+		a.set_atype(type);
 		switch (type) {
 			case 64: {
 				a.setName('phantom archer');
@@ -21024,6 +21031,9 @@
 				return ch;
 			}
 		}
+	};
+	$Forays_Actor.getSpellTypes = function() {
+		return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
 	};
 	$Forays_Actor.monsterDescriptionText = function(type) {
 		switch (type) {
@@ -21791,57 +21801,326 @@
 		$Forays_Buffer.set_player(g.player);
 	};
 	$Forays_Buffer.prototype = {
-		add: function(s, objs) {
-			//if there's at least one object, the player must be able to
-			var add = false;
-			if (ss.isValue(objs) && objs.length > 0) {
-				//see at least one of them. if not, no message is added. 
-				for (var $t1 = 0; $t1 < objs.length; $t1++) {
-					var obj = objs[$t1];
-					if (ss.referenceEquals(obj, $Forays_Buffer.get_player()) || $Forays_Buffer.get_player().canSee(obj)) {
-						add = true;
-						break;
-					}
-				}
-			}
-			else {
-				add = true;
-			}
-			if (add && s.length > 0) {
-				if (s.match(new RegExp(', [a-z]')).length > 0) {
-					s.replace(new RegExp(', [a-z]'), function(sr) {
-						return String.fromCharCode(sr.charCodeAt(2)).toUpperCase();
-					});
-					//					c[0] = Char.ToUpper(s[0]);
-					//s = new string(c);
-				}
-				var idx = this.$str.length - 1;
-				this.$str[idx] = this.$str[idx] + s;
-				while (this.$str[idx].length > this.$max_length) {
-					var extra_space_for_more = 7;
-					if (this.$str.length < 3) {
-						extra_space_for_more = 1;
-					}
-					for (var i = this.$max_length - extra_space_for_more; i >= 0; --i) {
-						if (this.$str[idx].substring(i, 1) === ' ') {
-							if (this.$str.length === 3) {
-								this.$overflow = this.$str[idx].substring(i + 1);
+		add$1: function(s, obj) {
+			var $state = 0, add, idx, $t1;
+			var $sm = Function.mkdel(this, function() {
+				$sm1:
+				for (;;) {
+					switch ($state) {
+						case 0: {
+							$state = -1;
+							//if there's at least one object, the player must be able to
+							add = false;
+							if (ss.referenceEquals(obj, $Forays_Buffer.get_player()) || $Forays_Buffer.get_player().canSee(obj)) {
+								add = true;
 							}
 							else {
-								this.$str.add(this.$str[idx].substring(i + 1));
-								//todo - this breaks very long lines again.
+								add = true;
 							}
-							this.$str[idx] = this.$str[idx].substring(0, i + 1);
-							break;
+							if (add && s.length > 0) {
+								if (ss.isValue(s.match(new RegExp('^[a-z]'))) && s.match(new RegExp('^[a-z]')).length > 0) {
+									s = s.replace(new RegExp('^[a-z]'), function(sr) {
+										return String.fromCharCode(sr.charCodeAt(0)).toUpperCase();
+									});
+									//					c[0] = Char.ToUpper(s[0]);
+									//s = new string(c);
+								}
+								idx = this.$str.length - 1;
+								this.$str[idx] = this.$str[idx] + s;
+								//str.Add(str[idx]);
+								//while (str[idx].Length > max_length)
+								//{
+								//    int extra_space_for_more = 7;
+								//    if (str.Count < 3)
+								//    {
+								//        extra_space_for_more = 1;
+								//    }
+								//    for (int i = max_length - extra_space_for_more; i >= 0; --i)
+								//    {
+								//        if (str[idx].Substring(i, 1) == " ")
+								//        {
+								//            if (str.Count == 3)
+								//            {
+								//                overflow = str[idx].Substring(i + 1);
+								//            }
+								//            else
+								//            {
+								//                //(str[idx].Substring(i + 1)); //todo - this breaks very long lines again.
+								//            }
+								//            str[idx] = str[idx].Substring(0, i + 1);
+								//            break;
+								//        }
+								//    }
+								if (this.$overflow !== '') {
+									$Forays_Screen.resetColors();
+									$t1 = this.print(false);
+									$state = 1;
+									$t1.continueWith($sm);
+									return;
+								}
+								$state = -1;
+								break $sm1;
+							}
+							$state = -1;
+							break $sm1;
+						}
+						case 1: {
+							$state = -1;
+							$t1.getResult();
+							idx = 0;
+							$state = -1;
+							break $sm1;
+						}
+						default: {
+							break $sm1;
 						}
 					}
-					if (this.$overflow !== '') {
-						$Forays_Screen.resetColors();
-						this.print(false);
-						idx = 0;
+				}
+			});
+			$sm();
+		},
+		add$3: function(s, obj1, obj2) {
+			var $state = 0, add, objs, $t1, obj, idx, $t2;
+			var $sm = Function.mkdel(this, function() {
+				$sm1:
+				for (;;) {
+					switch ($state) {
+						case 0: {
+							$state = -1;
+							//if there's at least one object, the player must be able to
+							add = false;
+							if (ss.isValue(obj1) && ss.isValue(obj2)) {
+								//see at least one of them. if not, no message is added. 
+								objs = [obj1, obj2];
+								for ($t1 = 0; $t1 < objs.length; $t1++) {
+									obj = objs[$t1];
+									if (ss.referenceEquals(obj, $Forays_Buffer.get_player()) || $Forays_Buffer.get_player().canSee(obj)) {
+										add = true;
+										break;
+									}
+								}
+							}
+							else {
+								add = true;
+							}
+							if (add && s.length > 0) {
+								if (ss.isValue(s.match(new RegExp('^[a-z]'))) && s.match(new RegExp('^[a-z]')).length > 0) {
+									s = s.replace(new RegExp('^[a-z]'), function(sr) {
+										return String.fromCharCode(sr.charCodeAt(0)).toUpperCase();
+									});
+									//					c[0] = Char.ToUpper(s[0]);
+									//s = new string(c);
+								}
+								idx = this.$str.length - 1;
+								this.$str[idx] = this.$str[idx] + s;
+								//str.Add(str[idx]);
+								//while (str[idx].Length > max_length)
+								//{
+								//    int extra_space_for_more = 7;
+								//    if (str.Count < 3)
+								//    {
+								//        extra_space_for_more = 1;
+								//    }
+								//    for (int i = max_length - extra_space_for_more; i >= 0; --i)
+								//    {
+								//        if (str[idx].Substring(i, 1) == " ")
+								//        {
+								//            if (str.Count == 3)
+								//            {
+								//                overflow = str[idx].Substring(i + 1);
+								//            }
+								//            else
+								//            {
+								//                //(str[idx].Substring(i + 1)); //todo - this breaks very long lines again.
+								//            }
+								//            str[idx] = str[idx].Substring(0, i + 1);
+								//            break;
+								//        }
+								//    }
+								if (this.$overflow !== '') {
+									$Forays_Screen.resetColors();
+									$t2 = this.print(false);
+									$state = 1;
+									$t2.continueWith($sm);
+									return;
+								}
+								$state = -1;
+								break $sm1;
+							}
+							$state = -1;
+							break $sm1;
+						}
+						case 1: {
+							$state = -1;
+							$t2.getResult();
+							idx = 0;
+							$state = -1;
+							break $sm1;
+						}
+						default: {
+							break $sm1;
+						}
 					}
 				}
-			}
+			});
+			$sm();
+		},
+		add$2: function(s, objs) {
+			var $state = 0, add, $t1, obj, idx, $t2;
+			var $sm = Function.mkdel(this, function() {
+				$sm1:
+				for (;;) {
+					switch ($state) {
+						case 0: {
+							$state = -1;
+							//if there's at least one object, the player must be able to
+							add = false;
+							if (ss.isValue(objs) && objs.length > 0) {
+								//see at least one of them. if not, no message is added. 
+								for ($t1 = 0; $t1 < objs.length; $t1++) {
+									obj = objs[$t1];
+									if (ss.referenceEquals(obj, $Forays_Buffer.get_player()) || $Forays_Buffer.get_player().canSee(obj)) {
+										add = true;
+										break;
+									}
+								}
+							}
+							else {
+								add = true;
+							}
+							if (add && ss.isValue(s) && s.length > 0) {
+								if (ss.isValue(s.match(new RegExp('^[a-z]'))) && s.match(new RegExp('^[a-z]')).length > 0) {
+									s = s.replace(new RegExp('^[a-z]'), function(sr) {
+										return String.fromCharCode(sr.charCodeAt(0)).toUpperCase();
+									});
+									//					c[0] = Char.ToUpper(s[0]);
+									//s = new string(c);
+								}
+								idx = this.$str.length - 1;
+								this.$str[idx] = this.$str[idx] + s;
+								//  str.Add(str[idx]);
+								//while (str[idx].Length > max_length)
+								//{
+								//    int extra_space_for_more = 7;
+								//    if (str.Count < 3)
+								//    {
+								//        extra_space_for_more = 1;
+								//    }
+								//    for (int i = max_length - extra_space_for_more; i >= 0; --i)
+								//    {
+								//        if (str[idx].Substring(i, 1) == " ")
+								//        {
+								//            if (str.Count == 3)
+								//            {
+								//                overflow = str[idx].Substring(i + 1);
+								//            }
+								//            else
+								//            {
+								//                //(str[idx].Substring(i + 1)); //todo - this breaks very long lines again.
+								//            }
+								//            str[idx] = str[idx].Substring(0, i + 1);
+								//            break;
+								//        }
+								//    }
+								if (this.$overflow !== '') {
+									$Forays_Screen.resetColors();
+									$t2 = this.print(false);
+									$state = 1;
+									$t2.continueWith($sm);
+									return;
+								}
+								$state = -1;
+								break $sm1;
+							}
+							$state = -1;
+							break $sm1;
+						}
+						case 1: {
+							$state = -1;
+							$t2.getResult();
+							idx = 0;
+							$state = -1;
+							break $sm1;
+						}
+						default: {
+							break $sm1;
+						}
+					}
+				}
+			});
+			$sm();
+		},
+		add: function(s) {
+			var $state = 0, add, idx, $t1;
+			var $sm = Function.mkdel(this, function() {
+				$sm1:
+				for (;;) {
+					switch ($state) {
+						case 0: {
+							$state = -1;
+							//if there's at least one object, the player must be able to
+							add = true;
+							if (add && s.length > 0) {
+								if (ss.isValue(s.match(new RegExp('^[a-z]'))) && s.match(new RegExp('^[a-z]')).length > 0) {
+									s = s.replace(new RegExp('^[a-z]'), function(sr) {
+										return String.fromCharCode(sr.charCodeAt(0)).toUpperCase();
+									});
+									//					c[0] = Char.ToUpper(s[0]);
+									//s = new string(c);
+								}
+								idx = this.$str.length - 1;
+								this.$str[idx] = this.$str[idx] + s;
+								//  str.Add(str[idx]);
+								//while (str[idx].Length > max_length)
+								//{
+								//    int extra_space_for_more = 7;
+								//    if (str.Count < 3)
+								//    {
+								//        extra_space_for_more = 1;
+								//    }
+								//    for (int i = max_length - extra_space_for_more; i >= 0; --i)
+								//    {
+								//        if (str[idx].Substring(i, 1) == " ")
+								//        {
+								//            if (str.Count == 3)
+								//            {
+								//                overflow = str[idx].Substring(i + 1);
+								//            }
+								//            else
+								//            {
+								//                //(str[idx].Substring(i + 1)); //todo - this breaks very long lines again.
+								//            }
+								//            str[idx] = str[idx].Substring(0, i + 1);
+								//            break;
+								//        }
+								//    }
+								if (this.$overflow !== '') {
+									$Forays_Screen.resetColors();
+									$t1 = this.print(false);
+									$state = 1;
+									$t1.continueWith($sm);
+									return;
+								}
+								$state = -1;
+								break $sm1;
+							}
+							$state = -1;
+							break $sm1;
+						}
+						case 1: {
+							$state = -1;
+							$t1.getResult();
+							idx = 0;
+							$state = -1;
+							break $sm1;
+						}
+						default: {
+							break $sm1;
+						}
+					}
+				}
+			});
+			$sm();
 		},
 		displayNow$1: function(s) {
 			this.displayNow$2(s, true);
@@ -22197,12 +22476,12 @@
 		addDependingOnLastPartialMessage: function(s) {
 			//   =|
 			if (!$Forays_Extensions.last(String).call(null, this.$str).endsWith(s)) {
-				this.add(s, []);
+				this.add(s);
 			}
 		},
 		addIfEmpty: function(s) {
 			if ($Forays_Extensions.last(String).call(null, this.$str).length === 0) {
-				this.add(s, []);
+				this.add(s);
 			}
 		}
 	};
@@ -22697,7 +22976,7 @@
 									}
 									else if ($t93 === 2) {
 										temp1 = Type.safeCast(this.get_target(), $Forays_Actor);
-										if (temp1.get_type() === 30 && this.get_attr() === 70) {
+										if (temp1.get_atype() === 30 && this.get_attr() === 70) {
 											temp1.attrs.set_item(this.get_attr(), 0);
 										}
 										else {
@@ -22716,8 +22995,8 @@
 											}
 										}
 										if (this.get_attr() === 35) {
-											if (temp1.get_type() !== 0) {
-												temp1.set_speed($Forays_Actor.prototype$1(temp1.get_type()).get_speed());
+											if (temp1.get_atype() !== 0) {
+												temp1.set_speed($Forays_Actor.prototype$1(temp1.get_atype()).get_speed());
 											}
 											else if (temp1.hasAttr(20)) {
 												temp1.set_speed(80);
@@ -22742,7 +23021,7 @@
 												//otherwise, set things to normal
 												temp1.attrs.set_item(98, temp1.attrs.get_item(98) - ss.Int32.div(this.get_value(), 2));
 												if (temp1.attrs.get_item(88) >= 2) {
-													$Forays_Event.get_b().add('You wipe off your weapon. ', []);
+													$Forays_Event.get_b().add('You wipe off your weapon. ');
 												}
 												temp1.attrs.set_item(88, 0);
 											}
@@ -22754,15 +23033,15 @@
 										}
 										if (this.get_attr() === 29 && ss.referenceEquals(temp1, $Forays_Event.get_player())) {
 											if (temp1.hasAttr(29)) {
-												$Forays_Event.get_b().add('The poison begins to subside. ', []);
+												$Forays_Event.get_b().add('The poison begins to subside. ');
 											}
 											else {
-												$Forays_Event.get_b().add('You are no longer poisoned. ', []);
+												$Forays_Event.get_b().add('You are no longer poisoned. ');
 											}
 										}
-										if (this.get_attr() === 69 && temp1.get_type() === 30) {
-											$Forays_Event.get_b().add(temp1.your() + ' rage diminishes. ', [temp1]);
-											$Forays_Event.get_b().add(temp1.get_the_name() + ' dies. ', [temp1]);
+										if (this.get_attr() === 69 && temp1.get_atype() === 30) {
+											$Forays_Event.get_b().add$1(temp1.your() + ' rage diminishes. ', temp1);
+											$Forays_Event.get_b().add$1(temp1.get_the_name() + ' dies. ', temp1);
 											$t4 = temp1.takeDamage$1(0, 2, 8888, null);
 											$state = 4;
 											$t4.continueWith($sm);
@@ -22795,16 +23074,16 @@
 												}
 												if ($Forays_Global.roll(difficulty) === difficulty) {
 													if (t.isTrap() || t.is$1(29) || t.is$1(32) || t.is$1(33)) {
-														t.set_name($Forays_Tile.prototype$1(t.get_type()).get_name());
-														t.set_a_name($Forays_Tile.prototype$1(t.get_type()).get_a_name());
-														t.set_the_name($Forays_Tile.prototype$1(t.get_type()).get_the_name());
-														t.set_symbol($Forays_Tile.prototype$1(t.get_type()).get_symbol());
-														t.set_color($Forays_Tile.prototype$1(t.get_type()).get_color());
-														$Forays_Event.get_b().add('You notice ' + t.get_a_name() + '. ', []);
+														t.set_name($Forays_Tile.prototype$1(t.get_ttype()).get_name());
+														t.set_a_name($Forays_Tile.prototype$1(t.get_ttype()).get_a_name());
+														t.set_the_name($Forays_Tile.prototype$1(t.get_ttype()).get_the_name());
+														t.set_symbol($Forays_Tile.prototype$1(t.get_ttype()).get_symbol());
+														t.set_color($Forays_Tile.prototype$1(t.get_ttype()).get_color());
+														$Forays_Event.get_b().add('You notice ' + t.get_a_name() + '. ');
 													}
-													else if (t.get_type() === 20) {
+													else if (t.get_ttype() === 20) {
 														t.toggle(null);
-														$Forays_Event.get_b().add('You notice a hidden door. ', []);
+														$Forays_Event.get_b().add('You notice a hidden door. ');
 													}
 													removed.add(t);
 												}
@@ -22822,7 +23101,7 @@
 									}
 									else if ($t93 === 4) {
 										if ($Forays_Event.get_m().allActors().length === 1 && !$Forays_Event.get_q().contains(5) && !$Forays_Event.get_q().contains(21) && !$Forays_Event.get_q().contains(7) && !$Forays_Event.get_q().contains(6) && !$Forays_Event.get_q().contains(18)) {
-											$Forays_Event.get_b().add('The dungeon is still and silent. ', []);
+											$Forays_Event.get_b().add('The dungeon is still and silent. ');
 											$t7 = $Forays_Event.get_b().printAll();
 											$state = 6;
 											$t7.continueWith($sm);
@@ -22847,7 +23126,7 @@
 										})) {
 											manifested = false;
 											if (this.get_value() === 0) {
-												$Forays_Event.get_b().add('You feel like you\'re being watched. ', []);
+												$Forays_Event.get_b().add('You feel like you\'re being watched. ');
 												$state = 8;
 												continue $sm1;
 											}
@@ -22867,11 +23146,11 @@
 													item = temporary.get_inv()[0];
 													if (item.get_symbol() === '*') {
 														//orbs
-														if (item.get_type() === 11 || item.get_type() === 12) {
-															$Forays_Event.get_b().add(temporary.you('throw') + ' ' + item.aName() + '. ', [temporary]);
+														if (item.get_itype() === 11 || item.get_itype() === 12) {
+															$Forays_Event.get_b().add$1(temporary.you('throw') + ' ' + item.aName() + '. ', temporary);
 															$Forays_Event.get_b().displayNow();
 															$Forays_Screen.animateProjectile($Forays_Extensions.toFirstObstruction(tile.getBestExtendedLineOfEffect($Forays_Event.get_player())), new $Forays_colorchar.$ctor2(item.get_color(), item.get_symbol()));
-															$Forays_Event.get_b().add(item.theName() + ' shatters on you! ', []);
+															$Forays_Event.get_b().add(item.theName() + ' shatters on you! ');
 														}
 														$t8 = temporary.get_inv()[0].use$1(temporary, temporary.getBestExtendedLineOfEffect($Forays_Event.get_player()));
 														$state = 10;
@@ -22879,11 +23158,11 @@
 														return;
 													}
 													else {
-														$Forays_Event.get_b().add(temporary.you('throw') + ' ' + item.aName() + '. ', [temporary]);
+														$Forays_Event.get_b().add$1(temporary.you('throw') + ' ' + item.aName() + '. ', temporary);
 														$Forays_Event.get_b().displayNow();
 														$Forays_Screen.animateProjectile($Forays_Extensions.toFirstObstruction(tile.getBestExtendedLineOfEffect($Forays_Event.get_player())), new $Forays_colorchar.$ctor2(item.get_color(), item.get_symbol()));
 														$Forays_Event.get_player().tile().getItem(item);
-														$Forays_Event.get_b().add(item.theName() + ' hits you. ', []);
+														$Forays_Event.get_b().add(item.theName() + ' hits you. ');
 														$t9 = $Forays_Event.get_player().takeDamage$2(0, 0, $Forays_Global.roll(6), temporary, 'a flying ' + item.name());
 														$state = 11;
 														$t9.continueWith($sm);
@@ -22922,14 +23201,14 @@
 													}
 												}
 												$Forays_Actor.tiebreakers[this.get_tiebreaker()] = a;
-												$Forays_Event.get_b().add('A poltergeist manifests in front of you! ', []);
+												$Forays_Event.get_b().add('A poltergeist manifests in front of you! ');
 												$Forays_Event.get_q().add(new $Forays_Event.$ctorf(a, this.area, ($Forays_Global.roll(8) + 6) * 100, 5, 109, 0, ''));
 												manifested = true;
 												$state = 8;
 												continue $sm1;
 											}
-											else if ($Forays_Event.get_player().tile().get_type() === 2) {
-												$Forays_Event.get_b().add('The door slams closed on you! ', []);
+											else if ($Forays_Event.get_player().tile().get_ttype() === 2) {
+												$Forays_Event.get_b().add('The door slams closed on you! ');
 												$t12 = $Forays_Event.get_player().takeDamage$2(0, 0, $Forays_Global.roll(6), null, 'a slamming door');
 												$state = 12;
 												$t12.continueWith($sm);
@@ -22960,11 +23239,11 @@
 													item1 = temporary1.get_inv()[0];
 													if (item1.get_symbol() === '*') {
 														//orbs
-														if (item1.get_type() === 11 || item1.get_type() === 12) {
-															$Forays_Event.get_b().add(temporary1.you('throw') + ' ' + item1.theName() + '. ', [temporary1]);
+														if (item1.get_itype() === 11 || item1.get_itype() === 12) {
+															$Forays_Event.get_b().add$1(temporary1.you('throw') + ' ' + item1.theName() + '. ', temporary1);
 															$Forays_Event.get_b().displayNow();
 															$Forays_Screen.animateProjectile($Forays_Extensions.toFirstObstruction(tile2.getBestExtendedLineOfEffect($Forays_Event.get_player())), new $Forays_colorchar.$ctor2(item1.get_color(), item1.get_symbol()));
-															$Forays_Event.get_b().add(item1.theName() + ' shatters on you! ', []);
+															$Forays_Event.get_b().add(item1.theName() + ' shatters on you! ');
 														}
 														$t14 = temporary1.get_inv()[0].use$1(temporary1, temporary1.getBestExtendedLineOfEffect($Forays_Event.get_player()));
 														$state = 13;
@@ -22972,11 +23251,11 @@
 														return;
 													}
 													else {
-														$Forays_Event.get_b().add(temporary1.you('throw') + ' ' + item1.theName() + '. ', [temporary1]);
+														$Forays_Event.get_b().add$1(temporary1.you('throw') + ' ' + item1.theName() + '. ', temporary1);
 														$Forays_Event.get_b().displayNow();
 														$Forays_Screen.animateProjectile($Forays_Extensions.toFirstObstruction(tile2.getBestExtendedLineOfEffect($Forays_Event.get_player())), new $Forays_colorchar.$ctor2(item1.get_color(), item1.get_symbol()));
 														$Forays_Event.get_player().tile().getItem(item1);
-														$Forays_Event.get_b().add(item1.theName() + ' hits you. ', []);
+														$Forays_Event.get_b().add(item1.theName() + ' hits you. ');
 														$t15 = $Forays_Event.get_player().takeDamage$2(0, 0, $Forays_Global.roll(6), temporary1, 'a flying ' + item1.name());
 														$state = 14;
 														$t15.continueWith($sm);
@@ -22984,17 +23263,17 @@
 													}
 												}
 												else if ($Forays_Extensions.any($Forays_Tile).call(null, this.area, function(t7) {
-													return t7.get_type() === 2 || t7.get_type() === 3;
+													return t7.get_ttype() === 2 || t7.get_ttype() === 3;
 												})) {
 													door = $Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, this.area, function(t8) {
-														return t8.get_type() === 2 || t8.get_type() === 3;
+														return t8.get_ttype() === 2 || t8.get_ttype() === 3;
 													}));
-													if (door.get_type() === 3) {
+													if (door.get_ttype() === 3) {
 														if ($Forays_Event.get_player().canSee(door)) {
-															$Forays_Event.get_b().add('The door flies open! ', [door]);
+															$Forays_Event.get_b().add$1('The door flies open! ', door);
 														}
 														else if (door.get_seen() || $Forays_Event.get_player().distanceFrom(door) <= 12) {
-															$Forays_Event.get_b().add('You hear a door slamming. ', []);
+															$Forays_Event.get_b().add('You hear a door slamming. ');
 														}
 														door.toggle(null);
 														$state = 8;
@@ -23002,10 +23281,10 @@
 													}
 													else if (ss.isNullOrUndefined(door.actor())) {
 														if ($Forays_Event.get_player().canSee(door)) {
-															$Forays_Event.get_b().add('The door slams closed! ', [door]);
+															$Forays_Event.get_b().add$1('The door slams closed! ', door);
 														}
 														else if (door.get_seen() || $Forays_Event.get_player().distanceFrom(door) <= 12) {
-															$Forays_Event.get_b().add('You hear a door slamming. ', []);
+															$Forays_Event.get_b().add('You hear a door slamming. ');
 														}
 														door.toggle(null);
 														$state = 8;
@@ -23013,10 +23292,10 @@
 													}
 													else {
 														if ($Forays_Event.get_player().canSee(door)) {
-															$Forays_Event.get_b().add('The door slams closed on ' + door.actor().theVisible() + '! ', [door]);
+															$Forays_Event.get_b().add$1('The door slams closed on ' + door.actor().theVisible() + '! ', door);
 														}
 														else if ($Forays_Event.get_player().distanceFrom(door) <= 12) {
-															$Forays_Event.get_b().add('You hear a door slamming and a grunt of pain. ', []);
+															$Forays_Event.get_b().add('You hear a door slamming and a grunt of pain. ');
 														}
 														$t16 = door.actor().takeDamage$2(0, 0, $Forays_Global.roll(6), null, 'a slamming door');
 														$state = 15;
@@ -23025,7 +23304,7 @@
 													}
 												}
 												else {
-													$Forays_Event.get_b().add('You hear mocking laughter from nearby. ', []);
+													$Forays_Event.get_b().add('You hear mocking laughter from nearby. ');
 													$state = 8;
 													continue $sm1;
 												}
@@ -23057,7 +23336,7 @@
 											attacked = false;
 											if ($Forays_Event.get_player().distanceFrom(this.area[0]) === 1 && ss.isNullOrUndefined(this.area[0].actor())) {
 												if ($Forays_Event.get_player().stealth() * 5 < $Forays_Global.roll$1(1, 100)) {
-													$Forays_Event.get_b().add(item2.theName() + ' suddenly grows tentacles! ', []);
+													$Forays_Event.get_b().add(item2.theName() + ' suddenly grows tentacles! ');
 													attacked = true;
 													this.area[0].set_inv(null);
 													a1 = $Forays_Actor.create(16, this.area[0].get_row(), this.area[0].get_col());
@@ -23093,7 +23372,7 @@
 											}
 											if (open.length > 0) {
 												t11 = $Forays_Extensions.random($Forays_Tile).call(null, open);
-												$Forays_Event.get_b().add(item2.theName() + ' suddenly grows tentacles! ', []);
+												$Forays_Event.get_b().add(item2.theName() + ' suddenly grows tentacles! ');
 												a2 = $Forays_Actor.create(16, t11.get_row(), t11.get_col());
 												$Forays_Event.get_q().killEvents$1(a2, 1);
 												a2.q0();
@@ -23112,7 +23391,7 @@
 												$Forays_Event.get_player().get_inv().remove(item2);
 											}
 											else {
-												$Forays_Event.get_b().add('Your pack feels lighter. ', []);
+												$Forays_Event.get_b().add('Your pack feels lighter. ');
 												$Forays_Event.get_player().get_inv().remove(item2);
 											}
 										}
@@ -23123,7 +23402,7 @@
 										t12 = Type.safeCast(this.get_target(), $Forays_Tile);
 										if (t12.is(0)) {
 											t12.features.remove(0);
-											$Forays_Event.get_b().add('The grenade explodes! ', [t12]);
+											$Forays_Event.get_b().add$1('The grenade explodes! ', t12);
 											if (t12.get_seen()) {
 												$Forays_Screen.writeMapChar(t12.get_row(), t12.get_col(), $Forays_Event.get_m().visibleColorChar(t12.get_row(), t12.get_col()));
 											}
@@ -23150,7 +23429,7 @@
 										t13 = Type.safeCast(this.get_target(), $Forays_Tile);
 										if (t13.is(10)) {
 											t13.features.remove(10);
-											$Forays_Event.get_b().add('The blast fungus explodes! ', [t13]);
+											$Forays_Event.get_b().add$1('The blast fungus explodes! ', t13);
 											if (t13.get_seen()) {
 												$Forays_Screen.writeMapChar(t13.get_row(), t13.get_col(), $Forays_Event.get_m().visibleColorChar(t13.get_row(), t13.get_col()));
 											}
@@ -23178,20 +23457,20 @@
 										stalagmites = 0;
 										for ($t38 = 0; $t38 < this.area.length; $t38++) {
 											tile5 = this.area[$t38];
-											if (tile5.get_type() === 7) {
+											if (tile5.get_ttype() === 7) {
 												stalagmites++;
 											}
 										}
 										if (stalagmites > 0) {
 											if (stalagmites > 1) {
-												$Forays_Event.get_b().add('The stalagmites crumble. ', Enumerable.from(this.area).toArray());
+												$Forays_Event.get_b().add$2('The stalagmites crumble. ', Enumerable.from(this.area).toArray());
 											}
 											else {
-												$Forays_Event.get_b().add('The stalagmite crumbles. ', Enumerable.from(this.area).toArray());
+												$Forays_Event.get_b().add$2('The stalagmite crumbles. ', Enumerable.from(this.area).toArray());
 											}
 											for ($t39 = 0; $t39 < this.area.length; $t39++) {
 												tile6 = this.area[$t39];
-												if (tile6.get_type() === 7) {
+												if (tile6.get_ttype() === 7) {
 													tile6.toggle(null);
 												}
 											}
@@ -23235,11 +23514,11 @@
 												if (ss.isValue(hiddencheck)) {
 													hiddencheck.area.remove(t14);
 												}
-												t14.set_name($Forays_Tile.prototype$1(t14.get_type()).get_name());
-												t14.set_a_name($Forays_Tile.prototype$1(t14.get_type()).get_a_name());
-												t14.set_the_name($Forays_Tile.prototype$1(t14.get_type()).get_the_name());
-												t14.set_symbol($Forays_Tile.prototype$1(t14.get_type()).get_symbol());
-												t14.set_color($Forays_Tile.prototype$1(t14.get_type()).get_color());
+												t14.set_name($Forays_Tile.prototype$1(t14.get_ttype()).get_name());
+												t14.set_a_name($Forays_Tile.prototype$1(t14.get_ttype()).get_a_name());
+												t14.set_the_name($Forays_Tile.prototype$1(t14.get_ttype()).get_the_name());
+												t14.set_symbol($Forays_Tile.prototype$1(t14.get_ttype()).get_symbol());
+												t14.set_color($Forays_Tile.prototype$1(t14.get_ttype()).get_color());
 											}
 										}
 										if (this.get_value() >= 0) {
@@ -23247,7 +23526,7 @@
 											if (this.get_target().get_light_radius() === 0) {
 												this.get_target().updateRadius$1(0, 8, true);
 											}
-											$Forays_Event.get_b().add(this.get_target().get_the_name() + ' spouts flames! ', [this.get_target()]);
+											$Forays_Event.get_b().add$1(this.get_target().get_the_name() + ' spouts flames! ', this.get_target());
 											$Forays_Event.get_m().draw();
 											for (i3 = 0; i3 < 3; ++i3) {
 												cells2 = [];
@@ -23290,11 +23569,11 @@
 												if (ss.isValue(hiddencheck1)) {
 													hiddencheck1.area.remove(t17);
 												}
-												t17.set_name($Forays_Tile.prototype$1(t17.get_type()).get_name());
-												t17.set_a_name($Forays_Tile.prototype$1(t17.get_type()).get_a_name());
-												t17.set_the_name($Forays_Tile.prototype$1(t17.get_type()).get_the_name());
-												t17.set_symbol($Forays_Tile.prototype$1(t17.get_type()).get_symbol());
-												t17.set_color($Forays_Tile.prototype$1(t17.get_type()).get_color());
+												t17.set_name($Forays_Tile.prototype$1(t17.get_ttype()).get_name());
+												t17.set_a_name($Forays_Tile.prototype$1(t17.get_ttype()).get_a_name());
+												t17.set_the_name($Forays_Tile.prototype$1(t17.get_ttype()).get_the_name());
+												t17.set_symbol($Forays_Tile.prototype$1(t17.get_ttype()).get_symbol());
+												t17.set_color($Forays_Tile.prototype$1(t17.get_ttype()).get_color());
 											}
 										}
 										current = Type.safeCast(this.get_target(), $Forays_Tile);
@@ -23374,11 +23653,11 @@
 												if (ss.isValue(hiddencheck2)) {
 													hiddencheck2.area.remove(t21);
 												}
-												t21.set_name($Forays_Tile.prototype$1(t21.get_type()).get_name());
-												t21.set_a_name($Forays_Tile.prototype$1(t21.get_type()).get_a_name());
-												t21.set_the_name($Forays_Tile.prototype$1(t21.get_type()).get_the_name());
-												t21.set_symbol($Forays_Tile.prototype$1(t21.get_type()).get_symbol());
-												t21.set_color($Forays_Tile.prototype$1(t21.get_type()).get_color());
+												t21.set_name($Forays_Tile.prototype$1(t21.get_ttype()).get_name());
+												t21.set_a_name($Forays_Tile.prototype$1(t21.get_ttype()).get_a_name());
+												t21.set_the_name($Forays_Tile.prototype$1(t21.get_ttype()).get_the_name());
+												t21.set_symbol($Forays_Tile.prototype$1(t21.get_ttype()).get_symbol());
+												t21.set_color($Forays_Tile.prototype$1(t21.get_ttype()).get_color());
 											}
 										}
 										current1 = Type.safeCast(this.get_target(), $Forays_Tile);
@@ -23418,7 +23697,7 @@
 												}
 											}
 											if (new_area.length > 0) {
-												$Forays_Event.get_b().add('Toxic vapors pour from ' + this.get_target().get_the_name() + '! ', [this.get_target()]);
+												$Forays_Event.get_b().add$1('Toxic vapors pour from ' + this.get_target().get_the_name() + '! ', this.get_target());
 												$Forays_Event.get_q().add(new $Forays_Event.$ctor6(new_area, 200, 16));
 											}
 										}
@@ -23447,7 +23726,7 @@
 									}
 									else if ($t93 === 17) {
 										t25 = Type.safeCast(this.get_target(), $Forays_Tile);
-										if (t25.get_type() === 34 && (t25.isLitFromAnywhere$1(true) || $Forays_Extensions.any($Forays_Tile).call(null, this.area, function(x) {
+										if (t25.get_ttype() === 34 && (t25.isLitFromAnywhere$1(true) || $Forays_Extensions.any($Forays_Tile).call(null, this.area, function(x) {
 											return ss.isValue(x.actor());
 										}))) {
 											vis = $Forays_Event.get_player().canSee(t25);
@@ -23456,13 +23735,13 @@
 												vis = true;
 											}
 											if (vis) {
-												$Forays_Event.get_b().add('The stone slab rises with a grinding sound. ', []);
+												$Forays_Event.get_b().add('The stone slab rises with a grinding sound. ');
 											}
 											else if ($Forays_Event.get_player().distanceFrom(t25) <= 6) {
-												$Forays_Event.get_b().add('You hear a grinding sound. ', []);
+												$Forays_Event.get_b().add('You hear a grinding sound. ');
 											}
 										}
-										else if (t25.get_type() === 1 && !t25.isLitFromAnywhere$1(true) && ss.isNullOrUndefined(t25.actor()) && !$Forays_Extensions.any($Forays_Tile).call(null, this.area, function(x1) {
+										else if (t25.get_ttype() === 1 && !t25.isLitFromAnywhere$1(true) && ss.isNullOrUndefined(t25.actor()) && !$Forays_Extensions.any($Forays_Tile).call(null, this.area, function(x1) {
 											return ss.isValue(x1.actor());
 										})) {
 											vis1 = $Forays_Event.get_player().canSee(t25);
@@ -23471,10 +23750,10 @@
 												vis1 = true;
 											}
 											if (vis1) {
-												$Forays_Event.get_b().add('The stone slab descends with a grinding sound. ', []);
+												$Forays_Event.get_b().add('The stone slab descends with a grinding sound. ');
 											}
 											else if ($Forays_Event.get_player().distanceFrom(t25) <= 6) {
-												$Forays_Event.get_b().add('You hear a grinding sound. ', []);
+												$Forays_Event.get_b().add('You hear a grinding sound. ');
 											}
 										}
 										$Forays_Event.get_q().add(new $Forays_Event.$ctor7(this.get_target(), this.area, 100, 17));
@@ -23483,7 +23762,7 @@
 									}
 									else if ($t93 === 18) {
 										t26 = Type.safeCast(this.get_target(), $Forays_Tile);
-										if (t26.get_type() === 30) {
+										if (t26.get_ttype() === 30) {
 											if (this.get_value() === 1 && $Forays_Event.get_player().canSee(t26) && !t26.isLit() && ss.isNullOrUndefined(t26.actor())) {
 												//if target was visible last turn & this turn, and it's currently in darkness...
 												t26.transformTo(1);
@@ -23499,11 +23778,11 @@
 												a6.q0();
 												switch ($Forays_Global.roll(2)) {
 													case 1: {
-														$Forays_Event.get_b().add('You think that statue might have just moved... ', []);
+														$Forays_Event.get_b().add('You think that statue might have just moved... ');
 														break;
 													}
 													case 2: {
-														$Forays_Event.get_b().add('The statue turns its head to face you. ', []);
+														$Forays_Event.get_b().add('The statue turns its head to face you. ');
 														break;
 													}
 												}
@@ -23537,9 +23816,9 @@
 												this.get_target().actor().set_level(0);
 												$t65 = this.get_target().actor().attrs;
 												$t65.set_item(26, $t65.get_item(26) + 1);
-												$Forays_Event.get_b().add('The troll stands up! ', [this.get_target()]);
+												$Forays_Event.get_b().add$1('The troll stands up! ', this.get_target());
 												this.get_target().actor().player_visibility_duration = -1;
-												if (this.get_target().tile().get_type() === 3) {
+												if (this.get_target().tile().get_ttype() === 3) {
 													this.get_target().tile().toggle(this.get_target().actor());
 												}
 												this.get_target().tile().features.remove(1);
@@ -23559,16 +23838,16 @@
 												switch (roll) {
 													case 1:
 													case 2: {
-														$Forays_Event.get_b().add('The troll\'s corpse twitches. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('The troll\'s corpse twitches. ', this.get_target());
 														break;
 													}
 													case 3:
 													case 4: {
-														$Forays_Event.get_b().add('You hear sounds coming from the troll\'s corpse. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('You hear sounds coming from the troll\'s corpse. ', this.get_target());
 														break;
 													}
 													case 5: {
-														$Forays_Event.get_b().add('The troll on the floor regenerates. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('The troll on the floor regenerates. ', this.get_target());
 														break;
 													}
 													default: {
@@ -23596,13 +23875,13 @@
 												this.get_target().actor().set_level(0);
 												$t69 = this.get_target().actor().attrs;
 												$t69.set_item(26, $t69.get_item(26) + 1);
-												$Forays_Event.get_b().add('The troll seer stands up! ', [this.get_target()]);
+												$Forays_Event.get_b().add$1('The troll seer stands up! ', this.get_target());
 												this.get_target().actor().player_visibility_duration = -1;
 												if (this.get_attr() === 69) {
 													$t70 = this.get_target().actor().attrs;
 													$t70.set_item(69, $t70.get_item(69) + 1);
 												}
-												if (this.get_target().tile().get_type() === 3) {
+												if (this.get_target().tile().get_ttype() === 3) {
 													this.get_target().tile().toggle(this.get_target().actor());
 												}
 												this.get_target().tile().features.remove(2);
@@ -23622,16 +23901,16 @@
 												switch (roll1) {
 													case 1:
 													case 2: {
-														$Forays_Event.get_b().add('The troll seer\'s corpse twitches. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('The troll seer\'s corpse twitches. ', this.get_target());
 														break;
 													}
 													case 3:
 													case 4: {
-														$Forays_Event.get_b().add('You hear sounds coming from the troll seer\'s corpse. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('You hear sounds coming from the troll seer\'s corpse. ', this.get_target());
 														break;
 													}
 													case 5: {
-														$Forays_Event.get_b().add('The troll seer on the floor regenerates. ', [this.get_target()]);
+														$Forays_Event.get_b().add$1('The troll seer on the floor regenerates. ', this.get_target());
 														break;
 													}
 													default: {
@@ -23654,15 +23933,15 @@
 												}
 												if (t27.is(1)) {
 													t27.features.remove(1);
-													$Forays_Event.get_b().add('The troll corpse burns to ashes! ', [t27]);
+													$Forays_Event.get_b().add$1('The troll corpse burns to ashes! ', t27);
 												}
 												if (t27.is(2)) {
 													t27.features.remove(2);
-													$Forays_Event.get_b().add('The troll seer corpse burns to ashes! ', [t27]);
+													$Forays_Event.get_b().add$1('The troll seer corpse burns to ashes! ', t27);
 												}
 												if (t27.is(8)) {
 													$Forays_Event.get_q().add(new $Forays_Event.$ctor5(t27, 200, 9));
-													$Forays_Actor.get_b().add('The blast fungus starts to smolder in the light. ', [t27]);
+													$Forays_Actor.get_b().add$1('The blast fungus starts to smolder in the light. ', t27);
 													t27.features.remove(8);
 													t27.features.add(9);
 												}
@@ -23698,15 +23977,15 @@
 													}
 													if (t30.is(1)) {
 														t30.features.remove(1);
-														$Forays_Event.get_b().add('The troll corpse burns to ashes! ', [t30]);
+														$Forays_Event.get_b().add$1('The troll corpse burns to ashes! ', t30);
 													}
 													if (t30.is(2)) {
 														t30.features.remove(2);
-														$Forays_Event.get_b().add('The troll seer corpse burns to ashes! ', [t30]);
+														$Forays_Event.get_b().add$1('The troll seer corpse burns to ashes! ', t30);
 													}
 													if (t30.is(8)) {
 														$Forays_Event.get_q().add(new $Forays_Event.$ctor5(t30, 200, 9));
-														$Forays_Actor.get_b().add('The blast fungus starts to smolder in the light. ', [t30]);
+														$Forays_Actor.get_b().add$1('The blast fungus starts to smolder in the light. ', t30);
 														t30.features.remove(8);
 														t30.features.add(9);
 													}
@@ -23784,11 +24063,11 @@
 											for ($t82 = 0; $t82 < trolls.length; $t82++) {
 												troll = trolls[$t82];
 												if (troll.is(1)) {
-													$Forays_Event.get_b().add('The troll corpse burns to ashes! ', [troll]);
+													$Forays_Event.get_b().add$1('The troll corpse burns to ashes! ', troll);
 													troll.features.remove(1);
 												}
 												else if (troll.is(2)) {
-													$Forays_Event.get_b().add('The troll seer corpse burns to ashes! ', [troll]);
+													$Forays_Event.get_b().add$1('The troll seer corpse burns to ashes! ', troll);
 													troll.features.remove(2);
 												}
 											}
@@ -23806,7 +24085,7 @@
 												goodtiles.remove(t33);
 											}
 											if (goodtiles.length > 0) {
-												$Forays_Event.get_b().add('You hear a loud crash and a nearby roar! ', []);
+												$Forays_Event.get_b().add('You hear a loud crash and a nearby roar! ');
 												t34 = goodtiles[$Forays_Global.roll(goodtiles.length) - 1];
 												a10 = $Forays_Actor.create$1(2, t34.get_row(), t34.get_col(), true, false);
 												spawned = true;
@@ -23814,7 +24093,7 @@
 											else if ($Forays_Extensions.any($Forays_Tile).call(null, $Forays_Event.get_m().allTiles(), function(t35) {
 												return t35.get_passable() && !t35.is$1(35) && ss.isNullOrUndefined(t35.actor());
 											})) {
-												$Forays_Event.get_b().add('You hear a loud crash and a nearby roar! ', []);
+												$Forays_Event.get_b().add('You hear a loud crash and a nearby roar! ');
 												tile7 = $Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, $Forays_Event.get_m().allTiles(), function(t36) {
 													return t36.get_passable() && !t36.is$1(35) && ss.isNullOrUndefined(t36.actor());
 												}));
@@ -23830,10 +24109,10 @@
 										}
 										else {
 											//if there's no good value, this means that this is the first appearance.
-											$Forays_Event.get_b().add('The ground shakes as dust and rocks fall from the cavern ceiling. ', []);
-											$Forays_Event.get_b().add('This place is falling apart! ', []);
+											$Forays_Event.get_b().add('The ground shakes as dust and rocks fall from the cavern ceiling. ');
+											$Forays_Event.get_b().add('This place is falling apart! ');
 											floors = $Forays_Extensions.where($Forays_Tile).call(null, $Forays_Event.get_m().allTiles(), function(t37) {
-												return t37.get_passable() && t37.get_type() !== 35 && !ss.referenceEquals($Forays_Event.get_player().tile(), t37);
+												return t37.get_passable() && t37.get_ttype() !== 35 && !ss.referenceEquals($Forays_Event.get_player().tile(), t37);
 											});
 											tile8 = null;
 											if (floors.length > 0) {
@@ -23864,7 +24143,7 @@
 													if (!possible2.is$1(35)) {
 														possible2.toggle$1(null, 35);
 														open_neighbors = $Forays_Extensions.where($Forays_Tile).call(null, possible2.tilesAtDistance(1), function(t39) {
-															return t39.get_passable() && t39.get_type() !== 35;
+															return t39.get_passable() && t39.get_ttype() !== 35;
 														});
 														num_neighbors = open_neighbors.length;
 														while (open_neighbors.length > ss.Int32.div(num_neighbors, 2)) {
@@ -23884,7 +24163,7 @@
 										}
 										if (tries2 === 50 || ss.isNullOrUndefined(current3)) {
 											floors1 = $Forays_Extensions.where($Forays_Tile).call(null, $Forays_Event.get_m().allTiles(), function(t40) {
-												return t40.get_passable() && t40.get_type() !== 35 && !ss.referenceEquals($Forays_Event.get_player().tile(), t40);
+												return t40.get_passable() && t40.get_ttype() !== 35 && !ss.referenceEquals($Forays_Event.get_player().tile(), t40);
 											});
 											if (floors1.length > 0) {
 												this.set_target($Forays_Extensions.random($Forays_Tile).call(null, floors1));
@@ -23896,7 +24175,7 @@
 										continue $sm1;
 									}
 									else if ($t93 === 23) {
-										$Forays_Event.get_b().add('The ground shakes and debris falls from the ceiling! ', []);
+										$Forays_Event.get_b().add('The ground shakes and debris falls from the ceiling! ');
 										for (i5 = 1; i5 < 21; ++i5) {
 											for (j1 = 1; j1 < 65; ++j1) {
 												t41 = $Forays_Event.get_m().tile.get_item(i5, j1);
@@ -23919,7 +24198,7 @@
 															for ($t90 = 0; $t90 < $t89.length; $t90++) {
 																neighbor2 = $t89[$t90];
 																neighbor2.set_solid_rock(false);
-																if (neighbor2.get_type() === 1 && $Forays_Global.oneIn(10)) {
+																if (neighbor2.get_ttype() === 1 && $Forays_Global.oneIn(10)) {
 																	neighbor2.toggle$1(null, 28);
 																}
 															}
@@ -23937,7 +24216,7 @@
 														$t91 = t41.tilesAtDistance(1);
 														for ($t92 = 0; $t92 < $t91.length; $t92++) {
 															neighbor3 = $t91[$t92];
-															if (neighbor3.get_type() === 1 && $Forays_Global.oneIn(6)) {
+															if (neighbor3.get_ttype() === 1 && $Forays_Global.oneIn(6)) {
 																neighbor3.toggle$1(null, 28);
 															}
 														}
@@ -24107,7 +24386,7 @@
 								a9 = actors[$t78];
 								if (!a9.hasAttr(64) && !a9.hasAttr(103)) {
 									if ($Forays_Event.get_player().canSee(a9.tile())) {
-										$Forays_Event.get_b().add('The quickfire burns ' + a9.get_the_name() + '. ', [a9]);
+										$Forays_Event.get_b().add$1('The quickfire burns ' + a9.get_the_name() + '. ', a9);
 									}
 									$t79 = a9.takeDamage$2(1, 0, $Forays_Global.roll(6), null, 'quickfire');
 									$state = 35;
@@ -24121,10 +24400,10 @@
 								$state = -1;
 								if (this.get_msg() !== '') {
 									if (ss.isNullOrUndefined(this.msg_objs)) {
-										$Forays_Event.get_b().add(this.get_msg(), []);
+										$Forays_Event.get_b().add(this.get_msg());
 									}
 									else {
-										$Forays_Event.get_b().add(this.get_msg(), Enumerable.from(this.msg_objs).toArray());
+										$Forays_Event.get_b().add$2(this.get_msg(), Enumerable.from(this.msg_objs).toArray());
 									}
 								}
 								$state = -1;
@@ -24183,10 +24462,10 @@
 								if ($t44.getResult()) {
 									if (!a5.hasAttr(61) && !a5.hasAttr(64) && !a5.hasAttr(31) && !a5.hasAttr(32) && !a5.hasAttr(33)) {
 										if (a5.get_name() === 'you') {
-											$Forays_Event.get_b().add('You start to catch fire! ', []);
+											$Forays_Event.get_b().add('You start to catch fire! ');
 										}
 										else {
-											$Forays_Event.get_b().add(a5.get_the_name() + ' starts to catch fire. ', [a5]);
+											$Forays_Event.get_b().add$1(a5.get_the_name() + ' starts to catch fire. ', a5);
 										}
 										a5.attrs.set_item(32, 1);
 									}
@@ -24198,11 +24477,11 @@
 								$state = -1;
 								if (t16.is(1)) {
 									t16.features.remove(1);
-									$Forays_Event.get_b().add('The troll corpse burns to ashes! ', [t16]);
+									$Forays_Event.get_b().add$1('The troll corpse burns to ashes! ', t16);
 								}
 								if (t16.is(2)) {
 									t16.features.remove(2);
-									$Forays_Event.get_b().add('The troll seer corpse burns to ashes! ', [t16]);
+									$Forays_Event.get_b().add$1('The troll seer corpse burns to ashes! ', t16);
 								}
 								$state = 29;
 								continue $sm1;
@@ -26097,6 +26376,11 @@
 						case 11: {
 							$state = -1;
 							$t6.getResult();
+							//}
+							//catch (Exception exc)
+							//{
+							//    Window.Alert("Main Loop Exception!!!  \n    " + exc.Message);
+							//}
 							$state = 4;
 							continue $sm1;
 						}
@@ -26163,7 +26447,7 @@
 								game.player.displayStats$1(false);
 								if ($Forays_Global.killeD_BY !== 'giving up' && !$Forays_Help.displayed.get_item(10)) {
 									if ($Forays_Extensions.where($Forays_Item).call(null, game.player.get_inv(), function(item) {
-										return item.get_type() === 0 || item.get_type() === 6;
+										return item.get_itype() === 0 || item.get_itype() === 6;
 									}).length > 0) {
 										$t7 = $Forays_Help.tutorialTip(10);
 										$state = 15;
@@ -26298,7 +26582,7 @@
 									if (ss.isValue(window.localStorage['quickstart.txt'])) {
 										quickstarted = true;
 										good = true;
-										game.b.add('Welcome, ' + $Forays_Actor.player_name + '! ', []);
+										game.b.add('Welcome, ' + $Forays_Actor.player_name + '! ');
 										file1 = Type.cast(window.localStorage['quickstart.txt'], Array);
 										attr = Type.cast(ss.Enum.parse($Forays_AttrType, file1[0]), ss.Int32);
 										game.player.attrs.set_item(attr, game.player.attrs.get_item(attr) + 1);
@@ -26315,13 +26599,13 @@
 											game.player.feats.set_item(feat, game.player.feats.get_item(feat) - 1);
 											if (game.player.feats.get_item(feat) === -$Forays_Feat.maxRank(feat)) {
 												game.player.feats.set_item(feat, 1);
-												game.b.add('You learn the ' + $Forays_Feat.name$1(feat) + ' feat. ', []);
+												game.b.add('You learn the ' + $Forays_Feat.name$1(feat) + ' feat. ');
 											}
 										}
 										if (magic) {
 											spell = Type.cast(ss.Enum.parse($Forays_SpellType, file1[7]), ss.Int32);
 											game.player.spells.set_item(spell, game.player.spells.get_item(spell) + 1);
-											game.b.add('You learn ' + $Forays_Spell.name$1(spell) + '. ', []);
+											game.b.add('You learn ' + $Forays_Spell.name$1(spell) + '. ');
 										}
 										//									file.Close();
 									}
@@ -26394,12 +26678,12 @@
 								$t10 = game.m.allTiles();
 								for ($t11 = 0; $t11 < $t10.length; $t11++) {
 									t = $t10[$t11];
-									if (t.get_type() !== 1 && !t.isTrap()) {
+									if (t.get_ttype() !== 1 && !t.isTrap()) {
 										good1 = false;
 										$t12 = t.tilesAtDistance(1);
 										for ($t13 = 0; $t13 < $t12.length; $t13++) {
 											neighbor = $t12[$t13];
-											if (neighbor.get_type() !== 0) {
+											if (neighbor.get_ttype() !== 0) {
 												good1 = true;
 											}
 										}
@@ -26543,12 +26827,12 @@
 							$t25 = game.m.allTiles();
 							for ($t26 = 0; $t26 < $t25.length; $t26++) {
 								t1 = $t25[$t26];
-								if (t1.get_type() !== 1 && !t1.isTrap()) {
+								if (t1.get_ttype() !== 1 && !t1.isTrap()) {
 									good2 = false;
 									$t27 = t1.tilesAtDistance(1);
 									for ($t28 = 0; $t28 < $t27.length; $t28++) {
 										neighbor1 = $t27[$t28];
-										if (neighbor1.get_type() !== 0) {
+										if (neighbor1.get_ttype() !== 0) {
 											good2 = true;
 										}
 									}
@@ -27489,6 +27773,9 @@
 	// Forays.Help
 	var $Forays_Help = function() {
 	};
+	$Forays_Help.getTutorialTopics = function() {
+		return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+	};
 	$Forays_Help.displayHelp = function() {
 		var $state = 0, $tcs = new ss.TaskCompletionSource(), $t1;
 		var $sm = function() {
@@ -27534,7 +27821,7 @@
 							$state = -1;
 							$Forays_Game.console.cursorVisible = false;
 							$Forays_Screen.blank();
-							num_topics = $Forays_Extensions.getValues($Forays_HelpTopic).length;
+							num_topics = $Forays_Help.getHelpTopics().length;
 							$Forays_Screen.writeString$3(5, 4, 'Topics:', 6);
 							for (i = 0; i < num_topics + 1; ++i) {
 								$Forays_Screen.writeString$2(i + 7, 0, '[ ]');
@@ -27555,7 +27842,7 @@
 								$state = 2;
 								continue $sm1;
 							}
-							$t1 = $Forays_Extensions.getValues($Forays_HelpTopic);
+							$t1 = $Forays_Help.getHelpTopics();
 							for ($t2 = 0; $t2 < $t1.length; $t2++) {
 								help = $t1[$t2];
 								if (h === help) {
@@ -27739,6 +28026,9 @@
 		$sm();
 		return $tcs.task;
 	};
+	$Forays_Help.getHelpTopics = function() {
+		return [0, 1, 2, 3, 4, 5, 6, 7];
+	};
 	$Forays_Help.helpText = function(h) {
 		var path = '';
 		var startline = 0;
@@ -27790,7 +28080,7 @@
 			result.add('');
 			result.add('');
 			result.add('');
-			var $t1 = $Forays_Extensions.getValues($Forays_TutorialTopic);
+			var $t1 = $Forays_Help.getTutorialTopics();
 			for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 				var topic = $t1[$t2];
 				var $t3 = $Forays_Help.tutorialText(topic);
@@ -28059,18 +28349,18 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// Forays.Item
 	var $Forays_Item = function() {
-		this.$2$typeField = 0;
+		this.$2$itypeField = 0;
 		this.$2$quantityField = 0;
 		this.$2$ignoredField = false;
 		this.$2$do_not_stackField = false;
 		$Forays_PhysicalObject.call(this);
 	};
 	$Forays_Item.prototype = {
-		get_type: function() {
-			return this.$2$typeField;
+		get_itype: function() {
+			return this.$2$itypeField;
 		},
-		set_type: function(value) {
-			this.$2$typeField = value;
+		set_itype: function(value) {
+			this.$2$itypeField = value;
 		},
 		get_quantity: function() {
 			return this.$2$quantityField;
@@ -28210,7 +28500,7 @@
 							case 0: {
 								$state = -1;
 								used = true;
-								$t41 = this.get_type();
+								$t41 = this.get_itype();
 								if ($t41 === 0) {
 									$t1 = user.takeDamage$1(5, 2, 50, null);
 									$state = 2;
@@ -28221,12 +28511,12 @@
 									if (!user.hasAttr(67)) {
 										if (user.hasAttr(29)) {
 											user.attrs.set_item(29, 0);
-											$Forays_Item.get_b().add(user.youFeel() + ' relieved. ', [user]);
+											$Forays_Item.get_b().add$1(user.youFeel() + ' relieved. ', user);
 										}
-										user.gainAttr$3(67, 5100, user.youAre() + ' no longer immune to toxins. ', [user]);
+										user.gainAttr$4(67, 5100, user.youAre() + ' no longer immune to toxins. ', [user]);
 									}
 									else {
-										$Forays_Item.get_b().add('Nothing happens. ', [user]);
+										$Forays_Item.get_b().add$1('Nothing happens. ', user);
 									}
 									$state = 1;
 									continue $sm1;
@@ -28234,10 +28524,10 @@
 								else if ($t41 === 1) {
 									user.attrs.set_item(24, user.attrs.get_item(24) + 1);
 									if (user.get_name() === 'you') {
-										$Forays_Item.get_b().add('Your blood tingles. ', [user]);
+										$Forays_Item.get_b().add$1('Your blood tingles. ', user);
 									}
 									else {
-										$Forays_Item.get_b().add(user.get_the_name() + ' looks energized. ', [user]);
+										$Forays_Item.get_b().add$1(user.get_the_name() + ' looks energized. ', user);
 									}
 									duration = 60;
 									//was Roll(10)+20
@@ -28248,20 +28538,20 @@
 								else if ($t41 === 3) {
 									user.resetSpells();
 									if (user.get_name() === 'you') {
-										$Forays_Item.get_b().add('Your mind clears. ', []);
+										$Forays_Item.get_b().add('Your mind clears. ');
 									}
 									else {
-										$Forays_Item.get_b().add(user.get_the_name() + ' seems focused. ', [user]);
+										$Forays_Item.get_b().add$1(user.get_the_name() + ' seems focused. ', user);
 									}
 									$state = 1;
 									continue $sm1;
 								}
 								else if ($t41 === 4) {
 									if (user.tile().isLit()) {
-										$Forays_Item.get_b().add('You would feel at home in the shadows. ', []);
+										$Forays_Item.get_b().add('You would feel at home in the shadows. ');
 									}
 									else {
-										$Forays_Item.get_b().add('You fade away in the darkness. ', []);
+										$Forays_Item.get_b().add('You fade away in the darkness. ');
 									}
 									user.gainAttrRefreshDuration$1(13, ($Forays_Global.roll(41) + 29) * 100, 'You are no longer cloaked. ', [user]);
 									$state = 1;
@@ -28280,7 +28570,7 @@
 								else if ($t41 === 7) {
 									i2 = user.directionOfOnlyUnblocked$1(0, true);
 									if (i2 === 0) {
-										$Forays_Item.get_b().add('This item requires an adjacent wall. ', []);
+										$Forays_Item.get_b().add('This item requires an adjacent wall. ');
 										used = false;
 										$state = 1;
 										continue $sm1;
@@ -28293,7 +28583,7 @@
 									}
 								}
 								else if ($t41 === 8) {
-									$Forays_Item.get_b().add('Time stops for a moment. ', []);
+									$Forays_Item.get_b().add('Time stops for a moment. ');
 									$t11 = $Forays_Item.get_q();
 									$t11.set_turn($t11.get_turn() - 200);
 									$state = 1;
@@ -28301,7 +28591,7 @@
 								}
 								else if ($t41 === 9) {
 									//user.attrs[AttrType.DETECTING_MONSTERS]++;
-									$Forays_Item.get_b().add('The scroll reveals ' + user.your() + ' foes. ', [user]);
+									$Forays_Item.get_b().add$1('The scroll reveals ' + user.your() + ' foes. ', user);
 									duration1 = $Forays_Global.roll(20) + 30;
 									//Q.Add(new Event(user,duration*100,AttrType.DETECTING_MONSTERS,user.Your() + " foes are no longer revealed. ",user));
 									user.gainAttrRefreshDuration$1(40, duration1 * 100, user.your() + ' foes are no longer revealed. ', [user]);
@@ -28309,7 +28599,7 @@
 									continue $sm1;
 								}
 								else if ($t41 === 10) {
-									$Forays_Item.get_b().add('The scroll reveals the layout of this level. ', []);
+									$Forays_Item.get_b().add('The scroll reveals the layout of this level. ');
 									hiddencheck = null;
 									$t12 = $Forays_Item.get_q().list;
 									for ($t13 = 0; $t13 < $t12.length; $t13++) {
@@ -28322,12 +28612,12 @@
 									$t14 = $Forays_PhysicalObject.get_m().allTiles();
 									for ($t15 = 0; $t15 < $t14.length; $t15++) {
 										t1 = $t14[$t15];
-										if (t1.get_type() !== 1) {
+										if (t1.get_ttype() !== 1) {
 											good = false;
 											$t16 = t1.tilesAtDistance(1);
 											for ($t17 = 0; $t17 < $t16.length; $t17++) {
 												neighbor = $t16[$t17];
-												if (neighbor.get_type() !== 0) {
+												if (neighbor.get_ttype() !== 0) {
 													good = true;
 												}
 											}
@@ -28339,11 +28629,11 @@
 													}
 												}
 												if (t1.isTrapOrVent()) {
-													t1.set_name($Forays_Tile.prototype$1(t1.get_type()).get_name());
-													t1.set_a_name($Forays_Tile.prototype$1(t1.get_type()).get_a_name());
-													t1.set_the_name($Forays_Tile.prototype$1(t1.get_type()).get_the_name());
-													t1.set_symbol($Forays_Tile.prototype$1(t1.get_type()).get_symbol());
-													t1.set_color($Forays_Tile.prototype$1(t1.get_type()).get_color());
+													t1.set_name($Forays_Tile.prototype$1(t1.get_ttype()).get_name());
+													t1.set_a_name($Forays_Tile.prototype$1(t1.get_ttype()).get_a_name());
+													t1.set_the_name($Forays_Tile.prototype$1(t1.get_ttype()).get_the_name());
+													t1.set_symbol($Forays_Tile.prototype$1(t1.get_ttype()).get_symbol());
+													t1.set_color($Forays_Tile.prototype$1(t1.get_ttype()).get_color());
 												}
 												if (t1.is$1(20)) {
 													t1.toggle(null);
@@ -28358,10 +28648,10 @@
 									if (!$Forays_PhysicalObject.get_m().get_wiz_lite()) {
 										$Forays_PhysicalObject.get_m().set_wiz_lite(true);
 										$Forays_PhysicalObject.get_m().set_wiz_dark(false);
-										$Forays_Item.get_b().add('The air itself seems to shine. ', []);
+										$Forays_Item.get_b().add('The air itself seems to shine. ');
 									}
 									else {
-										$Forays_Item.get_b().add('Nothing happens. ', []);
+										$Forays_Item.get_b().add('Nothing happens. ');
 									}
 									$state = 1;
 									continue $sm1;
@@ -28370,10 +28660,10 @@
 									if (!$Forays_PhysicalObject.get_m().get_wiz_dark()) {
 										$Forays_PhysicalObject.get_m().set_wiz_dark(true);
 										$Forays_PhysicalObject.get_m().set_wiz_lite(false);
-										$Forays_Item.get_b().add('The air itself grows dark. ', []);
+										$Forays_Item.get_b().add('The air itself grows dark. ');
 									}
 									else {
-										$Forays_Item.get_b().add('Nothing happens. ', []);
+										$Forays_Item.get_b().add('Nothing happens. ');
 									}
 									$state = 1;
 									continue $sm1;
@@ -28435,7 +28725,7 @@
 							case 2: {
 								$state = -1;
 								$t1.getResult();
-								$Forays_Item.get_b().add('A blue glow surrounds ' + user.get_the_name() + '. ', [user]);
+								$Forays_Item.get_b().add$2('A blue glow surrounds ' + user.get_the_name() + '. ', [user]);
 								$state = 1;
 								continue $sm1;
 							}
@@ -28451,7 +28741,7 @@
 									rr += user.get_row();
 									rc += user.get_col();
 									if ($Forays_PhysicalObject.get_m().boundsCheck(rr, rc) && $Forays_PhysicalObject.get_m().tile.get_item(rr, rc).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr, rc))) {
-										$Forays_Item.get_b().add(user.you('step') + ' through a rip in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr, rc)]);
+										$Forays_Item.get_b().add$2(user.you('step') + ' through a rip in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr, rc)]);
 										user.animateStorm(2, 3, 4, '*', 14);
 										$t2 = user.move(rr, rc);
 										$state = 18;
@@ -28474,7 +28764,7 @@
 								rc1 = $Forays_Global.roll$1(1, 64);
 								if (Math.abs(rr1 - user.get_row()) >= 10 || Math.abs(rc1 - user.get_col()) >= 10 || Math.abs(rr1 - user.get_row()) >= 7 && Math.abs(rc1 - user.get_col()) >= 7) {
 									if ($Forays_PhysicalObject.get_m().boundsCheck(rr1, rc1) && $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1).get_passable() && ss.isNullOrUndefined($Forays_PhysicalObject.get_m().actor.get_item(rr1, rc1))) {
-										$Forays_Item.get_b().add(user.you('jump') + ' through a rift in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1)]);
+										$Forays_Item.get_b().add$2(user.you('jump') + ' through a rift in reality. ', [$Forays_PhysicalObject.get_m().tile.get_item(user.get_row(), user.get_col()), $Forays_PhysicalObject.get_m().tile.get_item(rr1, rc1)]);
 										user.animateStorm(3, 3, 10, '*', 4);
 										$t3 = user.move(rr1, rc1);
 										$state = 21;
@@ -28492,7 +28782,7 @@
 								i2 = $t4.getResult();
 								t = user.tileInDirection(i2);
 								if (ss.isValue(t)) {
-									if (t.get_type() === 0) {
+									if (t.get_ttype() === 0) {
 										$Forays_Game.console.cursorVisible = false;
 										ch = new $Forays_colorchar.$ctor2(8, '!');
 										switch (user.directionOf(t)) {
@@ -28513,7 +28803,7 @@
 										continue $sm1;
 									}
 									else {
-										$Forays_Item.get_b().add('This item requires an adjacent wall. ', []);
+										$Forays_Item.get_b().add('This item requires an adjacent wall. ');
 										used = false;
 										$state = 1;
 										continue $sm1;
@@ -28542,13 +28832,13 @@
 									prev = $Forays_Extensions.lastBeforeSolidTile(line);
 									first = user.firstActorInLine$1(line);
 									//todo - consider allowing thrown items to pass over actors, because they fly in an arc
-									$Forays_Item.get_b().add(user.you('throw') + ' the prismatic orb. ', [user]);
+									$Forays_Item.get_b().add$1(user.you('throw') + ' the prismatic orb. ', user);
 									if (ss.isValue(first)) {
 										t2 = first.tile();
-										$Forays_Item.get_b().add('It shatters on ' + first.get_the_name() + '! ', [first]);
+										$Forays_Item.get_b().add$1('It shatters on ' + first.get_the_name() + '! ', first);
 									}
 									else {
-										$Forays_Item.get_b().add('It shatters on ' + t2.get_the_name() + '! ', [t2]);
+										$Forays_Item.get_b().add$1('It shatters on ' + t2.get_the_name() + '! ', t2);
 									}
 									user.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 19);
 									dmg = [];
@@ -28576,13 +28866,13 @@
 									t3 = $Forays_Extensions.last($Forays_Tile).call(null, line);
 									prev1 = $Forays_Extensions.lastBeforeSolidTile(line);
 									first1 = user.firstActorInLine$1(line);
-									$Forays_Item.get_b().add(user.you('throw') + ' the freezing orb. ', [user]);
+									$Forays_Item.get_b().add$1(user.you('throw') + ' the freezing orb. ', user);
 									if (ss.isValue(first1)) {
 										t3 = first1.tile();
-										$Forays_Item.get_b().add('It shatters on ' + first1.get_the_name() + '! ', [first1]);
+										$Forays_Item.get_b().add$1('It shatters on ' + first1.get_the_name() + '! ', first1);
 									}
 									else {
-										$Forays_Item.get_b().add('It shatters on ' + t3.get_the_name() + '! ', [t3]);
+										$Forays_Item.get_b().add$1('It shatters on ' + t3.get_the_name() + '! ', t3);
 									}
 									user.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 17);
 									user.animateExplosion$1(t3, 3, '*', 8);
@@ -28607,7 +28897,7 @@
 									}
 									while (targets.length > 0) {
 										ac2 = $Forays_Extensions.removeRandom($Forays_Actor).call(null, targets);
-										$Forays_Item.get_b().add(ac2.youAre() + ' encased in ice. ', [ac2]);
+										$Forays_Item.get_b().add$1(ac2.youAre() + ' encased in ice. ', ac2);
 										ac2.attrs.set_item(30, 25);
 									}
 								}
@@ -28629,13 +28919,13 @@
 									t4 = $Forays_Extensions.last($Forays_Tile).call(null, line);
 									prev2 = $Forays_Extensions.lastBeforeSolidTile(line);
 									first2 = user.firstActorInLine$1(line);
-									$Forays_Item.get_b().add(user.you('throw') + ' the orb of quickfire. ', [user]);
+									$Forays_Item.get_b().add$1(user.you('throw') + ' the orb of quickfire. ', user);
 									if (ss.isValue(first2)) {
 										t4 = first2.tile();
-										$Forays_Item.get_b().add('It shatters on ' + first2.get_the_name() + '! ', [first2]);
+										$Forays_Item.get_b().add$1('It shatters on ' + first2.get_the_name() + '! ', first2);
 									}
 									else {
-										$Forays_Item.get_b().add('It shatters on ' + t4.get_the_name() + '! ', [t4]);
+										$Forays_Item.get_b().add$1('It shatters on ' + t4.get_the_name() + '! ', t4);
 									}
 									user.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 16);
 									if (t4.get_passable()) {
@@ -28671,13 +28961,13 @@
 									t5 = $Forays_Extensions.last($Forays_Tile).call(null, line);
 									prev3 = $Forays_Extensions.lastBeforeSolidTile(line);
 									first3 = user.firstActorInLine$1(line);
-									$Forays_Item.get_b().add(user.you('throw') + ' the orb of fog. ', [user]);
+									$Forays_Item.get_b().add$1(user.you('throw') + ' the orb of fog. ', user);
 									if (ss.isValue(first3)) {
 										t5 = first3.tile();
-										$Forays_Item.get_b().add('It shatters on ' + first3.get_the_name() + '! ', [first3]);
+										$Forays_Item.get_b().add$1('It shatters on ' + first3.get_the_name() + '! ', first3);
 									}
 									else {
-										$Forays_Item.get_b().add('It shatters on ' + t5.get_the_name() + '! ', [t5]);
+										$Forays_Item.get_b().add$1('It shatters on ' + t5.get_the_name() + '! ', t5);
 									}
 									user.animateProjectile$2($Forays_Extensions.toFirstObstruction(line), '*', 2);
 									area = [];
@@ -28723,10 +29013,10 @@
 									user.recover_time = $Forays_Item.get_q().get_turn() + 500;
 								}
 								if (user.get_name() === 'you') {
-									$Forays_Item.get_b().add('You apply a bandage. ', []);
+									$Forays_Item.get_b().add('You apply a bandage. ');
 								}
 								else {
-									$Forays_Item.get_b().add(user.get_the_name() + ' applies a bandage. ', [user]);
+									$Forays_Item.get_b().add$1(user.get_the_name() + ' applies a bandage. ', user);
 								}
 								$state = 1;
 								continue $sm1;
@@ -28946,11 +29236,11 @@
 								$state = -1;
 								if (damtype === 1 && t21.is(1)) {
 									t21.features.remove(1);
-									$Forays_Item.get_b().add('The troll corpse burns to ashes! ', [t21]);
+									$Forays_Item.get_b().add$1('The troll corpse burns to ashes! ', t21);
 								}
 								if (damtype === 1 && t21.is(2)) {
 									t21.features.remove(2);
-									$Forays_Item.get_b().add('The troll seer corpse burns to ashes! ', [t21]);
+									$Forays_Item.get_b().add$1('The troll seer corpse burns to ashes! ', t21);
 								}
 								$state = 32;
 								continue $sm1;
@@ -28971,11 +29261,11 @@
 								$state = -1;
 								if (damtype === 1 && t22.is(1)) {
 									t22.features.remove(1);
-									$Forays_Item.get_b().add('The troll corpse burns to ashes! ', [t22]);
+									$Forays_Item.get_b().add$1('The troll corpse burns to ashes! ', t22);
 								}
 								if (damtype === 1 && t22.is(2)) {
 									t22.features.remove(2);
-									$Forays_Item.get_b().add('The troll seer corpse burns to ashes! ', [t22]);
+									$Forays_Item.get_b().add$1('The troll seer corpse burns to ashes! ', t22);
 								}
 								$state = 35;
 								continue $sm1;
@@ -29000,7 +29290,7 @@
 							}
 							case 39: {
 								$state = -1;
-								$Forays_Item.get_b().add(user.you('travel') + ' through the passage. ', [user, t]);
+								$Forays_Item.get_b().add$3(user.you('travel') + ' through the passage. ', user, t);
 								$t8 = user.move(t.get_row(), t.get_col());
 								$state = 44;
 								$t8.continueWith($sm);
@@ -29020,7 +29310,7 @@
 							}
 							case 42: {
 								$state = -1;
-								$Forays_Item.get_b().add('The passage is blocked. ', [user]);
+								$Forays_Item.get_b().add$1('The passage is blocked. ', user);
 								$state = 5;
 								continue $sm1;
 							}
@@ -29045,12 +29335,12 @@
 		}
 	};
 	$Forays_Item.$ctor2 = function(type_, name_, symbol_, color_) {
-		this.$2$typeField = 0;
+		this.$2$itypeField = 0;
 		this.$2$quantityField = 0;
 		this.$2$ignoredField = false;
 		this.$2$do_not_stackField = false;
 		$Forays_PhysicalObject.call(this);
-		this.set_type(type_);
+		this.set_itype(type_);
 		this.set_quantity(1);
 		this.set_ignored(false);
 		this.set_do_not_stack(false);
@@ -29082,12 +29372,12 @@
 		this.set_light_radius(0);
 	};
 	$Forays_Item.$ctor1 = function(i, r, c) {
-		this.$2$typeField = 0;
+		this.$2$itypeField = 0;
 		this.$2$quantityField = 0;
 		this.$2$ignoredField = false;
 		this.$2$do_not_stackField = false;
 		$Forays_PhysicalObject.call(this);
-		this.set_type(i.get_type());
+		this.set_itype(i.get_itype());
 		this.set_quantity(1);
 		this.set_ignored(false);
 		this.set_do_not_stack(false);
@@ -29135,7 +29425,7 @@
 				}
 				$Forays_PhysicalObject.get_m().tile.get_item(r, c).set_inv(i);
 			}
-			else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_inv().get_type() === type) {
+			else if ($Forays_PhysicalObject.get_m().tile.get_item(r, c).get_inv().get_itype() === type) {
 				var $t1 = $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_inv();
 				$t1.set_quantity($t1.get_quantity() + 1);
 				return $Forays_PhysicalObject.get_m().tile.get_item(r, c).get_inv();
@@ -29152,7 +29442,7 @@
 			var $t1 = a.get_inv();
 			for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 				var held = $t1[$t2];
-				if (held.get_type() === type) {
+				if (held.get_itype() === type) {
 					held.set_quantity(held.get_quantity() + 1);
 					return held;
 				}
@@ -29186,7 +29476,7 @@
 	};
 	$Forays_Item.randomItem = function() {
 		var list = [];
-		var $t1 = $Forays_Extensions.getValues($Forays_ConsumableType);
+		var $t1 = $Forays_Item.getConsumableTypes();
 		for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 			var item = $t1[$t2];
 			if ($Forays_Item.rarity(item) === 1) {
@@ -29197,6 +29487,9 @@
 			}
 		}
 		return $Forays_Extensions.random($Forays_ConsumableType).call(null, list);
+	};
+	$Forays_Item.getConsumableTypes = function() {
+		return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 	};
 	////////////////////////////////////////////////////////////////////////////////
 	// Forays.LevelType
@@ -29316,7 +29609,7 @@
 					var t = $t1[$t2];
 					if (t.is(8)) {
 						$Forays_Map.get_q().add(new $Forays_Event.$ctor5(t, 200, 9));
-						$Forays_Map.get_b().add('The blast fungus starts to smolder in the light. ', [t]);
+						$Forays_Map.get_b().add$1('The blast fungus starts to smolder in the light. ', t);
 						t.features.remove(8);
 						t.features.add(9);
 					}
@@ -29368,7 +29661,7 @@
 		},
 		chooseNextLevelType: function(current) {
 			var types = [];
-			var $t1 = $Forays_Extensions.getValues($Forays_LevelType);
+			var $t1 = this.getLevelTypes();
 			for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 				var l = $t1[$t2];
 				if (l !== current) {
@@ -29376,6 +29669,9 @@
 				}
 			}
 			return $Forays_Extensions.random($Forays_LevelType).call(null, types);
+		},
+		getLevelTypes: function() {
+			return [0, 1, 2, 3, 4, 5, 6];
 		},
 		generateLevelTypes: function() {
 			var $t1 = [];
@@ -29620,7 +29916,7 @@
 				var rr = $Forays_Global.roll(20);
 				var rc = $Forays_Global.roll(64);
 				var t = this.tile.get_item(rr, rc);
-				if (t.get_passable() && ss.isNullOrUndefined(t.get_inv()) && t.get_type() !== 5 && t.get_type() !== 6 && t.get_type() !== 4 && !t.isShrine()) {
+				if (t.get_passable() && ss.isNullOrUndefined(t.get_inv()) && t.get_ttype() !== 5 && t.get_ttype() !== 6 && t.get_ttype() !== 4 && !t.isShrine()) {
 					return $Forays_Item.create$1(result, rr, rc);
 					//done = true;
 				}
@@ -29722,7 +30018,7 @@
 					var $t1 = this.tile.get_item(rr, rc).tilesWithinDistance(3);
 					for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 						var t = $t1[$t2];
-						if (t.get_passable() || t.get_type() === 3) {
+						if (t.get_passable() || t.get_ttype() === 3) {
 							tiles.add(t);
 						}
 					}
@@ -29743,7 +30039,7 @@
 					var rr1 = $Forays_Global.roll(20);
 					var rc1 = $Forays_Global.roll(64);
 					var t1 = this.tile.get_item(rr1, rc1);
-					if (t1.get_passable() && ss.isNullOrUndefined(t1.get_inv()) && t1.get_type() !== 5 && t1.get_type() !== 6 && t1.get_type() !== 4 && !t1.isShrine()) {
+					if (t1.get_passable() && ss.isNullOrUndefined(t1.get_inv()) && t1.get_ttype() !== 5 && t1.get_ttype() !== 6 && t1.get_ttype() !== 4 && !t1.isShrine()) {
 						var item = $Forays_Item.create$1($Forays_Item.randomItem(), rr1, rc1);
 						$Forays_Actor.tiebreakers.add(null);
 						//placeholder
@@ -29758,7 +30054,7 @@
 			}
 			if (type === 37) {
 				var statue = $Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, this.allTiles(), function(t2) {
-					return t2.get_type() === 30;
+					return t2.get_ttype() === 30;
 				}));
 				if (ss.isValue(statue)) {
 					$Forays_Map.get_q().add(new $Forays_Event.$ctor5(statue, 100, 18));
@@ -29808,7 +30104,7 @@
 					for (var j1 = 0; j1 < 9999; ++j1) {
 						if (group_tiles.length === 0) {
 							//no space left!
-							if (group.length > 0) {
+							if (ss.isValue(group) && group.length > 0) {
 								return group[0];
 							}
 							else {
@@ -30492,7 +30788,7 @@
 									}
 									else if (type1 === 37) {
 										statue = $Forays_Extensions.random($Forays_Tile).call(null, $Forays_Extensions.where($Forays_Tile).call(null, this.allTiles(), function(t1) {
-											return t1.get_type() === 30;
+											return t1.get_ttype() === 30;
 										}));
 										if (!marble_horror_spawned && ss.isValue(statue)) {
 											this.spawnMob$1(type1);
@@ -30572,7 +30868,7 @@
 								good_location = Array.multidim(Boolean.getDefaultValue(), $Forays_Map.$ROWS, $Forays_Map.$COLS);
 								for (i10 = 0; i10 < $Forays_Map.$ROWS; ++i10) {
 									for (j3 = 0; j3 < $Forays_Map.$COLS; ++j3) {
-										if (this.tile.get_item(i10, j3).get_type() === 1) {
+										if (this.tile.get_item(i10, j3).get_ttype() === 1) {
 											good_location.set(i10, j3, true);
 										}
 										else {
@@ -30690,7 +30986,7 @@
 										$t40 = this.tile.get_item(rr9, rc9).tilesWithinDistance(2);
 										for ($t41 = 0; $t41 < $t40.length; $t41++) {
 											t6 = $t40[$t41];
-											if (t6.get_type() !== 0) {
+											if (t6.get_ttype() !== 0) {
 												good3 = false;
 												break;
 											}
@@ -30703,15 +30999,15 @@
 												t7 = this.tile.get_item(rr9, rc9).tileInDirection(i15).tileInDirection(i15);
 												good_dir = true;
 												distance = -1;
-												while (good_dir && ss.isValue(t7) && t7.get_type() === 0) {
-													if (t7.tileInDirection(t7.rotateDirection$1(i15, false, 2)).get_type() !== 0) {
+												while (good_dir && ss.isValue(t7) && t7.get_ttype() === 0) {
+													if (t7.tileInDirection(t7.rotateDirection$1(i15, false, 2)).get_ttype() !== 0) {
 														good_dir = false;
 													}
-													if (t7.tileInDirection(t7.rotateDirection$1(i15, true, 2)).get_type() !== 0) {
+													if (t7.tileInDirection(t7.rotateDirection$1(i15, true, 2)).get_ttype() !== 0) {
 														good_dir = false;
 													}
 													t7 = t7.tileInDirection(i15);
-													if (ss.isValue(t7) && t7.get_type() === 30) {
+													if (ss.isValue(t7) && t7.get_ttype() === 30) {
 														good_dir = false;
 													}
 													++distance;
@@ -30746,7 +31042,7 @@
 													t8 = this.tile.get_item(rr9, rc9).tileInDirection(i16);
 													distance1 = -2;
 													//distance of the corridor between traps and secret door
-													while (t8.get_type() === 0) {
+													while (t8.get_ttype() === 0) {
 														++distance1;
 														t8 = t8.tileInDirection(i16);
 													}
@@ -30754,7 +31050,7 @@
 														continue;
 													}
 													t8 = this.tile.get_item(rr9, rc9).tileInDirection(i16);
-													while (t8.get_type() === 0) {
+													while (t8.get_ttype() === 0) {
 														if (distance1 >= 4) {
 															tt = 1;
 															if ($Forays_Global.roll(3) >= 2) {
@@ -30769,7 +31065,7 @@
 															t8.set_color(1);
 															if (t8.distanceFrom(this.tile.get_item(rr9, rc9)) < distance1 + 2) {
 																neighbor = t8.tileInDirection(t8.rotateDirection$1(i16, false, 2));
-																if (neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 1)).get_type() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 2)).get_type() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 3)).get_type() === 0) {
+																if (neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 1)).get_ttype() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 2)).get_ttype() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, false, 3)).get_ttype() === 0) {
 																	tt = 1;
 																	if ($Forays_Global.roll(3) >= 2) {
 																		tt = $Forays_Extensions.random($Forays_TileType).call(null, possible_traps);
@@ -30785,7 +31081,7 @@
 																	}
 																}
 																neighbor = t8.tileInDirection(t8.rotateDirection$1(i16, true, 2));
-																if (neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 1)).get_type() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 2)).get_type() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 3)).get_type() === 0) {
+																if (neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 1)).get_ttype() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 2)).get_ttype() === 0 && neighbor.tileInDirection(t8.rotateDirection$1(i16, true, 3)).get_ttype() === 0) {
 																	tt = 1;
 																	if ($Forays_Global.roll(3) >= 2) {
 																		tt = $Forays_Extensions.random($Forays_TileType).call(null, possible_traps);
@@ -30834,7 +31130,7 @@
 													t8 = t8.tileInDirection(t8.rotateDirection$1(i16, true, 4));
 													if ($Forays_Global.coinFlip()) {
 														if (t8.isTrap()) {
-															t8.set_type(14);
+															t8.set_ttype(14);
 														}
 														else {
 															t8.transformTo(14);
@@ -30883,7 +31179,7 @@
 								$t49 = this.allTiles();
 								for ($t50 = 0; $t50 < $t49.length; $t50++) {
 									t11 = $t49[$t50];
-									if (t11.get_type() !== 0) {
+									if (t11.get_ttype() !== 0) {
 										$t51 = t11.tilesAtDistance(1);
 										for ($t52 = 0; $t52 < $t51.length; $t52++) {
 											neighbor1 = $t51[$t52];
@@ -30907,10 +31203,10 @@
 									$Forays_Map.get_q().add(e2);
 								}
 								if (this.get_current_level() === 1) {
-									$Forays_Map.get_b().add('Welcome, ' + $Forays_Actor.player_name + '! ', []);
+									$Forays_Map.get_b().add('Welcome, ' + $Forays_Actor.player_name + '! ');
 								}
 								else {
-									$Forays_Map.get_b().add(this.levelMessage(), []);
+									$Forays_Map.get_b().add(this.levelMessage());
 								}
 								$state = -1;
 								break $sm1;
@@ -30961,7 +31257,7 @@
 								$t3 = this.allActors();
 								for ($t4 = 0; $t4 < $t3.length; $t4++) {
 									a = $t3[$t4];
-									if (a.get_type() === 2) {
+									if (a.get_atype() === 2) {
 										boss_hp = a.get_curhp();
 										break;
 									}
@@ -31086,7 +31382,7 @@
 									}
 								}
 								goodtiles = $Forays_Extensions.where($Forays_Tile).call(null, this.allTiles(), function(t1) {
-									return t1.get_type() === 1 && !t1.isAdjacentTo$1(29);
+									return t1.get_ttype() === 1 && !t1.isAdjacentTo$1(29);
 								});
 								if (goodtiles.length > 0) {
 									t2 = $Forays_Extensions.random($Forays_Tile).call(null, goodtiles);
@@ -31146,7 +31442,7 @@
 								$t14 = this.allTiles();
 								for ($t15 = 0; $t15 < $t14.length; $t15++) {
 									t4 = $t14[$t15];
-									if (t4.get_type() !== 0) {
+									if (t4.get_ttype() !== 0) {
 										$t16 = t4.tilesAtDistance(1);
 										for ($t17 = 0; $t17 < $t16.length; $t17++) {
 											neighbor = $t16[$t17];
@@ -32137,7 +32433,7 @@
 			var dir = 0;
 			for (var i = 1; i <= 9; ++i) {
 				if (i !== 5) {
-					if (this.tileInDirection(i).get_type() === tiletype && ss.isNullOrUndefined(this.actorInDirection(i)) && ss.isNullOrUndefined(this.tileInDirection(i).get_inv())) {
+					if (this.tileInDirection(i).get_ttype() === tiletype && ss.isNullOrUndefined(this.actorInDirection(i)) && ss.isNullOrUndefined(this.tileInDirection(i).get_inv())) {
 						if (!orth || i % 2 === 0) {
 							++total;
 							dir = i;
@@ -32239,7 +32535,7 @@
 			var $t1 = this.tilesWithinDistance$1(1, !consider_origin);
 			for (var $t2 = 0; $t2 < $t1.length; $t2++) {
 				var t = $t1[$t2];
-				if (t.get_type() === type) {
+				if (t.get_ttype() === type) {
 					return true;
 				}
 			}
@@ -33428,7 +33724,7 @@
 			}
 		},
 		pop: function() {
-			var $state = 0, $tcs = new ss.TaskCompletionSource(), e;
+			var $state = 0, $tcs = new ss.TaskCompletionSource(), e, ex;
 			var $sm = Function.mkdel(this, function() {
 				try {
 					$sm1:
@@ -33440,7 +33736,13 @@
 								e = this.list[0];
 								//list.First.Value.Execute();
 								//list.RemoveFirst();
-								e.execute();
+								try {
+									e.execute();
+								}
+								catch ($t1) {
+									ex = ss.Exception.wrap($t1);
+									window.alert('Exception!  \n  ' + ex.get_message());
+								}
 								//await Task.Delay(1000);
 								this.list.remove(e);
 								$tcs.setResult(true);
@@ -33452,8 +33754,8 @@
 						}
 					}
 				}
-				catch ($t1) {
-					$tcs.setException(ss.Exception.wrap($t1));
+				catch ($t2) {
+					$tcs.setException(ss.Exception.wrap($t2));
 				}
 			});
 			$sm();
@@ -33520,7 +33822,7 @@
 		this.$intercept = false;
 		this.$kc = new $Forays_ConsoleKeyInfo.$ctor1(65);
 		this.$defr = null;
-		this.display = new ROT.Display({ width: 80, height: 25 });
+		this.display = new ROT.Display({ width: 80, height: 27 });
 	};
 	$Forays_ROTConsole.prototype = {
 		get_backgroundColor: function() {
@@ -35177,7 +35479,7 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// Forays.Tile
 	var $Forays_Tile = function() {
-		this.$2$typeField = 0;
+		this.$2$ttypeField = 0;
 		this.$2$passableField = false;
 		this.$internal_opaque = false;
 		this.$2$seenField = false;
@@ -35189,11 +35491,11 @@
 		$Forays_PhysicalObject.call(this);
 	};
 	$Forays_Tile.prototype = {
-		get_type: function() {
-			return this.$2$typeField;
+		get_ttype: function() {
+			return this.$2$ttypeField;
 		},
-		set_type: function(value) {
-			this.$2$typeField = value;
+		set_ttype: function(value) {
+			this.$2$ttypeField = value;
 		},
 		get_passable: function() {
 			return this.$2$passableField;
@@ -35226,7 +35528,7 @@
 			this.$internal_light_value = value;
 			if (value > 0 && this.features.contains(8)) {
 				$Forays_Tile.get_q().add(new $Forays_Event.$ctor5(this, 200, 9));
-				$Forays_Tile.get_b().add('The blast fungus starts to smolder in the light. ', [this]);
+				$Forays_Tile.get_b().add$2('The blast fungus starts to smolder in the light. ', [this]);
 				this.features.remove(8);
 				this.features.add(9);
 			}
@@ -35238,7 +35540,7 @@
 			this.$2$invField = value;
 		},
 		toString: function() {
-			switch (this.get_type()) {
+			switch (this.get_ttype()) {
 				case 1: {
 					return '.';
 				}
@@ -35278,7 +35580,7 @@
 			}
 		},
 		is$1: function(t) {
-			if (this.get_type() === t) {
+			if (this.get_ttype() === t) {
 				return true;
 			}
 			return false;
@@ -35369,7 +35671,7 @@
 			}
 		},
 		preposition: function() {
-			switch (this.get_type()) {
+			switch (this.get_ttype()) {
 				case 1:
 				case 4: {
 					return ' on ';
@@ -35392,7 +35694,7 @@
 				this.set_inv(item);
 				return true;
 			}
-			else if (this.get_inv().get_type() === item.get_type() && !this.get_inv().get_do_not_stack() && !item.get_do_not_stack()) {
+			else if (this.get_inv().get_itype() === item.get_itype() && !this.get_inv().get_do_not_stack() && !item.get_do_not_stack()) {
 				var $t1 = this.get_inv();
 				$t1.set_quantity($t1.get_quantity() + item.get_quantity());
 				return true;
@@ -35425,7 +35727,7 @@
 		toggle$1: function(toggler, toggle_to) {
 			var lighting_update = false;
 			var light_sources = [];
-			var original_type = this.get_type();
+			var original_type = this.get_ttype();
 			if (this.get_opaque() !== $Forays_Tile.prototype$1(toggle_to).get_opaque()) {
 				for (var i = this.get_row() - 1; i <= this.get_row() + 1; ++i) {
 					for (var j = this.get_col() - 1; j <= this.get_col() + 1; ++j) {
@@ -35469,26 +35771,26 @@
 				}
 			}
 			if (ss.isValue(toggler) && !ss.referenceEquals(toggler, $Forays_Tile.get_player())) {
-				if (this.get_type() === 3 && original_type === 2) {
+				if (this.get_ttype() === 3 && original_type === 2) {
 					if ($Forays_Tile.get_player().canSee(this)) {
-						$Forays_Tile.get_b().add(toggler.theVisible() + ' closes the door. ', []);
+						$Forays_Tile.get_b().add(toggler.theVisible() + ' closes the door. ');
 					}
 					else if (this.get_seen() || $Forays_Tile.get_player().distanceFrom(this) <= 6) {
-						$Forays_Tile.get_b().add('You hear a door closing. ', []);
+						$Forays_Tile.get_b().add('You hear a door closing. ');
 					}
 				}
-				if (this.get_type() === 2 && original_type === 3) {
+				if (this.get_ttype() === 2 && original_type === 3) {
 					if ($Forays_Tile.get_player().canSee(this)) {
-						$Forays_Tile.get_b().add(toggler.theVisible() + ' opens the door. ', []);
+						$Forays_Tile.get_b().add(toggler.theVisible() + ' opens the door. ');
 					}
 					else if (this.get_seen() || $Forays_Tile.get_player().distanceFrom(this) <= 6) {
-						$Forays_Tile.get_b().add('You hear a door opening. ', []);
+						$Forays_Tile.get_b().add('You hear a door opening. ');
 					}
 				}
 			}
 			if (ss.isValue(toggler)) {
 				if (original_type === 28) {
-					$Forays_Tile.get_b().add(toggler.youVisible('shift') + ' the rubble aside. ', [this]);
+					$Forays_Tile.get_b().add$1(toggler.youVisible('shift') + ' the rubble aside. ', this);
 				}
 			}
 		},
@@ -35498,7 +35800,7 @@
 			this.set_the_name($Forays_Tile.prototype$1(type_).get_the_name());
 			this.set_symbol($Forays_Tile.prototype$1(type_).get_symbol());
 			this.set_color($Forays_Tile.prototype$1(type_).get_color());
-			this.set_type($Forays_Tile.prototype$1(type_).get_type());
+			this.set_ttype($Forays_Tile.prototype$1(type_).get_ttype());
 			this.set_passable($Forays_Tile.prototype$1(type_).get_passable());
 			this.set_opaque($Forays_Tile.prototype$1(type_).get_opaque());
 			this.toggles_into = $Forays_Tile.prototype$1(type_).toggles_into;
@@ -35657,18 +35959,18 @@
 						switch ($state) {
 							case 0: {
 								$state = -1;
-								if (this.actor().get_type() === 2) {
+								if (this.actor().get_atype() === 2) {
 									if (this.get_name() === 'floor') {
-										$Forays_Tile.get_b().add(this.actor().get_the_name() + ' smashes ' + $Forays_Tile.prototype$1(this.get_type()).get_a_name() + '. ', [this]);
+										$Forays_Tile.get_b().add$1(this.actor().get_the_name() + ' smashes ' + $Forays_Tile.prototype$1(this.get_ttype()).get_a_name() + '. ', this);
 									}
 									else {
-										$Forays_Tile.get_b().add(this.actor().get_the_name() + ' smashes ' + this.get_the_name() + '. ', [this]);
+										$Forays_Tile.get_b().add$1(this.actor().get_the_name() + ' smashes ' + this.get_the_name() + '. ', this);
 									}
 									this.transformTo(1);
 									return;
 								}
 								if ($Forays_Tile.get_player().canSee(this)) {
-									$Forays_Tile.get_b().add('*CLICK* ', [this]);
+									$Forays_Tile.get_b().add$1('*CLICK* ', this);
 									$t1 = $Forays_Tile.get_b().printAll();
 									$state = 2;
 									$t1.continueWith($sm);
@@ -35685,13 +35987,13 @@
 							}
 							case 1: {
 								$state = -1;
-								switch (this.get_type()) {
+								switch (this.get_ttype()) {
 									case 12: {
 										if ($Forays_Tile.get_player().canSee(this.actor())) {
-											$Forays_Tile.get_b().add('Grenades fall from the ceiling above ' + this.actor().get_the_name() + '! ', [this]);
+											$Forays_Tile.get_b().add$1('Grenades fall from the ceiling above ' + this.actor().get_the_name() + '! ', this);
 										}
 										else {
-											$Forays_Tile.get_b().add('Grenades fall from the ceiling! ', [this]);
+											$Forays_Tile.get_b().add$1('Grenades fall from the ceiling! ', this);
 										}
 										//bool nade_here = false;
 										valid = [];
@@ -35710,14 +36012,14 @@
 											//}
 											if (ss.isValue(t1.actor())) {
 												if (ss.referenceEquals(t1.actor(), $Forays_Tile.get_player())) {
-													$Forays_Tile.get_b().add('One lands under you! ', []);
+													$Forays_Tile.get_b().add('One lands under you! ');
 												}
 												else if ($Forays_Tile.get_player().canSee(this)) {
-													$Forays_Tile.get_b().add('One lands under ' + t1.actor().get_the_name() + '. ', [t1.actor()]);
+													$Forays_Tile.get_b().add$1('One lands under ' + t1.actor().get_the_name() + '. ', t1.actor());
 												}
 											}
 											else if (ss.isValue(t1.get_inv())) {
-												$Forays_Tile.get_b().add('One lands under ' + t1.get_inv().theName() + '. ', [t1]);
+												$Forays_Tile.get_b().add$1('One lands under ' + t1.get_inv().theName() + '. ', t1);
 											}
 											t1.features.add(0);
 											valid.remove(t1);
@@ -35731,9 +36033,9 @@
 										for (i = 2; i <= 8; i += 2) {
 											t2 = this;
 											good = true;
-											while (t2.get_type() !== 0) {
+											while (t2.get_ttype() !== 0) {
 												t2 = t2.tileInDirection(i);
-												if (t2.get_opaque() && t2.get_type() !== 0) {
+												if (t2.get_opaque() && t2.get_ttype() !== 0) {
 													good = false;
 													break;
 												}
@@ -35752,7 +36054,7 @@
 												$t4 = t2.tilesWithinDistance(1);
 												for ($t5 = 0; $t5 < $t4.length; $t5++) {
 													tt = $t4[$t5];
-													if (tt.get_type() !== 0) {
+													if (tt.get_ttype() !== 0) {
 														good = false;
 													}
 												}
@@ -35765,12 +36067,12 @@
 											}
 										}
 										if (dirs.length === 0) {
-											$Forays_Tile.get_b().add('Nothing happens. ', [this]);
+											$Forays_Tile.get_b().add$1('Nothing happens. ', this);
 										}
 										else {
 											dir = dirs[$Forays_Global.roll(dirs.length) - 1];
 											first = this;
-											while (first.get_type() !== 0) {
+											while (first.get_ttype() !== 0) {
 												first = first.tileInDirection(dir);
 											}
 											first.tileInDirection(dir).turnToFloor();
@@ -35786,17 +36088,17 @@
 											//first.ActorInDirection(dir).player_visibility_duration = -1;
 											first.actorInDirection(dir).findPath(this.tileInDirection(dir));
 											if ($Forays_Tile.get_player().canSee(first)) {
-												$Forays_Tile.get_b().add('The wall slides away. ', []);
+												$Forays_Tile.get_b().add('The wall slides away. ');
 											}
 											else if (this.distanceFrom($Forays_Tile.get_player()) <= 6) {
-												$Forays_Tile.get_b().add('You hear rock sliding on rock. ', []);
+												$Forays_Tile.get_b().add('You hear rock sliding on rock. ');
 											}
 										}
 										this.toggle(this.actor());
 										break;
 									}
 									case 9: {
-										$Forays_Tile.get_b().add('An unstable energy covers ' + this.actor().theVisible() + '. ', [this.actor()]);
+										$Forays_Tile.get_b().add$1('An unstable energy covers ' + this.actor().theVisible() + '. ', this.actor());
 										this.actor().attrs.set_item(42, $Forays_Global.roll(4));
 										$Forays_Tile.get_q().killEvents(this.actor(), 42);
 										$Forays_Tile.get_q().add(new $Forays_Event.$ctorc(this.actor(), this.actor().durationOfMagicalEffect($Forays_Global.roll(10) + 25) * 100, 42, this.actor().youFeel() + ' more stable. ', [this.actor()]));
@@ -35805,10 +36107,10 @@
 									}
 									case 13: {
 										if ($Forays_Tile.get_player().canSee(this.actor())) {
-											$Forays_Tile.get_b().add('A disorienting flash assails ' + this.actor().get_the_name() + '. ', [this]);
+											$Forays_Tile.get_b().add$1('A disorienting flash assails ' + this.actor().get_the_name() + '. ', this);
 										}
 										else {
-											$Forays_Tile.get_b().add('You notice a flash of light. ', [this]);
+											$Forays_Tile.get_b().add$1('You notice a flash of light. ', this);
 										}
 										this.actor().gainAttrRefreshDuration$1(27, this.actor().durationOfMagicalEffect($Forays_Global.roll(10) + 7) * 100, this.actor().youFeel() + ' less disoriented. ', [this.actor()]);
 										this.toggle(this.actor());
@@ -35817,16 +36119,16 @@
 									case 10: {
 										if ($Forays_PhysicalObject.get_m().get_wiz_lite() === false) {
 											if ($Forays_Tile.get_player().hasLOS$1(this.get_row(), this.get_col()) && !this.actor().isHiddenFrom($Forays_Tile.get_player())) {
-												$Forays_Tile.get_b().add('A wave of light washes out from above ' + this.actor().get_the_name() + '! ', []);
+												$Forays_Tile.get_b().add('A wave of light washes out from above ' + this.actor().get_the_name() + '! ');
 											}
 											else {
-												$Forays_Tile.get_b().add('A wave of light washes over the area! ', []);
+												$Forays_Tile.get_b().add('A wave of light washes over the area! ');
 											}
 											$Forays_PhysicalObject.get_m().set_wiz_lite(true);
 											$Forays_PhysicalObject.get_m().set_wiz_dark(false);
 										}
 										else {
-											$Forays_Tile.get_b().add('Nothing happens. ', [this]);
+											$Forays_Tile.get_b().add$1('Nothing happens. ', this);
 										}
 										this.toggle(this.actor());
 										break;
@@ -35834,25 +36136,25 @@
 									case 15: {
 										if ($Forays_PhysicalObject.get_m().get_wiz_dark() === false) {
 											if ($Forays_Tile.get_player().canSee(this.actor())) {
-												$Forays_Tile.get_b().add('A surge of darkness radiates out from above ' + this.actor().get_the_name() + '! ', []);
+												$Forays_Tile.get_b().add('A surge of darkness radiates out from above ' + this.actor().get_the_name() + '! ');
 												if ($Forays_Tile.get_player().get_light_radius() > 0) {
-													$Forays_Tile.get_b().add('Your light is extinguished! ', []);
+													$Forays_Tile.get_b().add('Your light is extinguished! ');
 												}
 											}
 											else {
-												$Forays_Tile.get_b().add('A surge of darkness extinguishes all light in the area! ', []);
+												$Forays_Tile.get_b().add('A surge of darkness extinguishes all light in the area! ');
 											}
 											$Forays_PhysicalObject.get_m().set_wiz_dark(true);
 											$Forays_PhysicalObject.get_m().set_wiz_lite(false);
 										}
 										else {
-											$Forays_Tile.get_b().add('Nothing happens. ', [this]);
+											$Forays_Tile.get_b().add$1('Nothing happens. ', this);
 										}
 										this.toggle(this.actor());
 										break;
 									}
 									case 8: {
-										$Forays_Tile.get_b().add('Fire pours over ' + this.actor().theVisible() + ' and starts to spread! ', [this]);
+										$Forays_Tile.get_b().add$1('Fire pours over ' + this.actor().theVisible() + ' and starts to spread! ', this);
 										a = this.actor();
 										if (!a.hasAttr(61) && !a.hasAttr(32) && !a.hasAttr(31) && !a.hasAttr(64) && !a.hasAttr(33)) {
 											if (ss.referenceEquals(a, this.actor())) {
@@ -35864,7 +36166,7 @@
 												a.attrs.set_item(32, 1);
 											}
 											if ($Forays_Tile.get_player().canSee(a.tile())) {
-												$Forays_Tile.get_b().add(a.you('start') + ' to catch fire. ', [a]);
+												$Forays_Tile.get_b().add$1(a.you('start') + ' to catch fire. ', a);
 											}
 										}
 										this.features.add(3);
@@ -35876,18 +36178,18 @@
 									}
 									case 14: {
 										if (ss.referenceEquals(this.actor(), $Forays_Tile.get_player())) {
-											$Forays_Tile.get_b().add('A high-pitched ringing sound reverberates from above you. ', []);
+											$Forays_Tile.get_b().add('A high-pitched ringing sound reverberates from above you. ');
 										}
 										else if ($Forays_Tile.get_player().canSee(this.actor())) {
-											$Forays_Tile.get_b().add('A high-pitched ringing sound reverberates from above ' + this.actor().get_the_name() + '. ', []);
+											$Forays_Tile.get_b().add('A high-pitched ringing sound reverberates from above ' + this.actor().get_the_name() + '. ');
 										}
 										else {
-											$Forays_Tile.get_b().add('You hear a high-pitched ringing sound. ', []);
+											$Forays_Tile.get_b().add('You hear a high-pitched ringing sound. ');
 										}
 										$t8 = this.actorsWithinDistance$1(12, true);
 										for ($t9 = 0; $t9 < $t8.length; $t9++) {
 											a1 = $t8[$t9];
-											if (a1.get_type() !== 4 && a1.get_type() !== 7 && a1.get_type() !== 10 && a1.get_type() !== 49 && a1.get_type() !== 24) {
+											if (a1.get_atype() !== 4 && a1.get_atype() !== 7 && a1.get_atype() !== 10 && a1.get_atype() !== 49 && a1.get_atype() !== 24) {
 												a1.findPath(this);
 											}
 										}
@@ -35895,14 +36197,14 @@
 										break;
 									}
 									case 17: {
-										$Forays_Tile.get_b().add('A dart strikes ' + this.actor().get_the_name() + '. ', [this.actor()]);
+										$Forays_Tile.get_b().add$1('A dart strikes ' + this.actor().get_the_name() + '. ', this.actor());
 										if (ss.referenceEquals(this.actor(), $Forays_Tile.get_player())) {
-											$Forays_Tile.get_b().add('Your vision becomes weaker! ', []);
+											$Forays_Tile.get_b().add('Your vision becomes weaker! ');
 											this.actor().gainAttrRefreshDuration$1(45, this.actor().durationOfMagicalEffect($Forays_Global.roll(10) + 20) * 100, 'Your vision returns to normal. ', []);
 										}
-										else if (!this.actor().hasAttr(67) && !this.actor().hasAttr(1) && !this.actor().hasAttr(8) && this.actor().get_type() !== 7 && this.actor().get_type() !== 24) {
+										else if (!this.actor().hasAttr(67) && !this.actor().hasAttr(1) && !this.actor().hasAttr(8) && this.actor().get_atype() !== 7 && this.actor().get_atype() !== 24) {
 											if ($Forays_Tile.get_player().canSee(this.actor())) {
-												$Forays_Tile.get_b().add(this.actor().get_the_name() + ' seems to have trouble seeing. ', []);
+												$Forays_Tile.get_b().add(this.actor().get_the_name() + ' seems to have trouble seeing. ');
 											}
 											this.actor().gainAttrRefreshDuration(45, this.actor().durationOfMagicalEffect($Forays_Global.roll(10) + 20) * 100);
 										}
@@ -35911,7 +36213,7 @@
 									}
 									case 18: {
 										if ($Forays_Tile.get_player().canSee(this)) {
-											$Forays_Tile.get_b().add('The air suddenly freezes, encasing ' + this.actor().theVisible() + ' in ice. ', []);
+											$Forays_Tile.get_b().add('The air suddenly freezes, encasing ' + this.actor().theVisible() + ' in ice. ');
 										}
 										this.actor().attrs.set_item(30, 25);
 										this.toggle(this.actor());
@@ -35926,14 +36228,14 @@
 											if (ss.isValue(a2)) {
 												a2.attrs.set_item(15, a2.attrs.get_item(15) + 1);
 												a2.player_visibility_duration = -1;
-												$Forays_Tile.get_b().add('A ghostly image rises! ', [a2]);
+												$Forays_Tile.get_b().add$1('A ghostly image rises! ', a2);
 											}
 											else {
-												$Forays_Tile.get_b().add('Nothing happens. ', [this]);
+												$Forays_Tile.get_b().add$1('Nothing happens. ', this);
 											}
 										}
 										else {
-											$Forays_Tile.get_b().add('Nothing happens. ', [this]);
+											$Forays_Tile.get_b().add$1('Nothing happens. ', this);
 										}
 										this.toggle(this.actor());
 										break;
@@ -35975,7 +36277,7 @@
 											}
 										}
 										if (new_area.length > 0) {
-											$Forays_Tile.get_b().add('Poisonous gas fills the area! ', [this]);
+											$Forays_Tile.get_b().add$1('Poisonous gas fills the area! ', this);
 											$Forays_Tile.get_q().add(new $Forays_Event.$ctor6(new_area, 300, 16));
 										}
 										this.toggle(this.actor());
@@ -36003,7 +36305,7 @@
 			return $tcs.task;
 		},
 		openChest: function() {
-			if (this.get_type() === 5) {
+			if (this.get_ttype() === 5) {
 				if ($Forays_Global.roll$1(1, 10) === 10) {
 					var upgrades = [];
 					if ($Forays_Global.roll$1(1, 2) === 2 && !$Forays_Tile.get_player().weapons.contains(5)) {
@@ -36125,13 +36427,13 @@
 						}
 					}
 					if (upgrade <= 4) {
-						$Forays_Tile.get_b().add('You find a ' + $Forays_Weapon.name$1(upgrade + 5) + '! ', []);
+						$Forays_Tile.get_b().add('You find a ' + $Forays_Weapon.name$1(upgrade + 5) + '! ');
 					}
 					else if (upgrade <= 7) {
-						$Forays_Tile.get_b().add('You find ' + $Forays_Armor.name$1(upgrade - 2) + '! ', []);
+						$Forays_Tile.get_b().add('You find ' + $Forays_Armor.name$1(upgrade - 2) + '! ');
 					}
 					else {
-						$Forays_Tile.get_b().add('You find a ' + $Forays_MagicItem.name$1(upgrade - 8) + '! ', []);
+						$Forays_Tile.get_b().add('You find a ' + $Forays_MagicItem.name$1(upgrade - 8) + '! ');
 					}
 				}
 				else {
@@ -36141,9 +36443,9 @@
 					}
 					var i = $Forays_Item.create($Forays_Item.randomItem(), $Forays_Tile.get_player());
 					if (ss.isValue(i)) {
-						$Forays_Tile.get_b().add('You find ' + $Forays_Item.prototype$1(i.get_type()).aName() + '. ', []);
+						$Forays_Tile.get_b().add('You find ' + $Forays_Item.prototype$1(i.get_itype()).aName() + '. ');
 						if (no_room) {
-							$Forays_Tile.get_b().add('Your pack is too full to pick it up. ', []);
+							$Forays_Tile.get_b().add('Your pack is too full to pick it up. ');
 						}
 					}
 				}
@@ -36220,7 +36522,7 @@
 			return false;
 		},
 		isTrap: function() {
-			switch (this.get_type()) {
+			switch (this.get_ttype()) {
 				case 8:
 				case 12:
 				case 10:
@@ -36241,7 +36543,7 @@
 			}
 		},
 		isTrapOrVent: function() {
-			return this.isTrap() || this.get_type() === 29 || this.get_type() === 32 || this.get_type() === 33;
+			return this.isTrap() || this.get_ttype() === 29 || this.get_ttype() === 32 || this.get_ttype() === 33;
 		},
 		isKnownTrap: function() {
 			if (this.isTrap() && this.get_name() !== 'floor') {
@@ -36250,7 +36552,7 @@
 			return false;
 		},
 		isShrine: function() {
-			switch (this.get_type()) {
+			switch (this.get_ttype()) {
 				case 21:
 				case 22:
 				case 23:
@@ -36265,7 +36567,7 @@
 			}
 		},
 		conductsElectricity: function() {
-			if (this.isShrine() || this.get_type() === 5 || this.get_type() === 26) {
+			if (this.isShrine() || this.get_ttype() === 5 || this.get_ttype() === 26) {
 				return true;
 			}
 			return false;
@@ -36304,7 +36606,7 @@
 		}
 	};
 	$Forays_Tile.$ctor1 = function(t, r, c) {
-		this.$2$typeField = 0;
+		this.$2$ttypeField = 0;
 		this.$2$passableField = false;
 		this.$internal_opaque = false;
 		this.$2$seenField = false;
@@ -36314,7 +36616,7 @@
 		this.$2$invField = null;
 		this.features = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(t.get_type());
+		this.set_ttype(t.get_ttype());
 		this.set_name(t.get_name());
 		this.set_a_name(t.get_a_name());
 		this.set_the_name(t.get_the_name());
@@ -36332,7 +36634,7 @@
 		this.set_light_radius(t.get_light_radius());
 	};
 	$Forays_Tile.$ctor2 = function(type_, name_, symbol_, color_, passable_, opaque_, toggles_into_) {
-		this.$2$typeField = 0;
+		this.$2$ttypeField = 0;
 		this.$2$passableField = false;
 		this.$internal_opaque = false;
 		this.$2$seenField = false;
@@ -36342,7 +36644,7 @@
 		this.$2$invField = null;
 		this.features = [];
 		$Forays_PhysicalObject.call(this);
-		this.set_type(type_);
+		this.set_ttype(type_);
 		this.set_name(name_);
 		this.set_the_name('the ' + this.get_name());
 		switch (this.get_name().charCodeAt(0)) {

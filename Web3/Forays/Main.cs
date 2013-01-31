@@ -648,7 +648,15 @@ namespace Forays{
                                 file.Close();*/
                                 Window.LocalStorage.RemoveItem("forays.sav");
                             }
-                            while (!Global.GAME_OVER) { await game.Q.Pop(); }
+                            while (!Global.GAME_OVER) {
+                                
+                                    await game.Q.Pop();
+                                //}
+                                //catch (Exception exc)
+                                //{
+                                //    Window.Alert("Main Loop Exception!!!  \n    " + exc.Message);
+                                //}
+                            }
                             Console.CursorVisible = false;
                             Global.SaveOptions();
                             recentdepth = game.M.current_level;
@@ -722,7 +730,7 @@ namespace Forays{
                                 game.player.DisplayStats(false);
                                 if (Global.KILLED_BY != "giving up" && !Help.displayed[TutorialTopic.Consumables])
                                 {
-                                    if (game.player.inv.Where(item => item.type == ConsumableType.HEALING || item.type == ConsumableType.TELEPORTATION).Count > 0)
+                                    if (game.player.inv.Where(item => item.itype == ConsumableType.HEALING || item.itype == ConsumableType.TELEPORTATION).Count > 0)
                                     {
                                         await Help.TutorialTip(TutorialTopic.Consumables);
                                         Global.SaveOptions();
@@ -745,12 +753,12 @@ namespace Forays{
                                         case 0:
                                             foreach (Tile t in game.M.AllTiles())
                                             {
-                                                if (t.type != TileType.FLOOR && !t.IsTrap())
+                                                if (t.ttype != TileType.FLOOR && !t.IsTrap())
                                                 {
                                                     bool good = false;
                                                     foreach (Tile neighbor in t.TilesAtDistance(1))
                                                     {
-                                                        if (neighbor.type != TileType.WALL)
+                                                        if (neighbor.ttype != TileType.WALL)
                                                         {
                                                             good = true;
                                                         }
@@ -827,12 +835,12 @@ namespace Forays{
                                                 fileout[0] += "\n";
                                                 foreach (Tile t in game.M.AllTiles())
                                                 {
-                                                    if (t.type != TileType.FLOOR && !t.IsTrap())
+                                                    if (t.ttype != TileType.FLOOR && !t.IsTrap())
                                                     {
                                                         bool good = false;
                                                         foreach (Tile neighbor in t.TilesAtDistance(1))
                                                         {
-                                                            if (neighbor.type != TileType.WALL)
+                                                            if (neighbor.ttype != TileType.WALL)
                                                             {
                                                                 good = true;
                                                             }

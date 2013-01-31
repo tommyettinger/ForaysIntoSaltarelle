@@ -579,7 +579,7 @@ compare this number to 1/2:  if less than 1/2, major.
 			int dir=0;
 			for(int i=1;i<=9;++i){
 				if(i != 5){
-					if(TileInDirection(i).type == tiletype && ActorInDirection(i) == null && TileInDirection(i).inv == null){
+					if(TileInDirection(i).ttype == tiletype && ActorInDirection(i) == null && TileInDirection(i).inv == null){
 						if(!orth || i%2==0){
 							++total;
 							dir = i;
@@ -675,7 +675,7 @@ compare this number to 1/2:  if less than 1/2, major.
 		public bool IsAdjacentTo(TileType type){ return IsAdjacentTo(type,false); } //didn't need an Actor (or Item) version yet
 		public bool IsAdjacentTo(TileType type,bool consider_origin){
 			foreach(Tile t in TilesWithinDistance(1,!consider_origin)){
-				if(t.type == type){
+				if(t.ttype == type){
 					return true;
 				}
 			}

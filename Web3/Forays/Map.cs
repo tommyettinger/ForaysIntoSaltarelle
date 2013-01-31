@@ -110,13 +110,19 @@ namespace Forays{
 		public List<pos> AllPositions(){ return allpositions; }
 		public LevelType ChooseNextLevelType(LevelType current){
 			List<LevelType> types = new List<LevelType>();
-			foreach(LevelType l in typeof(LevelType).GetValues()){
+            foreach (LevelType l in GetLevelTypes())
+            {
 				if(l != current){
 					types.Add(l);
 				}
 			}
 			return types.Random();
 		}
+
+        public int[] GetLevelTypes()
+        {
+            return new int[] { 0, 1, 2, 3, 4, 5, 6 };
+        }
 		public void GenerateLevelTypes(){
 			level_types = new List<LevelType>{LevelType.Standard,LevelType.Standard};
 			LevelType current = LevelType.Standard;
@@ -408,8 +414,8 @@ namespace Forays{
 				int rr = Global.Roll(ROWS-2);
 				int rc = Global.Roll(COLS-2);
 				Tile t = tile[rr,rc];
-				if(t.passable && t.inv == null && t.type != TileType.CHEST && t.type != TileType.FIREPIT
-				&& t.type != TileType.STAIRS && !t.IsShrine()){
+				if(t.passable && t.inv == null && t.ttype != TileType.CHEST && t.ttype != TileType.FIREPIT
+				&& t.ttype != TileType.STAIRS && !t.IsShrine()){
 					return Item.Create(result,rr,rc);
 					//done = true;
 				}
@@ -509,7 +515,7 @@ namespace Forays{
 					int rc = Global.Roll(COLS-4) + 1;
 					List<Tile> tiles = new List<Tile>();
 					foreach(Tile t in tile[rr,rc].TilesWithinDistance(3)){
-						if(t.passable || t.type == TileType.DOOR_C){
+						if(t.passable || t.ttype == TileType.DOOR_C){
 							tiles.Add(t);
 						}
 					}
@@ -529,8 +535,8 @@ namespace Forays{
 					int rr = Global.Roll(ROWS-2);
 					int rc = Global.Roll(COLS-2);
 					Tile t = tile[rr,rc];
-					if(t.passable && t.inv == null && t.type != TileType.CHEST && t.type != TileType.FIREPIT
-					&& t.type != TileType.STAIRS && !t.IsShrine()){
+					if(t.passable && t.inv == null && t.ttype != TileType.CHEST && t.ttype != TileType.FIREPIT
+					&& t.ttype != TileType.STAIRS && !t.IsShrine()){
 						Item item = Item.Create(Item.RandomItem(),rr,rc);
 						Actor.tiebreakers.Add(null); //placeholder
 						Event e = new Event(item,new List<Tile>{t},100,EventType.MIMIC,AttrType.NO_ATTR,0,"");
@@ -541,7 +547,7 @@ namespace Forays{
 				}
 			}
 			if(type == ActorType.MARBLE_HORROR){
-				Tile statue = AllTiles().Where(t=>t.type == TileType.STATUE).Random();
+				Tile statue = AllTiles().Where(t=>t.ttype == TileType.STATUE).Random();
 				if(statue != null){
 					Q.Add(new Event(statue,100,EventType.MARBLE_HORROR));
 				}
@@ -587,7 +593,7 @@ namespace Forays{
 				else{
 					for(int j=0;j<9999;++j){
 						if(group_tiles.Count == 0){ //no space left!
-							if(group.Count > 0){
+							if(group != null && group.Count > 0){
 								return group[0];
 							}
 							else{
@@ -1192,7 +1198,7 @@ namespace Forays{
 					}
 					else{
 						if(type == ActorType.MARBLE_HORROR){
-							Tile statue = AllTiles().Where(t=>t.type == TileType.STATUE).Random();
+							Tile statue = AllTiles().Where(t=>t.ttype == TileType.STATUE).Random();
 							if(!marble_horror_spawned && statue != null){
 								SpawnMob(type);
 								marble_horror_spawned = true;
@@ -1269,7 +1275,7 @@ namespace Forays{
 			bool[,] good_location = new bool[ROWS,COLS];
 			for(int i=0;i<ROWS;++i){
 				for(int j=0;j<COLS;++j){
-					if(tile[i,j].type == TileType.FLOOR){
+					if(tile[i,j].ttype == TileType.FLOOR){
 						good_location[i,j] = true;
 					}
 					else{
@@ -1356,7 +1362,7 @@ namespace Forays{
 					int rc = Global.Roll(COLS-4) + 1;
 					bool good = true;
 					foreach(Tile t in tile[rr,rc].TilesWithinDistance(2)){
-						if(t.type != TileType.WALL){
+						if(t.ttype != TileType.WALL){
 							good = false;
 							break;
 						}
@@ -1369,15 +1375,15 @@ namespace Forays{
 							Tile t = tile[rr,rc].TileInDirection(i).TileInDirection(i);
 							bool good_dir = true;
 							int distance = -1;
-							while(good_dir && t != null && t.type == TileType.WALL){
-								if(t.TileInDirection(t.RotateDirection(i,false,2)).type != TileType.WALL){
+							while(good_dir && t != null && t.ttype == TileType.WALL){
+								if(t.TileInDirection(t.RotateDirection(i,false,2)).ttype != TileType.WALL){
 									good_dir = false;
 								}
-								if(t.TileInDirection(t.RotateDirection(i,true,2)).type != TileType.WALL){
+								if(t.TileInDirection(t.RotateDirection(i,true,2)).ttype != TileType.WALL){
 									good_dir = false;
 								}
 								t = t.TileInDirection(i);
-								if(t != null && t.type == TileType.STATUE){
+								if(t != null && t.ttype == TileType.STATUE){
 									good_dir = false;
 								}
 								++distance;
@@ -1409,7 +1415,7 @@ namespace Forays{
 							foreach(int i in dirs){
 								Tile t = tile[rr,rc].TileInDirection(i);
 								int distance = -2; //distance of the corridor between traps and secret door
-								while(t.type == TileType.WALL){
+								while(t.ttype == TileType.WALL){
 									++distance;
 									t = t.TileInDirection(i);
 								}
@@ -1417,7 +1423,7 @@ namespace Forays{
 									continue;
 								}
 								t = tile[rr,rc].TileInDirection(i);
-								while(t.type == TileType.WALL){
+								while(t.ttype == TileType.WALL){
 									if(distance >= 4){
 										TileType tt = TileType.FLOOR;
 										if(Global.Roll(3) >= 2){
@@ -1432,9 +1438,9 @@ namespace Forays{
 										t.color = Color.White;
 										if(t.DistanceFrom(tile[rr,rc]) < distance+2){
 											Tile neighbor = t.TileInDirection(t.RotateDirection(i,false,2));
-											if(neighbor.TileInDirection(t.RotateDirection(i,false,1)).type == TileType.WALL
-											   && neighbor.TileInDirection(t.RotateDirection(i,false,2)).type == TileType.WALL
-											   && neighbor.TileInDirection(t.RotateDirection(i,false,3)).type == TileType.WALL){
+											if(neighbor.TileInDirection(t.RotateDirection(i,false,1)).ttype == TileType.WALL
+											   && neighbor.TileInDirection(t.RotateDirection(i,false,2)).ttype == TileType.WALL
+											   && neighbor.TileInDirection(t.RotateDirection(i,false,3)).ttype == TileType.WALL){
 												tt = TileType.FLOOR;
 												if(Global.Roll(3) >= 2){
 													tt = possible_traps.Random();
@@ -1450,9 +1456,9 @@ namespace Forays{
 												}
 											}
 											neighbor = t.TileInDirection(t.RotateDirection(i,true,2));
-											if(neighbor.TileInDirection(t.RotateDirection(i,true,1)).type == TileType.WALL
-											   && neighbor.TileInDirection(t.RotateDirection(i,true,2)).type == TileType.WALL
-											   && neighbor.TileInDirection(t.RotateDirection(i,true,3)).type == TileType.WALL){
+											if(neighbor.TileInDirection(t.RotateDirection(i,true,1)).ttype == TileType.WALL
+											   && neighbor.TileInDirection(t.RotateDirection(i,true,2)).ttype == TileType.WALL
+											   && neighbor.TileInDirection(t.RotateDirection(i,true,3)).ttype == TileType.WALL){
 												tt = TileType.FLOOR;
 												if(Global.Roll(3) >= 2){
 													tt = possible_traps.Random();
@@ -1498,7 +1504,7 @@ namespace Forays{
 								t = t.TileInDirection(t.RotateDirection(i,true,4));
 								if(Global.CoinFlip()){
 									if(t.IsTrap()){
-										t.type = TileType.ALARM_TRAP;
+										t.ttype = TileType.ALARM_TRAP;
 									}
 									else{
 										t.TransformTo(Forays.TileType.ALARM_TRAP);
@@ -1541,7 +1547,7 @@ namespace Forays{
 				}
 			}
 			foreach(Tile t in AllTiles()){
-				if(t.type != TileType.WALL){
+				if(t.ttype != TileType.WALL){
 					foreach(Tile neighbor in t.TilesAtDistance(1)){
 						neighbor.solid_rock = false;
 					}
@@ -1579,7 +1585,7 @@ namespace Forays{
 				}
 			}
 			foreach(Actor a in AllActors()){
-				if(a.type == ActorType.FIRE_DRAKE){
+				if(a.atype == ActorType.FIRE_DRAKE){
 					boss_hp = a.curhp;
 					break;
 				}
@@ -1688,7 +1694,7 @@ namespace Forays{
 					t.UpdateRadius(0,t.light_radius);
 				}
 			}
-			List<Tile> goodtiles = AllTiles().Where(t=>t.type == TileType.FLOOR && !t.IsAdjacentTo(TileType.FIRE_GEYSER));
+			List<Tile> goodtiles = AllTiles().Where(t=>t.ttype == TileType.FLOOR && !t.IsAdjacentTo(TileType.FIRE_GEYSER));
 			if(goodtiles.Count > 0){
 				Tile t = goodtiles.Random();
 				int light = player.light_radius;
@@ -1720,7 +1726,7 @@ namespace Forays{
 				}
 			}
 			foreach(Tile t in AllTiles()){
-				if(t.type != TileType.WALL){
+				if(t.ttype != TileType.WALL){
 					foreach(Tile neighbor in t.TilesAtDistance(1)){
 						neighbor.solid_rock = false;
 					}

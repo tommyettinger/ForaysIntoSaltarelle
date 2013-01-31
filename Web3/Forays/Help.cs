@@ -13,12 +13,13 @@ namespace Forays{
 	public enum HelpTopic{Overview,Skills,Feats,Spells,Items,Commands,Advanced,Tips};
 	public enum TutorialTopic{Movement,Attacking,Torch,Resistance,Fire,Recovery,RangedAttacks,Feats,Armor,HealingPool,Consumables};
 	public static class Help{
+        public static int[] GetTutorialTopics() { return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; }
 		public static Dict<TutorialTopic,bool> displayed = new Dict<TutorialTopic,bool>();
 		public static async Task DisplayHelp(){ await DisplayHelp(HelpTopic.Overview); }
 		public static async Task DisplayHelp(HelpTopic h){
 			Game.Console.CursorVisible = false;
 			Screen.Blank();
-			int num_topics = (typeof(HelpTopic).GetValues()).Length;
+			int num_topics = GetHelpTopics().Length;
 			Screen.WriteString(5,4,"Topics:",Color.Yellow);
 			for(int i=0;i<num_topics+1;++i){
 				Screen.WriteString(i+7,0,"[ ]");
@@ -32,7 +33,7 @@ namespace Forays{
 			ConsoleKeyInfo command;
 			string ch;
 			for(bool done=false;!done;){
-                foreach (HelpTopic help in (typeof(HelpTopic).GetValues()))
+                foreach (HelpTopic help in GetHelpTopics())
                 {
 					if(h == help){
 						Screen.WriteString(7+(int)help,4,Enum.ToString(typeof(HelpTopic),help),Color.Yellow);
@@ -177,6 +178,11 @@ namespace Forays{
 			}
 			Screen.Blank();
 		}
+
+        public static int[] GetHelpTopics()
+        {
+            return new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
+        }
 		public static List<string> HelpText(HelpTopic h){
 			string path = "";
 			int startline = 0;
@@ -223,7 +229,7 @@ namespace Forays{
 				result.Add("");
 				result.Add("");
 				result.Add("");
-				foreach(TutorialTopic topic in (typeof(TutorialTopic).GetValues())){
+				foreach(TutorialTopic topic in GetTutorialTopics()){
 					foreach(string s in TutorialText(topic)){
 						result.Add(s);
 					}

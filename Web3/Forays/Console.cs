@@ -180,7 +180,7 @@ namespace Forays
         //private Element keydiv;
         public ROTConsole()
         {
-            display = new Display(new DisplayOptions(80, 25));
+            display = new Display(new DisplayOptions(80, 27));
         }
         private TaskCompletionSource<ConsoleKeyInfo> defr;// Task<ConsoleKeyInfo> cki = null;
         private async void processKey(Element elem, jQueryEvent ev)

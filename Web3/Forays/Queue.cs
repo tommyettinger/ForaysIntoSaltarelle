@@ -107,7 +107,14 @@ namespace Forays{
 			Event e = list[0];
 			//list.First.Value.Execute();
 			//list.RemoveFirst();
-            e.Execute();
+            try{
+                e.Execute();
+            }
+            catch (Exception ex)
+            {
+                System.Html.Window.Alert("Exception!  \n  " + ex.Message);
+            }
+            
             //await Task.Delay(1000);
 			list.Remove(e);
             return true;
@@ -464,7 +471,7 @@ namespace Forays{
 				case EventType.REMOVE_ATTR:
 				{
 					Actor temp = target as Actor;
-					if(temp.type == ActorType.BERSERKER && attr == AttrType.COOLDOWN_2){
+					if(temp.atype == ActorType.BERSERKER && attr == AttrType.COOLDOWN_2){
 						temp.attrs[attr] = 0;
 					}
 					else{
@@ -480,8 +487,8 @@ namespace Forays{
 						}
 					}
 					if(attr==AttrType.SLOWED){
-						if(temp.type != ActorType.PLAYER){
-							temp.speed = Actor.Prototype(temp.type).speed;
+						if(temp.atype != ActorType.PLAYER){
+							temp.speed = Actor.Prototype(temp.atype).speed;
 						}
 						else{
 							if(temp.HasAttr(AttrType.LONG_STRIDE)){
@@ -524,7 +531,7 @@ namespace Forays{
 							B.Add("You are no longer poisoned. ");
 						}
 					}
-					if(attr==AttrType.COOLDOWN_1 && temp.type == ActorType.BERSERKER){
+					if(attr==AttrType.COOLDOWN_1 && temp.atype == ActorType.BERSERKER){
 						B.Add(temp.Your() + " rage diminishes. ",temp);
 						B.Add(temp.the_name + " dies. ",temp);
                         await temp.TakeDamage(DamageType.NORMAL, DamageClass.NO_TYPE, 8888, null);
@@ -554,15 +561,15 @@ namespace Forays{
 							}
 							if(Global.Roll(difficulty) == difficulty){
 								if(t.IsTrap() || t.Is(TileType.FIRE_GEYSER) || t.Is(TileType.FOG_VENT) || t.Is(TileType.POISON_GAS_VENT)){
-									t.name = Tile.Prototype(t.type).name;
-									t.a_name = Tile.Prototype(t.type).a_name;
-									t.the_name = Tile.Prototype(t.type).the_name;
-									t.symbol = Tile.Prototype(t.type).symbol;
-									t.color = Tile.Prototype(t.type).color;
+									t.name = Tile.Prototype(t.ttype).name;
+									t.a_name = Tile.Prototype(t.ttype).a_name;
+									t.the_name = Tile.Prototype(t.ttype).the_name;
+									t.symbol = Tile.Prototype(t.ttype).symbol;
+									t.color = Tile.Prototype(t.ttype).color;
 									B.Add("You notice " + t.a_name + ". ");
 								}
 								else{
-									if(t.type == TileType.HIDDEN_DOOR){
+									if(t.ttype == TileType.HIDDEN_DOOR){
 										t.Toggle(null);
 										B.Add("You notice a hidden door. ");
 									}
@@ -616,7 +623,7 @@ namespace Forays{
 									temporary.inv.Add(target as Item);
 									Item item = temporary.inv[0];
 									if(item.symbol == "*"){ //orbs
-										if(item.type == ConsumableType.SUNLIGHT || item.type == ConsumableType.DARKNESS){
+										if(item.itype == ConsumableType.SUNLIGHT || item.itype == ConsumableType.DARKNESS){
 											B.Add(temporary.You("throw") + " " + item.AName() + ". ",temporary);
 											B.DisplayNow();
 											Screen.AnimateProjectile(tile.GetBestExtendedLineOfEffect(player).ToFirstObstruction(),new colorchar(item.color,item.symbol));
@@ -662,7 +669,7 @@ namespace Forays{
 									manifested = true;
 								}
 								else{
-									if(player.tile().type == TileType.DOOR_O){
+									if(player.tile().ttype == TileType.DOOR_O){
 										B.Add("The door slams closed on you! ");
 										await player.TakeDamage(DamageType.NORMAL,DamageClass.PHYSICAL,Global.Roll(6),null,"a slamming door");
 									}
@@ -687,7 +694,7 @@ namespace Forays{
 											M.Draw();
 											Item item = temporary.inv[0];
 											if(item.symbol == "*"){ //orbs
-												if(item.type == ConsumableType.SUNLIGHT || item.type == ConsumableType.DARKNESS){
+												if(item.itype == ConsumableType.SUNLIGHT || item.itype == ConsumableType.DARKNESS){
 													B.Add(temporary.You("throw") + " " + item.TheName() + ". ",temporary);
 													B.DisplayNow();
 													Screen.AnimateProjectile(tile.GetBestExtendedLineOfEffect(player).ToFirstObstruction(),new colorchar(item.color,item.symbol));
@@ -705,9 +712,9 @@ namespace Forays{
 											}
 										}
 										else{
-											if(area.Any(t => t.type == TileType.DOOR_O || t.type == TileType.DOOR_C)){
-												Tile door = area.Where(t=>t.type == TileType.DOOR_O || t.type == TileType.DOOR_C).Random();
-												if(door.type == TileType.DOOR_C){
+											if(area.Any(t => t.ttype == TileType.DOOR_O || t.ttype == TileType.DOOR_C)){
+												Tile door = area.Where(t=>t.ttype == TileType.DOOR_O || t.ttype == TileType.DOOR_C).Random();
+												if(door.ttype == TileType.DOOR_C){
 													if(player.CanSee(door)){
 														B.Add("The door flies open! ",door);
 													}
@@ -903,7 +910,7 @@ namespace Forays{
 				{
 					int stalagmites = 0;
 					foreach(Tile tile in area){
-						if(tile.type == TileType.STALAGMITE){
+						if(tile.ttype == TileType.STALAGMITE){
 							stalagmites++;
 						}
 					}
@@ -915,7 +922,7 @@ namespace Forays{
 							B.Add("The stalagmite crumbles. ",area.ToArray());
 						}
 						foreach(Tile tile in area){
-							if(tile.type == TileType.STALAGMITE){
+							if(tile.ttype == TileType.STALAGMITE){
 								tile.Toggle(null);
 							}
 						}
@@ -955,11 +962,11 @@ namespace Forays{
 							if(hiddencheck != null){
 								hiddencheck.area.Remove(t);
 							}
-							t.name = Tile.Prototype(t.type).name;
-							t.a_name = Tile.Prototype(t.type).a_name;
-							t.the_name = Tile.Prototype(t.type).the_name;
-							t.symbol = Tile.Prototype(t.type).symbol;
-							t.color = Tile.Prototype(t.type).color;
+							t.name = Tile.Prototype(t.ttype).name;
+							t.a_name = Tile.Prototype(t.ttype).a_name;
+							t.the_name = Tile.Prototype(t.ttype).the_name;
+							t.symbol = Tile.Prototype(t.ttype).symbol;
+							t.color = Tile.Prototype(t.ttype).color;
 						}
 					}
 					if(value >= 0){ //a value of -1 means 'reset light radius to 0'
@@ -1030,11 +1037,11 @@ namespace Forays{
 							if(hiddencheck != null){
 								hiddencheck.area.Remove(t);
 							}
-							t.name = Tile.Prototype(t.type).name;
-							t.a_name = Tile.Prototype(t.type).a_name;
-							t.the_name = Tile.Prototype(t.type).the_name;
-							t.symbol = Tile.Prototype(t.type).symbol;
-							t.color = Tile.Prototype(t.type).color;
+							t.name = Tile.Prototype(t.ttype).name;
+							t.a_name = Tile.Prototype(t.ttype).a_name;
+							t.the_name = Tile.Prototype(t.ttype).the_name;
+							t.symbol = Tile.Prototype(t.ttype).symbol;
+							t.color = Tile.Prototype(t.ttype).color;
 						}
 					}
 					Tile current = target as Tile;
@@ -1102,11 +1109,11 @@ namespace Forays{
 							if(hiddencheck != null){
 								hiddencheck.area.Remove(t);
 							}
-							t.name = Tile.Prototype(t.type).name;
-							t.a_name = Tile.Prototype(t.type).a_name;
-							t.the_name = Tile.Prototype(t.type).the_name;
-							t.symbol = Tile.Prototype(t.type).symbol;
-							t.color = Tile.Prototype(t.type).color;
+							t.name = Tile.Prototype(t.ttype).name;
+							t.a_name = Tile.Prototype(t.ttype).a_name;
+							t.the_name = Tile.Prototype(t.ttype).the_name;
+							t.symbol = Tile.Prototype(t.ttype).symbol;
+							t.color = Tile.Prototype(t.ttype).color;
 						}
 					}
 					Tile current = target as Tile;
@@ -1171,7 +1178,7 @@ namespace Forays{
 				case EventType.STONE_SLAB:
 				{
 					Tile t = target as Tile;
-					if(t.type == TileType.STONE_SLAB && (t.IsLitFromAnywhere(true) || area.Any(x=>x.actor()!=null))){
+					if(t.ttype == TileType.STONE_SLAB && (t.IsLitFromAnywhere(true) || area.Any(x=>x.actor()!=null))){
 						bool vis = player.CanSee(t);
 						t.Toggle(null,Forays.TileType.FLOOR);
 						if(!vis && player.CanSee(t)){
@@ -1187,7 +1194,7 @@ namespace Forays{
 						}
 					}
 					else{
-						if(t.type == TileType.FLOOR && !t.IsLitFromAnywhere(true) && t.actor() == null && !area.Any(x=>x.actor()!=null)){
+						if(t.ttype == TileType.FLOOR && !t.IsLitFromAnywhere(true) && t.actor() == null && !area.Any(x=>x.actor()!=null)){
 							bool vis = player.CanSee(t);
 							t.Toggle(null,Forays.TileType.STONE_SLAB);
 							if(!vis && player.CanSee(t)){
@@ -1209,7 +1216,7 @@ namespace Forays{
 				case EventType.MARBLE_HORROR:
 				{
 					Tile t = target as Tile;
-					if(t.type == TileType.STATUE){
+					if(t.ttype == TileType.STATUE){
 						if(value == 1 && player.CanSee(t) && !t.IsLit() && t.actor() == null){ //if target was visible last turn & this turn, and it's currently in darkness...
 							t.TransformTo(TileType.FLOOR);
 							Actor a = Actor.Create(ActorType.MARBLE_HORROR,t.row,t.col,true,true);
@@ -1258,7 +1265,7 @@ namespace Forays{
 							target.actor().attrs[Forays.AttrType.NO_ITEM]++;
 							B.Add("The troll stands up! ",target);
 							target.actor().player_visibility_duration = -1;
-							if(target.tile().type == TileType.DOOR_C){
+							if(target.tile().ttype == TileType.DOOR_C){
 								target.tile().Toggle(target.actor());
 							}
 							target.tile().features.Remove(FeatureType.TROLL_CORPSE);
@@ -1311,7 +1318,7 @@ namespace Forays{
 							if(attr == AttrType.COOLDOWN_1){
 								target.actor().attrs[Forays.AttrType.COOLDOWN_1]++;
 							}
-							if(target.tile().type == TileType.DOOR_C){
+							if(target.tile().ttype == TileType.DOOR_C){
 								target.tile().Toggle(target.actor());
 							}
 							target.tile().features.Remove(FeatureType.TROLL_SEER_CORPSE);
@@ -1528,7 +1535,7 @@ namespace Forays{
 						else{ //if there's no good value, this means that this is the first appearance.
 							B.Add("The ground shakes as dust and rocks fall from the cavern ceiling. ");
 							B.Add("This place is falling apart! ");
-							List<Tile> floors = M.AllTiles().Where(t=>t.passable && t.type != TileType.CHASM && player.tile() != t);
+							List<Tile> floors = M.AllTiles().Where(t=>t.passable && t.ttype != TileType.CHASM && player.tile() != t);
 							Tile tile = null;
 							if(floors.Count > 0){
 								tile = floors.Random();
@@ -1557,7 +1564,7 @@ namespace Forays{
 								Tile possible = open.Random();
 								if(!possible.Is(TileType.CHASM)){
 									possible.Toggle(null,TileType.CHASM);
-									List<Tile> open_neighbors = possible.TilesAtDistance(1).Where(t=>t.passable && t.type != TileType.CHASM);
+									List<Tile> open_neighbors = possible.TilesAtDistance(1).Where(t=>t.passable && t.ttype != TileType.CHASM);
 									int num_neighbors = open_neighbors.Count;
 									while(open_neighbors.Count > num_neighbors/2){
 										Tile neighbor = open_neighbors.RemoveRandom();
@@ -1575,7 +1582,7 @@ namespace Forays{
 						}
 					}
 					if(tries == 50 || current == null){
-						List<Tile> floors = M.AllTiles().Where(t=>t.passable && t.type != TileType.CHASM && player.tile() != t);
+						List<Tile> floors = M.AllTiles().Where(t=>t.passable && t.ttype != TileType.CHASM && player.tile() != t);
 						if(floors.Count > 0){
 							target = floors.Random();
 							(target as Tile).Toggle(null,TileType.CHASM);
@@ -1603,7 +1610,7 @@ namespace Forays{
 										t.Toggle(null,Forays.TileType.RUBBLE);
 										foreach(Tile neighbor in t.TilesAtDistance(1)){
 											neighbor.solid_rock = false;
-											if(neighbor.type == TileType.FLOOR && Global.OneIn(10)){
+											if(neighbor.ttype == TileType.FLOOR && Global.OneIn(10)){
 												neighbor.Toggle(null,Forays.TileType.RUBBLE);
 											}
 										}
@@ -1617,7 +1624,7 @@ namespace Forays{
 										t.Toggle(null,Forays.TileType.RUBBLE);
 									}
 									foreach(Tile neighbor in t.TilesAtDistance(1)){
-										if(neighbor.type == TileType.FLOOR && Global.OneIn(6)){
+										if(neighbor.ttype == TileType.FLOOR && Global.OneIn(6)){
 											neighbor.Toggle(null,Forays.TileType.RUBBLE);
 										}
 									}

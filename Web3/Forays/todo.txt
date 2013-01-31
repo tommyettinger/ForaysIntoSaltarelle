@@ -564,7 +564,7 @@ ENTRANCER		 -	35	-	2	hits		  (in the same style as the necro)
 mind taker or stealer of minds or brainwasher or something, enthralls, bends to will, enslaves, until a more powerful thrall appears, 
 The entrancer bends a weak-minded being to her will and has it fight on her behalf, at least until a more desirable thrall appears. The entrancer can protect and teleport the enthralled creature.
 SHADOWVEIL_DUELIST	 -	40	-	3	hits? or slashes?	notices
-cloak of (dark), magical technique(?), (the duelist's style, however it might be described...twisting, parrying, lunging???) is well-matched with his magical advantage.
+cloak of (dark), magical technique(?), (the duelist's style, however it might be described...twisting, parrying, lunging???) is well-});ed with his magical advantage.
 The shadowveil duelist hides under a cloak of shadows to strike unseen. A spinning, feinting fighting style keeps the duelist in motion.
 SP_D_PIXIE		 -	35	-	1 or 2?	?			notices
 faerie/fairy, magical, fills your head with a buzzing sound (maybe), scratches furiously, (feels like something is missing here), 
