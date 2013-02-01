@@ -1,0 +1,708 @@
+
+
+
+okay, I did the automatic r/c/N/E/v/h/i function. it works great, but the corner definition should be updated to allow 2x2 rooms, basically. this allows corners to touch. also, edge definition should allow 2x3 rooms:
+cEc
+cEc
+	-this won't be used at all until I have nonrectangular rooms
+
+
+room shapes:
+rectangular
+  min: 3x3
+elliptical
+  min: 5x5
+diamond
+  min: 5x5
+triangular
+  min: 5x5
+L-shaped
+  min: 6x6
+cross-shaped
+  min: 7x7
+alcoves(2x2 holes on sides of room)
+  min: 9x9
+
+room features:
+pillars in various configurations. basic guidelines: no 2 pillars should touch, &
+	rooms should be symmetrical in at least one dimension.
+	explicit pillar rules! find the dimensions of the 'pillar matrix' - the
+	largest arrangement of pillars that can fit in a single(say, the top-left)
+	quadrant of a room. Then, fill randomly, respecting the rule "no staggered
+	pillars, such as #.  .# ". If the dimension is divisible by 4, you can add an
+	offset of 0 or 1 in that dimension. Then, simply reflect to fill the room.
+	an 11x11 room has a 3x3 matrix, a 15x22 room has 4x5, and 3x3 has 1x1.
+   -don't use the above method just yet. for now, either make 1 pillar in each
+	quadrant, or tile it fully.
+rooms with walls in the center. should leave at least 2 spaces on each side.
+
+
+	########	########	########	     ###
+	#......#	##....##	###..###	    ##N#
+	#......#	#......#	##....##	   ##NN#
+	#......#	#......#	#......#	  ##NNE#
+	#......+	#......+	#......+	 ##NNrE+
+	#......#	#......#	##....##	##NNrrE#
+	#......#	##....##	###..###	#NNEEEc#
+	##+#####	##+#####	##+#####	##+#####
+							
+
+
+	########	########	########	########
+	#......#	#......#	#......#	###..###
+	#......#	#.#..#.#	#......#	###..###
+	#......#	#......#	#..##..#	#......#
+	####...+	#......+	#..##..+	#......+
+	 3x3...#	#.#..#.#	#......#	###..###
+	   #...#	#......#	#......#	###..###
+	   #####	##+#####	##+#####	##+#####
+	at least 3x3?					
+
+
+bigger!
+
+	#############	#############	#############	#############
+	#####...#####	######.######	#...........#	#######.....#
+	###.......###	#####...#####	##..........#	#######.....#
+	##.........##	####.....####	###.........#	#######.....#
+	##.........##	###.......###	####........#	#######.....#
+	#...........#	##.........##	#####.......#	#...........#
+	#...........#	#...........#	######......#	#...........#
+	#...........#	##.........##	#######.....#	#...........#
+	##.........##	###.......###	########....#	#...........#
+	##.........##	####.....####	#########...#	#...........#
+	###.......###	#####...#####	##########..#	#...........#
+	#####...#####	######.######	###########.#	#...........#
+	#############	#############	#############	#############
+		       4 possible doors 
+
+
+	#############	#############	#############	#############
+	#...........#	#...........#	#...........#	###.##.##.###
+	#...........#	#.#.#...#.#.#	#...........#	###.##.##.###
+	#...........#	#...........#	#...........#	#...........#
+	#...........#	#.#.......#.#	#...#####...#	###.......###
+	#...........#	#...........#	#...#####...#	###.......###
+	#.....#.....#	#...........#	#...#####...#	#...........#
+	#...........#	#...........#	#...#####...#	###.......###
+	#...........#	#.#.......#.#	#...#####...#	###.......###
+	#...........#	#...........#	#...........#	#...........#
+	#...........#	#.#.#...#.#.#	#...........#	###.##.##.###
+	#...........#	#...........#	#...........#	###.##.##.###
+	#############	#############	#############	#############
+							no, see below.
+
+	    #####	     ###	#############	      #######
+	  ###...###  	    ##.##	#...........#	      #.....#
+	 ##.......## 	   ##...##	##..........#	      #.....#
+	 #.........# 	  ##.....##	 ##.........#	      #.....#
+	##.........##	 ##.......##	  ##........#	#######.....#
+	#...........#	##.........##	   ##.......#	#...........#
+	#...........#	#...........#	    ##......#	#...........#
+	#...........#	##.........##	     ##.....#	#...........#
+	##.........##	 ##.......##	      ##....#	#...........#
+	 #.........# 	  ##.....##	       ##...#	#...........#
+	 ##.......## 	   ##...##	        ##..#	#...........#
+	  ###...###  	    ##.##    	         ##.#	#...........#
+	    #####    	     ###     	          ###	#############
+
+
+	#############	  #########  
+	#...........#	  #.##.##.#  
+	#...........#	###.##.##.###
+	#...........#	#...........#
+	#...#####...#	###.......###
+	#...#   #...#	###.......###
+	#...#   #...#	#...........#
+	#...#   #...#	###.......###
+	#...#####...#	###.......###
+	#...........#	#...........#
+	#...........#	###.##.##.###
+	#...........#	  #.##.##.#  
+	#############	  #########  
+			no, use the one below:
+	#############	#############
+	#...........#	###..###..###
+	#...#...#...#	###..###..###
+	#...........#	#...........#
+	#...#.#.#...#	#...........#
+	#...........#	###.......###
+	#.#.#...#.#.#	###.......###
+	#...........#	###.......###
+	#...#.#.#...#	#...........#
+	#...........#	#...........#
+	#...#...#...#	###..###..###
+	#...........#	###..###..###
+	#############	#############
+			much better!
+
+
+	########################
+	#......................#
+	#.#..................#.#
+	#......................#
+	#.#.#...#......#...#.#.#
+	#......................#
+	#......................#
+	#......................#
+	#.#.......#..#.......#.#
+	#......................#
+	#......................#
+	#......................#
+	#.#.#...#......#...#.#.#
+	#......................#
+	#.#..................#.#
+	#......................#
+	########################
+
+!implemented
+
+!fungus
+!fog
+!fog vent
+!poison gas
+!poison gas vent
+!fire geyser
+rubble, perhaps in 2x2 - 3x3 piles
+	-in general, MOST level types should have a (small) chance to have any of these features.
+!slab doors
+
+not yet:
+traps incl. on chests and doors, or alarms on items.
+double doors for fortresses - easy
+candlelit altar. like a solid fire pit. maybe radius 2.
+torches
+mirrors
+levers
+wind (works like conveyors)
+rocks
+mud
+bombable walls
+tunnels that allow travel to possibly-disconnected parts of the level. would remove you from the map for several turns. 
+
+
+single-use (or one-way) corridors
+2- and 3-wide corridors, with possible statues or other features
+
+round rooms
+diamond rooms
+triangular rooms
+rooms with rectangular sections missing from a corner (the easy way to do 'combined' rooms)
+rooms that aren't carved out in the middle (i.e. a large central 'pillar')
+'starburst' rooms, maybe
+unangband's overlapping rooms: 2 random rectangles within a larger one.
+this type of room: (even dimensions in both directions, and at least 6x6)
+  ########  
+  #..##..#  		  ####
+###..##..###		 ##..##
++..........#		###..###
+#..........#		#......#
+###......###		+..@...#
+###......###		###..###
+#..........####		 ##..##
+#.............		  #.##
+###......######		  #.#
+###......###		  # #
+#..........#
+#..........#
+###..##..###
+  #..##..#  
+  ########  
+
+
+slime levels: lots of elliptical rooms. pools and streamers/trails of slime. fog or poison gas vents. enemy type: slimes or slug-men or something
+
+hive levels: 3x3 rooms only, no doors. corridor numbers 4 4 1 4 4. GenerateInitial, then generate (50/50) rooms and corridor chains, 700 times. Do standard cleanup and verification. enemy type: some kind of insect, or hive dogs
+	-no firepits, fire geysers, ....
+
+fog levels: ???. lots of fog vents. enemy type: phantoms. (probably spawns 2-3 phantoms for every replaced monster)
+
+mine levels: normal levels turned into caves. rubble. enemy type: kobolds.
+
+fortress levels. big central hall, more ordered rooms and corridors. possibly symmetric.
+
+opulent levels. lots of statues. pools of water? long (dead-end) halls?
+
+more: moving parts? corridor features? carve rooms for chests in caves?
+
+
+
+
+
+leveltype-specific monsters that can only appear in the proper "biome"
+
+don't increase in power, but rather in number.
+
+
+items you can only find on certain level types?
+
+
+
+levelgen:
+what sort of separations? would a level have only 2 'types'?
+what about 'templates' in the form of functions that could be applied, like 'ruined'?
+
+
+
+include a goal at the start	-	"None of the other scouts returned." etc
+
+
+brutish strength
+	-smash known traps, stalagmites, doors, statues. anything useful?
+  no items, spells, or certain feats, but lots of damage and the ability to smash
+  doors, statues, and other features?
+explosive fungus orb-type item? or orcish grenades?
+
+
+orc assassin? even more basic than the skulking killer? (but more dangerous because it sneak attacks.) Needs an AI enhancement: when moving toward the player, if there is a spot that the player can't see (but it's at the same distance as the spot you would have stepped to), step there to stay out of sight. shadowsight?
+
+noxious worm
+high hp. slow. breathes small clouds of poison every few turns. (could burrow into a wall and koolaid out when the player walks by. if it's a level 10 monster, it definitely should.)
+
+
+
+new monsters:
+undead fast animal - summoned by necro
+slugman
+  appears in groups. leaves slime trails on the ground. usually moves slowly, but
+  moves quickly when on a slime trail. ranged attack, maybe?
+(on-death triggers? light, knockback?)
+(anything that doesn't care about how much damage you deal)
+
+
+new dungeon features:
+trapped chests or doors?
+torches
+	-implemented as walls that actually shed light from an adjacent tile?
+alarms tied to items or doors?
+periodic stun trap that affects everything in its LOS
+bombable walls to hide some hidden rooms.
+more open areas. maybe even LoL-style brush?
+  open areas make carrying a torch more dangerous, and make lightning bolt better
+beamos-inspired mob/trap/feature. probably mounted in the wall. might hit an
+  entire direction instead of just a line.
+round rooms
+any other active dungeon elements or 'moving parts'
+some other features that can be found in corridors.
+deity statues. these would be colored instead of gray, and would have an associated event and terrain effect. the event simply checks the area and prints the appropriate descriptive message, then stops. the terrain effect depends on which type of statue it is. flat bonus to that skill? no, probably just set it to 10. that would lead to rooms where it's easy to hit & damage, rooms where it's hard to hit, rooms where magic is easy, rooms where magical/supernatural effects are diminished, and rooms where everything is stealthy. are there other good effects besides these?
+anyway, these would appear near the center of rooms, and could replace the walls between shrines.
+should rubble become nonopaque? that would allow me to put some along a corridor, making groups harder to fight there. (i could do it anyway, but the player would move it)
+	-OTOH, if the player moves it, monsters don't have to. also, secret rooms can be here
+One-way and/or single-use corridors. (thanks to .orphle. in #br.gue)
+sometimes, monsters should actually guard corridors
+
+other:
+an event (possibly triggered by shrines or chests) where you defend an area for a
+  short while, for some purpose.
+light and dark sensitivity - i'm thinking blind-in-darkness and damaged-in-light.
+
+
+#
+
+considering a 'slimed' status that would put out fires but leave you clumsy or something. fire melts ice, ice freezes slime, slime douses fire. slime traps, slime enemies, slime orbs that you can employ to extinguish fires on yourself.
+	-being on fire makes you immune to freezing, being frozen makes you immune to slime, and being slimed makes you immune to burning? sounds decent.
+	-then i would add slime orb and orb of burning at the same time.
+being slimed could give you a 50% chance to drop items rather than use them.
+
+i think i've figured out slime:
+	-any fire damage or catching fire breaks FROZEN.
+	-any cold damage or being frozen breaks SLIMED.
+	-FROZEN makes you immune to being SLIMED. SLIMED makes you immune to being on fire.
+		being on fire makes you immune to being frozen.
+	-walking on slime fails 1/3 of the time. The effect is identical to being stunned, 
+		except that the message is "you slide" instead of "you stagger"
+	-attacking on slime has a 1/3 chance of making you fall into the slime. this doesn't
+		affect your attack, nor does it take time to stand up, but it SLIMES you.
+	-while SLIMED, any item you try to use has a 50% chance to be dropped instead. evil!
+
+
+             
+                           #####
+HP: 69                   ###...####       ############
+Depth: 1                 #........#       #..........######
+---                   ####........#       #...............#
+Mace                  #...........#     ###..........####.#
+---                   #.##........#      .................#
+Leather               #.##........#       #..........##.#.#
+---                   #.##........#       #..........##.#.#
+             ##########.####.#.####   #########.##.####.#.#       #############
+[paralyzed-] #........#.####.#.#      #....#  #...........#########...........#
+[-stunned--] #....0............#      #....####.##.####.####......#.###.#.### #
+[-burning--] #........#.####.######## #...................##..................#
+[--afraid--] #........#.............# #.0..####.##.####.#.##......#.###.#.#####
+[--slowed--] #^.........####.######.# #.........#  #  #.#......>........#.#
+[--shine---] #........###  #.#    #.# #....######     #.####......#####.#.#
+             ##########    #.#    #.# ###.##          #.#  ##.##.##  ##.#.####
+                           #.#    #.#   #.#        ####.#  ##.##.#####.......#
+                           #.######.#####.######   .....####.........#.......#
+11                         #...................       #.@.......0..0.........#
+12                         ####.###.##.##.#.####      ######.........#.......#
+13                            #.............#              ###################
+14                            ###############
+             Depth: 1
+---
+(removed XP, level, and AC)
+
+it's a stretch, but there might be room for EIGHT statuses at once. that ain't bad; let me see if I can reasonably get more than 8 at once...
+
+conviction
+boiling blood
+regen
+resistance (+immunity?)
+detecting
+counter for fail rate, sure.
+
+[regenerate]
+[-poisoned-]
+[--frozen--]
+ or
+[-immobile-]
+[--dimmed--]
+[dim-light-]
+[conviction]
+[invincible]
+[bloodboil-]
+
+
+#
+
+probably split all these into 0.7.0 and 0.8.0.
+then 0.9.0 can have special levels, and 1.0.0 will be the final iteration.
+	-equipment update: better identities for weapons and armor. chainmail would resist slashing, 
+		weapons would have different crit effects, plate would ... etc
+
+		new terrain
+		other balance changes
+		and help check
+
+-for the next version: item descriptions, slime and fog levels, leveltype-specific monsters, circular, diamond, and L-shaped rooms
+
+in ForaysSuperClass: public ActorType ZOMBIE = ActorType.ZOMBIE;
+
+
+things to do between 0.5 and 1.0:
+
+at least 1 special level per game, with an appropriate number of different special levels
+	-cave of bats
+
+animations should support the concept of a 'viewer' - cells outside viewer's FOV don't animate.
+
+generate trolls with rocks they can throw, in a lair, and have them stay in that lair.
+
+consider making ranged attacks...not attacks at all, but generated straight from the AI routine
+
+Select() needs a rewrite, and to be moved out of Actor.
+
+mirrors: can be generated when there is solid rock behind a wall.
+		-or, if I wanted to generate them anywhere, I could have a can_be_reflection thing.
+			then what you see depends on where you stand.
+	-they just show what is opposite them. doesn't show vampires. doesn't show the player's reflection 
+		if the player is shadow cloaked.
+
+partial classes to separate AI from the rest of Actor
+foreach(int i in FourDirections) or foreach(int i in Dir8). 4, 8, and 9.
+
+option to put stat window on right.
+
+0.7.0 should have: (focus on gameplay)
+
+"You are burned. You are unburnt." <--being attacked by burning enemy while Tough
+think about scaling Spirit's duration reduction to more than 50%
+what about a 'default ranged attack' in addition to the 'default melee attack' spell?
+potion of vampirism? life drain, light allergy, flying. this would be a nice addition to an ID game, at least.
+things other than the player should be able to call MakeNoise
+extend the "monster notices" sounds so that you can hear them even if you can't see them.
+	-this would make a good candidate for generalization: printing a message if the player can see an object OR if that object is within a certain distance. perhaps a distance that implies that the message is a sound, not a visual.
+
+
+bugs: 
+here's that really weird one where I got killed the turn I used a rune of time:
+"Time stops for a moment. (grayed out)
+You bring out your torch. The troll seer regenerates. The troll
+seer casts glacial blast. The glacial blast hits you. You [more]
+die. [more]"
+minor: passage shows a WHITE floor under the player, not the correct color.
+using lunge on an aware goblin archer a knight's move away. the archer appears normal, when it should have a green background from the targeting.
+	-i believe this is another form of the other background color bug.
+	-linux or win?
+	-does not happen every time. this one might be a pain to track down.
+again on linux - bits of the previous map still appear. no idea why. does not happen often. (once so far!)
+	-not reproduced yet
+"The skeleton looks less disoriented. " - no skeleton in sight.
+	-reviewed code. should never happen, but it did.
+		-theory: it died and the message was still printed. rework removal from msg_obj list.
+			-happened again with "the skeleton looks more stable". debug the trap messages, then do the msg_obj fix.
+		-above theory is probably wrong: happened with a goblin that was alive
+"You fire an arrow. The arrow hits the cultist. The cultist [more]
+dies."
+	-note that the [more] takes up exactly as much space as "dies. " - what gives?
+	-should be fixed!
+
+
+
+--generate the list of monsters first, THEN generate the level. then verify that i.e. a troll has a proper lair.
+
+
+
+room mimic
+	-how is this going to work? perhaps it's usually generated at the end of a longish corridor, so blinking out is harder to do.
+	-it shouldn't ACTUALLY prevent teleportation escapes, though. a quick Passage out is probably just the thing.
+	-perhaps some kind of interactive 'don't stand here' thing.
+	-so, the event checks every several turns to see if the player is within its area(which is the entire room)
+	-if this happens, it either sets some state, or spawns another event type to check again a few turns later(remember, there's a chest in here)
+		-how about a good chance of an extra item or two, as well?
+			-EITHER 1d3 items OR a chest?
+		-wait, why not trigger on the chest, also? both will work great.
+	-when the mimic has been disturbed, a message is printed, the membrane/door starts to close, and acid starts to fall.
+		-and some of the walls and floor turn to red?
+	-i think the average distance from chest to door will be like 3, so probably 2d2 turns.
+	-if the player is on the door when it closes, he takes some damage and becomes immobilized. (and can then escape)
+	-otherwise, the door becomes a membrane (would be great if certain terrain had ATTACKABLE flag, yeah?) with an okay amount of HP.
+	-all the while, every 1d3 turns acid drops onto the floor from the ceiling - this is delayed by 1 turn, so it doesn't hit the player directly.
+		-lasts for 1d3+3 turns or so
+	-standing in the acid deals damage, of course.
+	-ALSO, to prevent the player from simply dancing around until he gets out...the room should probably either shrink, or be subject to an area attack.
+		-a crushing attack is way easier. lowish damage, i suppose.
+	-annnnd, when the player escapes, the membrane soon returns to its door form and the walls and floors to their normal colors.
+
+	-first, i need terrain for acid and membrane, no problem.
+	-and an event for 'spawn acid here', no prob
+	-now, what state do i need to track? the event already tracks the area, no problem.
+		-'player inside room' - the first trigger. unneeded if i trigger only on the chest.
+		-state for 'disturbed', of course
+		-'number of turns until membrane closes'
+		-state for membrane: closing, crushing, closed.
+		-'number of turns until next acid attack'
+		-'number of turns until next crushing attack'
+		-'membrane has been destroyed' - could also just mean it's dead, and remove the event.
+
+idea for the cultist's special level: a receptacle fills as cultists die to fire damage. you don't want it to fill up.
+idea for pangolin special level: giant pangolins tear open giant termite mounds. the pangolins use their armor to avoid harm as the termites swarm you.
+battle of the titans special level: a brawl between titans that don't care about you. avoid being stepped on or destroyed by AOEs.
+ <.agikm.> Maybe some wormlike creatures that would merge together and create more powerful variant of the same thing.
+ <.agikm.> So you'd better just kill them one by one fast.
+special level brainstorm idea dump:
+skeleton jelly. hilarious.
+
+
+voltaic rapture was too badass
+-this spell wasn't voltaic rapture, but was lightning-based: each time you're hit in melee you release a radius 2 burst of electricity
+
+trap disarming that simply requires different actions. One requires you to '.' wait on 2 opposite sides. One requires you to run around it without stopping. One requires you to step on all the diagonals without stepping on any of the cardinal directions.
+
+secrets
+silence
+mystery
+concealment
+
+onslaught
+battle
+conflict
+assault
+
+protection
+security
+shielding
+warding
+
+heart
+energy
+will
+essence
+
+wizardry
+sorcery
+conjuring
+evocation
+
+
+BLOOD_MOTH		 -	25	-	3	bites		    (nothing)/"notices your light"
+attracted to light, 
+Found fluttering around any source of light, this huge moth is named for the rivulets of crimson on its wings that mimic dripping blood. Unlike most moths, it has a wide razor-filled mouth.
+SWORDSMAN		40	35	3	2	hits			-
+ready to duel, eyes watch (your) movements, twirls his sword in his hand, 
+Always ready for a fight, the swordsman twirls his sword in his hand as he walks. His eyes never leave his foe, watching for the next advance.
+SKULKING_KILLER		40	35	3	3	hits			-
+leaping/dashing/? from shadow to shadow, blade in hand, grin or grimace, 
+This rogue dashes from shadow to shadow, dagger in hand. A smirk appears as the killer overtakes the victim.
+ROBED_ZEALOT		40	40	3	3	hammers			-
+holy symbol, holy magic, church's spells, heretics, 
+A holy symbol hangs, silver and forked, from the neck of the zealot. The holy magic of the church's spells promises the zealot a swift victory over heretics.
+SHADOW			45	40	2	2	touches			-
+manifest darkness, not quite entirely solid, visible in light, 
+Shadows are manifest darkness, barely maintaining a physical presence. A dark environment hides them utterly, but the light reveals their warped human shape.
+BANSHEE			40	40	2	2	claws			-
+Claws are blood-caked nails, the length of your entire hand, face full of pain and hate, (wisp/shred/?) dress hangs/floats/flies behind her, scream, 
+The banshee's face is full of pain and hate. Blood-caked nails
+The banshee floats shrieking, trailing wisps of a faded dress behind her. Her nails are blood-caked claws. The banshee's hateful scream is painful for the living to hear.
+WARG			40	40	2	2	bites			-
+more intelligent relative of the wolf, white fur with black markings, eyes too human, 
+This wolf has white fur with black markings. Its eyes are too human for your liking.
+PHASE_SPIDER		50	45	1*	1*	bites			-
+noneuclidean, seems to climb into solid surfaces, dripping fangs, even when looking at it, you think you can hear it behind you, 
+Heedless of the laws of nature, this brilliantly iridescent spider steps to the side and appears twenty feet away. Even when you're looking right at it, you think you can hear it behind you.
+ASCETICMONK_		 -	40	-	3	punches/kicks/strikes	"babbles incoherently"
+mad, flurry, skilled, mad rambling, you can only do the same, 
+This solitary monk constantly kicks and punches at empty space, madly repeating nonsense words. Those nearby will find themselves uttering the same gibberish.
+POLTERGEIST		40	35     2,1	1*?	slimes/grabs item	-
+troublesome, penchant/? for tossing things around, haunting a location,
+This troublesome spirit has a penchant for throwing things and upending furniture. It affords no rest to intruders in the area that it haunts.
+CAVERN_HAG		 -	40	-	3?	clutches at?		"cackles"
+cracked warty skin, cackle, catching victims, cursing (someone), 
+The hag's foul brand of magic can impart a nasty curse on those who cross her. Cracked, warty skin hides surprising strength, used to wrestle her victims into the stewpot.
+
+COMPY			 -	25	-	1* or 2*bites			"squeaks"
+little scavengers and waste-eaters, possess a subtle(?) poison, only attack weak or helpless, (tendency to ignore healthy stuff), 
+Compys are little waste-eating scavengers that possess a subtle poison. They tend to ignore healthy creatures, preferring to surround those who are weak, helpless, or otherwise occupied.
+NOXIOUS_WORM		 -	55	-	3	bites/slams		"notices"
+thick stench, round(ed) and as tall as a man, whips its tail around, 
+The noxious worm, almost as tall as a man, slams foes with its bulk. It vomits a thick stench from its maw.
+BERSERKER		40	40	3	3	hits			-
+trophies of war, axe, rage, uncontrolled, unfeeling or impervious, 
+In battle, the berserker enters a state of unfeeling rage, axe swinging at anything within reach. Trophies of war adorn the berserker's minimally armored form.
+ENTRANCER		 -	35	-	2	hits		  (in the same style as the necro)
+mind taker or stealer of minds or brainwasher or something, enthralls, bends to will, enslaves, until a more powerful thrall appears, 
+The entrancer bends a weak-minded being to her will and has it fight on her behalf, at least until a more desirable thrall appears. The entrancer can protect and teleport the enthralled creature.
+SHADOWVEIL_DUELIST	 -	40	-	3	hits? or slashes?	notices
+cloak of (dark), magical technique(?), (the duelist's style, however it might be described...twisting, parrying, lunging???) is well-});ed with his magical advantage.
+The shadowveil duelist hides under a cloak of shadows to strike unseen. A spinning, feinting fighting style keeps the duelist in motion.
+SP_D_PIXIE		 -	35	-	1 or 2?	?			notices
+faerie/fairy, magical, fills your head with a buzzing sound (maybe), scratches furiously, (feels like something is missing here), 
+fairies have some control over the flow of magic
+Using fairy enchantments to influence the flow of magic, this pixie causes its every wingbeat to reverberate in the skulls of those nearby, stifling words of magic.
+
+PYREN_ARCHER		 -	55	-	3*	hits			notices
+wide shoulders, tall, strange race of men, descendants of flame, still capable of calling the flame, nocks an arrow and it ignites or smth, 
+Tall and wide-shouldered descendants of flame, the pyren are a strange race of men. Though they are flesh and blood, they still possess the power to ignite nearby objects.ORC_ASSASSIN		 -	50	-	3	hits			snarls
+wicked grin, stalker, pointed teeth and ??? blade, camo, 
+This orcish stalker is well camouflaged. A wicked grin shows off sharp teeth as the assassin brandishes a sharp blade.
+TROLL_SOOTHSAYER	 -	50	-	3	claws			growls viciously
+leader, spells and claws, arcane tricks passed down from seer to seer, 
+The seer is a leader of the loose association that passes for a troll society
+The seer is a leader among the solitary troll population, sought for augury and council. Spells and arcane tricks are passed down from seer to seer. 
+ORC_WARMAGE		50	50	3	3	hits			-
+tracking magic, orc war parties (maybe), powerful wizardry, maybe some backstory about warmage badassery (?), 
+The destruction wreaked by warmages evokes respect and feat even among their own kind. They often lead raids and war parties, using tracking spells to complement their lethal magic.
+LUMINOUS_AVENGER	 -	40	-	3	hits or strikes		notices
+being of light, empyreal appearance/look/visage, (here's a good question - is it man-shaped? featureless? angelic? not winged? sword or other weapon?), 
+ The radiance of this empyreal being prevents you from gazing continuously at it.
+ The radiance of this empyreal being prevents you from looking directly at it for more than a few seconds.
+The radiance of this empyreal being makes your eyes hurt after a few seconds. When you look again it still has the shape of a human, but occasionally its silhouette seems to have wings, horns, or four legs.
+FIRE_DRAKE
+(huge), (deadly and hungry for your flesh and treasure), sizing up your flesh and (making plans) to drag your treasures back to its lair, snarling fiery master of this place, 
+Huge, deadly, and hungry for your charred flesh, the fire drake prepares to drag your valuables back to its lair. You have no doubts that you now face the snarling fiery master of this dungeon.
+
+GOBLIN			25	25	2	2	hits			-
+The goblin is a small ugly humanoid, often found inhabiting the upper reaches of any cave, chamber, or tunnel it can find.
+LARGE_BAT		20	20	1	1	bites/scratches		-
+The bats here are substantially bigger than most, perhaps because their insect prey is also unusually large.
+BLOOD_MOTH		 -	25	-	3	bites		    (nothing)/"notices your light"
+attracted to light, 
+WOLF			30	25	2	2	bites			-
+snarl, lithe, teeth, 
+Lithe and quick, this canine predator has formidable teeth and powerful jaws.
+SKELETON		30	30	2	2	hits			-
+A humanoid skeleton, animated by magic, seeing without eyes, and moving without muscles.
+A humanoid skeleton, animated by magic to see without eyes and move without muscles.
+SWORDSMAN		40	35	3	2	hits			-
+ready to duel, 
+DARKNESS_DWELLER	 -	45	-	2	hits			notices?
+This pale dirty humanoid wears tattered rags. Its huge eyes are sensitive to light.
+CARNIVOROUS_BRAMBLE	 -	35	-	3	rakes			(nothing)
+Sharp tangles of thorny branches spread out from its center. The closest branches seem to follow your movements.
+FROSTLING		35	35    3*,2*,4*	<--	hits/blasts/bursts	-
+An alien-looking creature of cold, the frostling possesses insectlike mandibles, claws, and smooth whitish skin. A fog of chill condensation surrounds it.
+DREAM_WARRIOR		40	40	3	2	hits			-
+The features of this warrior are hard to make out, but the curved blade held at the ready is clear enough.
+CULTIST			35	35	2	2	hits			-
+This cultist wears a crimson robe that reaches the ground. His head has been shaved and tattooed in devotion to his demon lord.
+GOBLIN_ARCHER		25	25	2	2	hits			-
+This goblin carries a crude bow and wears a quiver of arrows. It glances around, looking for inviting targets.
+GOBLIN_SHAMAN		25	25	2	2	hits			-
+This goblin's markings identify it as a tribe leader and shaman. It carries a small staff and wears a necklace of ears and fingers.
+
+
+MIMIC			 -	30	-	2*	hits			(nothing)
+The mimic changes its shape to that of an ordinary object, then waits for an unwary goblin or adventurer. It can secrete a powerful adhesive to hold its prey.
+SKULKING_KILLER		40	35	3	3	hits			-
+
+ZOMBIE			50	50     2*,3	<--	lunges / bites		-
+The zombie is a rotting, shambling corpse animated by the dark art of necromancy. It mindlessly seeks the flesh of the living.
+DIRE_RAT		25	25	1	1	bites			-
+With red eyes and long yellow teeth, most dire rats outweigh forty of their smaller brethren.
+ROBED_ZEALOT		40	40	3	3	hammers			-
+
+SHADOW			45	40	2	2	touches			-
+
+BANSHEE			40	40	2	2	claws			-
+
+WARG			40	40	2	2	bites			-
+
+PHASE_SPIDER		50	45	1*	1*	bites			-
+noneuclidean, 
+ASCETICMONK_		 -	40	-	3	punches/kicks/strikes	"babbles incoherently"
+mad, flurry, skilled, 
+POLTERGEIST		40	35     2,1	1*?	slimes/grabs item	-
+
+CAVERN_HAG		 -	40	-	3?	clutches at?		"cackles"
+warty skin, cackle, 
+
+
+COMPY			 -	25	-	1* or 2*bites			"squeaks"
+
+NOXIOUS_WORM		 -	55	-	3	bites/slams		"notices"
+
+BERSERKER		40	40	3	3	hits			-
+
+TROLL			55	50	3	3	claws			-
+The troll towers above you, all muscles, claws, and warty greenish skin. The regenerative powers of the troll are well-known, as is the suggestion to fight them with fire.
+VAMPIRE			 -	40	-	2	bites?			"notices"
+The vampire floats above the ground with hunger in its eyes. A dark cape flows around its pale form.
+CRUSADING_KNIGHT	 -	45	-	5*	mace			"shouts"
+This knight's armor bears the holy symbols of his church. He holds his torch aloft, awaiting the appearance of evildoers.
+SKELETAL_SABERTOOTH	 -	40	-	3	bites			notices?
+The skeletal remains of an enormous feline predator stand here, seemingly ready to pounce at any moment.
+MUD_ELEMENTAL		 -	35	-	2	hits			notices?
+As the mud elemental oozes across the floor, bits of dirt seem to animate and are absorbed into its body.
+ENTRANCER		 -	35	-	2	hits		  (in the same style as the necro)
+
+OGRE			55	55	4	4	hits			-
+Built like an orc, but as big as a troll, this tusked brute wields a giant club.
+ORC_GRENADIER		50	50	3	3	hits			-
+Orcs are a burly and warlike race, quick to make enemies. This orc carries a satchel filled with deadly orcish explosives.
+-or 'This one'
+SHADOWVEIL_DUELIST	 -	40	-	3	hits? or slashes?	notices
+
+CARRION_CRAWLER		35	35     0*,1	<--	bites/lashes		-
+This many-legged segmented insect crawls over the ground and walls in search of carrion. When threatened or lacking another source of food, tentacles on its head are used to apply a paralyzing substance to living prey.
+SP_D_PIXIE		 -	35	-	1 or 2?	?			notices
+
+
+STONE_GOLEM		65	65	4	4	slams			-
+Constructs of stone are often created to guard or serve. Their rocky nature grants them a degree of resistance to many forms of attack.
+PYREN_ARCHER		 -	55	-	3*	hits			notices
+
+ORC_ASSASSIN		 -	50	-	3	hits			snarls
+
+TROLL_SOOTHSAYER	 -	50	-	3	claws			growls viciously
+
+MECHANICAL_KNIGHT	 -	?	-	3	hits?		 (starts moving? nothing?)
+The mechanical knight's shield moves with unnatural speed, ready to foil any onslaught. Its exposed gears appear vulnerable to any attack that could bypass its shield.
+ORC_WARMAGE		50	50	3	3	hits			-
+
+LASHER_FUNGUS		50	50     3,1*	<--	tentacle/tentacle	-
+The lasher is a tall mass of fungal growth with several ropelike tentacles extending from it.
+
+NECROMANCER		40	40	2	2	hits			-
+Necromancers practice the dark arts, raising the dead to serve them. They gain power through unholy rituals that make them unwelcome in any civilized place.
+LUMINOUS_AVENGER	 -	40	-	3	hits or strikes		notices
+
+CORPSETOWER_BEHEMOTH	75	75	5	5	clobbers		-
+This monstrosity looks like it was stitched together from corpses of several different species. You see pieces of humans, orcs, and trolls, in addition to some you can't begin to identify.
+FIRE_DRAKE
+
+PHANTOM (X)
+Phantoms are beings of illusion, but real enough to do lasting harm. Because they vanish at the slightest touch, they are easily dispatched with magic spells.
+
+
+
